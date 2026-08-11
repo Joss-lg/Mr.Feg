@@ -10,16 +10,15 @@
             margin: 0; 
         }
         body {
-            /* Fusionamos el ancho seguro de Agostadero con la tipografía de Pizzetos */
             width: 72mm;
             margin: 4mm auto;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
             font-size: 13px; 
             color: #000; 
-            text-transform: uppercase; /* Todo en mayúsculas como en Pizzetos */
+            text-transform: uppercase;
         }
         
-        /* Clases utilitarias estilo Pizzetos */
+
         .text-center { text-align: center; }
         .text-right { text-align: right; }
         .font-bold { font-weight: bold; }

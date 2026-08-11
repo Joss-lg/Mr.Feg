@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>El Agostadero - Acceso</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/agostadero.png') }}?v=2">
+    <title>Mr. Feg - Acceso</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/mrlogo.png') }}?v=2">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -138,12 +138,12 @@
         
         {{-- Cabecera más compacta --}}
         <div class="compact-header flex flex-col items-center mb-4 sm:mb-6">
-            <img src="{{ asset('images/agostadero.png') }}" alt="Logo El Agostadero" class="mx-auto w-28 h-28 sm:w-36 sm:h-36 mb-2 object-contain">
+            <img src="{{ asset('images/mrlogo.png') }}" alt="Logo Mr. Feg" class="mx-auto w-28 h-28 sm:w-36 sm:h-36 mb-2 object-contain">
             
             <h1 class="text-2xl sm:text-3xl font-black tracking-widest leading-none uppercase">
-                EL AGOSTADERO
+                Mr. Feg
             </h1>
-            <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] font-bold mt-2 opacity-60">Restaurante Campestre</p>
+            <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] font-bold mt-2 opacity-60">Restaurante</p>
         </div>
 
         @if($errors->any())
