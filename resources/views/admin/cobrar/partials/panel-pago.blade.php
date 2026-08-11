@@ -1,0 +1,155 @@
+{{-- panel-pago.blade.php --}}
+@php $anchoDerecha = $anchoDerecha ?? 'lg:w-3/5'; @endphp
+<div class="w-full {{ $anchoDerecha }} p-4 lg:p-8 bg-zinc-50 dark:bg-zinc-950 overflow-hidden h-full">
+    <div class="max-w-xl mx-auto h-full flex flex-col">
+
+        {{-- Inputs de Estado Ocultos --}}
+        <input id="mesa-id" type="hidden" value="{{ $mesa->id }}">
+        <input id="orden-id" type="hidden" value="{{ $ordenes->first()->id ?? '' }}">
+        <input id="metodo-pago" type="hidden" value="Efectivo">
+        {{-- NUEVO: cuando la mesa está dividida, aquí va el id de la persona seleccionada --}}
+        <input id="cuenta-division-id" type="hidden" value="">
+
+        @if(!empty($division))
+            <div class="mb-2 p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center">
+                <p class="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400" id="aviso-division-panel">
+                    Selecciona una persona en el panel izquierdo para cobrar su parte
+                </p>
+            </div>
+        @endif
+
+        <div class="flex-1 space-y-6 overflow-y-auto pr-2">
+
+            {{-- 1. Selector de Método --}}
+            <div class="flex items-center justify-center">
+                <div class="text-center">
+                    <p class="text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.35em] text-[10px] font-black mb-3">Método de pago</p>
+                    <button id="btn-abrir-modal-metodo" type="button" class="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 px-6 py-3 text-blue-700 dark:text-blue-300 font-black uppercase tracking-[0.25em] border border-blue-500/50 hover:from-blue-500/30 hover:to-cyan-500/30 transition-all">
+                        <i class="fas fa-money-bill-wave text-lg"></i>
+                        <span id="metodo-pago-label">Efectivo</span>
+                    </button>
+                </div>
+            </div>
+
+            {{-- MOVIDO AQUÍ: Sección de Referencia (justo debajo del método de pago) --}}
+            <div id="non-cash-section" class="hidden space-y-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-[2.5rem] p-6">
+                <label class="text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em] text-[10px] font-black block text-center">Referencia de operación</label>
+                <input id="referencia" type="text" placeholder="Referencia de operación"
+                    class="touch-input w-full rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 p-4 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" />
+            </div>
+
+            {{-- 2. Display de Montos --}}
+            <div class="relative bg-gradient-to-br from-zinc-900 to-zinc-800 dark:from-zinc-900 dark:to-black border border-white/10 rounded-[2rem] overflow-hidden shadow-xl">
+                {{-- Línea de acento superior --}}
+                <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 opacity-80"></div>
+                <div class="px-6 pt-6 pb-5 text-center">
+                    <p class="text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em] mb-3">Monto a cobrar</p>
+                    <div class="text-5xl font-black text-white tracking-tighter" id="monto-input">$0.00</div>
+                    <div class="mt-4 flex items-center justify-center gap-6 text-xs">
+                        <div class="flex flex-col items-center gap-0.5">
+                            <span class="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">Total</span>
+                            <strong class="text-white font-black text-sm" id="total-pagar-derecha">${{ number_format($totalPagar ?? 0, 2) }}</strong>
+                        </div>
+                        <div class="w-px h-8 bg-white/10"></div>
+                        <div class="flex flex-col items-center gap-0.5">
+                            <span class="text-zinc-500 uppercase tracking-widest text-[9px] font-bold">Cambio</span>
+                            <strong class="text-emerald-400 font-black text-sm" id="display-cambio">$0.00</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 3. Teclado Numérico --}}
+            <div id="cash-section" class="select-none">
+                {{-- Filas 1-9 --}}
+                <div class="grid grid-cols-3 gap-2 mb-2">
+                    @foreach(['1','2','3','4','5','6','7','8','9'] as $key)
+                        <button type="button"
+                            class="btn-tecla h-14 rounded-2xl font-black text-lg
+                                   bg-white dark:bg-zinc-800
+                                   border border-zinc-200 dark:border-white/10
+                                   text-zinc-800 dark:text-white
+                                   shadow-sm
+                                   hover:bg-blue-50 dark:hover:bg-blue-500/10
+                                   hover:border-blue-400/50 hover:text-blue-600 dark:hover:text-blue-400
+                                   active:scale-95 active:bg-blue-100 dark:active:bg-blue-500/20
+                                   transition-all duration-100"
+                            data-value="{{ $key }}">{{ $key }}</button>
+                    @endforeach
+                </div>
+                {{-- Fila . / 0 / 00 / DEL --}}
+                <div class="grid grid-cols-4 gap-2">
+                    @foreach(['.','0','00'] as $key)
+                        <button type="button"
+                            class="btn-tecla h-14 rounded-2xl font-black text-lg
+                                   bg-white dark:bg-zinc-800
+                                   border border-zinc-200 dark:border-white/10
+                                   text-zinc-800 dark:text-white
+                                   shadow-sm
+                                   hover:bg-blue-50 dark:hover:bg-blue-500/10
+                                   hover:border-blue-400/50 hover:text-blue-600 dark:hover:text-blue-400
+                                   active:scale-95 active:bg-blue-100 dark:active:bg-blue-500/20
+                                   transition-all duration-100"
+                            data-value="{{ $key }}">{{ $key }}</button>
+                    @endforeach
+                    <button type="button"
+                        class="btn-tecla h-14 rounded-2xl font-black
+                               bg-red-50 dark:bg-red-500/10
+                               border border-red-200 dark:border-red-500/20
+                               text-red-500 dark:text-red-400
+                               shadow-sm
+                               hover:bg-red-100 dark:hover:bg-red-500/20
+                               hover:border-red-400
+                               active:scale-95
+                               transition-all duration-100 flex items-center justify-center gap-1.5"
+                        data-value="DEL">
+                        <i class="fas fa-delete-left text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            {{-- Selector de Propina — siempre habilitado, incluso con la cuenta dividida --}}
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-[2rem] p-5">
+                <p class="text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.25em] text-[10px] font-black mb-3 text-center">
+                    ¿Cuánta propina desea dejar?
+                </p>
+
+                @if(!empty($division))
+                    <p class="text-center text-[9px] text-blue-500 font-black uppercase mb-3">
+                        <i class="fas fa-info-circle"></i> Se repartirá entre las personas que aún no han pagado
+                    </p>
+                @endif
+
+                <div class="grid grid-cols-4 gap-2 mb-3" id="propina-porcentaje-botones">
+                    <button type="button" class="propina-btn h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 font-black text-xs text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 transition-all" data-porcentaje="0">Sin propina</button>
+                    <button type="button" class="propina-btn h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 font-black text-xs text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 transition-all" data-porcentaje="10">10%</button>
+                    <button type="button" class="propina-btn h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 font-black text-xs text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 transition-all" data-porcentaje="15">15%</button>
+                    <button type="button" class="propina-btn h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 font-black text-xs text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 transition-all" data-porcentaje="20">20%</button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-bold">$</span>
+                        <input id="propina-manual-input" type="number" step="0.01" min="0" placeholder="Otro monto"
+                            data-teclado="numerico"
+                            class="touch-input pl-7 pr-4 h-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm font-bold" />
+                    </div>
+                    <button type="button" id="btn-aplicar-propina-manual" class="h-12 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider transition-all">
+                        Aplicar
+                    </button>
+                </div>
+
+                <p class="text-center text-[11px] text-zinc-400 dark:text-zinc-500 mt-3">
+                    Propina actual: <strong class="text-zinc-700 dark:text-zinc-200" id="propina-actual-display">${{ number_format($orden->propina ?? 0, 2) }}</strong>
+                </p>
+            </div>
+
+            {{-- 6. Botones Finales --}}
+            <div class="grid grid-cols-2 gap-4 pb-12">
+                <button id="btn-ticket" class="bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-900 dark:text-white font-black py-5 rounded-2xl border border-zinc-200 dark:border-white/10 transition-all">TICKET</button>
+                {{-- ID btn-procesar-pago para JS --}}
+                <button id="btn-procesar-pago" data-dividido="{{ !empty($division) ? '1' : '0' }}" class="bg-green-500 hover:bg-green-400 text-black font-black py-5 rounded-2xl transition-all">FINALIZAR</button>
+            </div>
+        </div>
+    </div>
+</div>
