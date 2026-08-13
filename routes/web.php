@@ -26,6 +26,8 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\PlataformaDeliveryController;
 use App\Http\Controllers\CorteController;
+// IMPORTAMOS EL NUEVO CONTROLADOR DE CLIENTES
+use App\Http\Controllers\ClienteController;
 
 // ==========================================
 // --- AUTENTICACIÓN ---
@@ -316,6 +318,11 @@ Route::middleware(['auth'])->group(function () {
         // en pantalla pero recibiría un 403 al intentar abrir el PDF.
         Route::get('/{id}/pdf', [CajaController::class, 'generarReportePdf'])->name('pdf');
     });
+
+    // ------------------------------------------
+    // CLIENTES (Nuevo Módulo)
+    // ------------------------------------------
+    Route::resource('clientes', ClienteController::class);
 
     // ------------------------------------------
     // LOGOUT
