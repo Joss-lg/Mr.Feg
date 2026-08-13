@@ -1,7 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // AGREGA ESTA LÍNEA:
-  // Le dice a Tailwind que busque la clase "dark" en un elemento padre (usualmente el html o body)
   darkMode: 'class', 
 
   content: [
@@ -12,10 +10,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'luxury-bg': '#0a0a0c',
-        'luxury-card': '#141417',
+        'luxury-bg': 'var(--bg-color)',
+        'luxury-card': 'var(--card-color)',
+        'luxury-border': 'var(--border-color)',
         'luxury-accent': '#3b82f6', 
-        'luxury-border': 'rgba(255, 255, 255, 0.1)',
+        'luxury-text': 'var(--text-color)',
+        'luxury-muted': 'var(--text-muted)',
       },
     },
   },

@@ -58,26 +58,28 @@
             --panel-secondary: rgba(148, 163, 184, 0.12);
         }
 
-        body.modo-crema {
-            --bg-color: #F5F5F7;
-            --sidebar-bg: rgba(245, 243, 239, 0.92);
-            --header-bg: rgba(250, 247, 243, 0.92);
-            --card-color: #F7F4EF;
-            --text-color: #111111;
-            --text-muted: #4F5258;
-            --border-color: rgba(79, 84, 94, 0.14);
-            --glass-bg: rgba(255, 255, 255, 0.80);
-            --glass-hover: rgba(255, 255, 255, 0.94);
-            --input-bg: #ECE9E4;
-            --panel-card: rgba(250, 247, 242, 0.94);
-            --panel-border: rgba(59, 130, 246, 0.18);
-            --panel-secondary: rgba(115, 123, 149, 0.12);
+        body.modo-azul-claro {
+            --bg-color: #E0F2FE; 
+            --sidebar-bg: rgba(224, 242, 254, 0.92);
+            --header-bg: rgba(224, 242, 254, 0.92);
+            --card-color: #F0F9FF;
+            --text-color: #0c4a6e;
+            --text-muted: #0369a1; 
+            --border-color: rgba(12, 74, 110, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.70);
+            --glass-hover: rgba(255, 255, 255, 0.90);
+            --input-bg: #FFFFFF;
+            --panel-card: rgba(255, 255, 255, 0.90);
+            --panel-border: rgba(14, 165, 233, 0.20);
+            --panel-secondary: rgba(14, 165, 233, 0.10);
         }
 
         body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; color: var(--text-color); overflow-x: hidden; margin: 0; padding: 0; transition: background-color 0.4s ease, color 0.4s ease; }
         .glass-card { backdrop-filter: blur(20px); border: 1px solid var(--border-color); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); background-color: var(--glass-bg); }
-        body:not(.modo-crema) .glass-card { background-color: var(--glass-bg); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.03), 0 10px 30px -10px rgba(0, 0, 0, 0.5); }
-        body.modo-crema .glass-card { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.005); }
+        
+        body:not(.modo-azul-claro) .glass-card { background-color: var(--glass-bg); box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.03), 0 10px 30px -10px rgba(0, 0, 0, 0.5); }
+        body.modo-azul-claro .glass-card { background-color: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.005); }
+        
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
         /* ===== ESTILOS DEL TOAST GLOBAL ===== */
@@ -88,6 +90,11 @@
         .animate-shrink {
             animation: shrink-bar 3s linear forwards;
         }
+
+        /* Utilidad para ocultar elementos en modo claro */
+        body.modo-azul-claro .ocultar-en-claro {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="selection:bg-[#3B82F6]/30 selection:text-[var(--text-color)]">
@@ -95,11 +102,11 @@
     <script>
         // 1. Recuperar estado del Tema
         const temaGuardado = localStorage.getItem('tema-ollintem');
-        if (temaGuardado === 'crema') {
-            document.body.classList.add('modo-crema');
+        if (temaGuardado === 'azul-claro') {
+            document.body.classList.add('modo-azul-claro');
             document.documentElement.classList.remove('dark');
         } else {
-            document.body.classList.remove('modo-crema');
+            document.body.classList.remove('modo-azul-claro');
             document.documentElement.classList.add('dark');
         }
 
@@ -110,12 +117,10 @@
         }
     </script>
 
-    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-600/5 blur-[150px] pointer-events-none z-0 modo-crema:hidden"></div>
-    <div class="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-orange-600/5 blur-[150px] pointer-events-none z-0 modo-crema:hidden"></div>
+    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-600/5 blur-[150px] pointer-events-none z-0 ocultar-en-claro"></div>
+    <div class="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-orange-600/5 blur-[150px] pointer-events-none z-0 ocultar-en-claro"></div>
 
-    {{-- ===== TOAST GLOBAL DE ALERTAS (Éxito / Error) =====
-         Este mismo contenedor recibe tanto los toasts de sesión (session('success')/session('error'))
-         como los toasts dinámicos generados desde JS con showToast(). ===== --}}
+    {{-- ===== TOAST GLOBAL DE ALERTAS (Éxito / Error) ===== --}}
     <div id="toastContainerGlobal" class="fixed top-6 right-6 z-[100] flex flex-col gap-4">
         @if(session('success'))
             <div id="toast-exito" class="relative overflow-hidden bg-white dark:bg-[#0f1015] border border-gray-100 dark:border-white/5 rounded-2xl shadow-2xl p-4 flex gap-3.5 items-start w-[320px] transition-all duration-300 transform translate-x-0 opacity-100">
@@ -222,29 +227,30 @@
         function toggleTheme() {
             const body = document.body;
             const html = document.documentElement;
-            body.classList.toggle('modo-crema');
-            const esCrema = body.classList.contains('modo-crema');
-            if (esCrema) {
+            body.classList.toggle('modo-azul-claro');
+            
+            const esClaro = body.classList.contains('modo-azul-claro');
+            if (esClaro) {
                 html.classList.remove('dark');
-                localStorage.setItem('tema-ollintem', 'crema');
+                localStorage.setItem('tema-ollintem', 'azul-claro');
             } else {
                 html.classList.add('dark');
-                localStorage.setItem('tema-ollintem', 'negro');
+                localStorage.setItem('tema-ollintem', 'azul-fuerte');
             }
-            actualizarIcono(esCrema);
+            actualizarIcono(esClaro);
         }
 
-        function actualizarIcono(esCrema) {
+        function actualizarIcono(esClaro) {
             const icon = document.getElementById('dashThemeIcon');
             if (icon) {
-                if (esCrema) {
+                if (esClaro) {
                     icon.classList.replace('fa-sun', 'fa-moon');
-                    icon.classList.add('text-blue-500');
+                    icon.classList.add('text-blue-800');
                     icon.classList.remove('text-yellow-400');
                 } else {
                     icon.classList.replace('fa-moon', 'fa-sun');
                     icon.classList.add('text-yellow-400');
-                    icon.classList.remove('text-blue-500');
+                    icon.classList.remove('text-blue-800');
                 }
             }
         }
@@ -261,8 +267,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const esCrema = document.body.classList.contains('modo-crema');
-            actualizarIcono(esCrema);
+            const esClaro = document.body.classList.contains('modo-azul-claro');
+            actualizarIcono(esClaro);
         });
 
         // --- GESTIÓN DEL TOAST DE SESIÓN (renderizado por Blade) ---

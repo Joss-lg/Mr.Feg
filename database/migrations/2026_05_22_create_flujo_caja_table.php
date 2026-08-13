@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('flujo_caja', function (Blueprint $table) {
             $table->id();
-            
+
             // Relación con el turno/sesión de caja operativa (opcional, por si es un movimiento externo como banco)
             $table->foreignId('caja_movimiento_id')
                   ->nullable()
                   ->constrained('caja_movimientos')
-                  ->nullOnDelete(); 
+                  ->nullOnDelete();
 
             $table->enum('tipo', ['ingreso', 'egreso']); // Tipo de movimiento financiero
             $table->string('categoria'); // "Venta", "Nómina", "Insumos", "Caja Chica"
@@ -26,16 +26,23 @@ return new class extends Migration
             $table->decimal('monto', 12, 2); // Capacidad para montos grandes
             $table->string('metodo_pago'); // "Efectivo", "Tarjeta", "Transferencia"
             $table->string('referencia')->nullable(); // Clave de rastreo o número de operación bancaria
+
+            // Registrado por (add_registrado_por)
+            $table->foreignId('registrado_por')
+                  ->nullable()
+                  ->constrained('users')
+                  ->nullOnDelete();
+
             $table->datetime('fecha'); // Cuándo ocurrió realmente el movimiento
-            
+
             // Relación Polimórfica (Para enlazar directamente con un Pedido, Gasto, Nómina, etc.)
-            $table->unsignedBigInteger('flujoable_id')->nullable(); 
-            $table->string('flujoable_type')->nullable(); 
-            
-            $table->text('observaciones')->nullable(); 
+            $table->unsignedBigInteger('flujoable_id')->nullable();
+            $table->string('flujoable_type')->nullable();
+
+            $table->text('observaciones')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             // Índices de velocidad para reportes rápidos
             $table->index(['tipo', 'fecha']);
             $table->index(['flujoable_type', 'flujoable_id']);

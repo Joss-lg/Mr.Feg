@@ -151,7 +151,7 @@
             @if($mostrarSeccion)
                 {{-- Título de la Sección --}}
                 <div class="px-3 pt-2">
-                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] sidebar-text transition-all duration-300">
+                    <span class="text-xs font-black uppercase tracking-[0.2em] sidebar-text transition-all duration-300 text-[var(--coral-400)]">
                         {{ $titulo }}
                     </span>
                 </div>
@@ -168,15 +168,15 @@
                             }
                         @endphp
 
-                        <a href="{{ $url }}" class="menu-link relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-blue-600/10 border border-blue-500/30' : 'border border-transparent hover:bg-[var(--input-bg)]' }}">
-                            <div class="menu-icon flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-blue-500 text-white' : 'bg-[var(--card-color)] border border-[var(--border-color)] text-[var(--text-muted)] group-hover:text-[var(--text-color)]' }}">
+                        <a href="{{ $url }}" class="menu-link relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-[var(--coral-500)]/10 border border-[var(--coral-500)]/20' : 'border border-transparent hover:bg-[var(--input-bg)]' }}">
+                            <div class="menu-icon flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-[var(--coral-500)] text-white' : 'bg-[var(--card-color)] border border-[var(--panel-border)] text-[var(--text-muted)] group-hover:text-[var(--text-color)]' }}">
                                 <i class="{{ $item['icon'] }} text-[15px]"></i>
                             </div>
                             <span class="sidebar-text ml-4 text-[14px] tracking-wide {{ $isActive ? 'text-[var(--text-color)] font-bold' : 'text-[var(--text-muted)] font-medium group-hover:text-[var(--text-color)]' }}">
                                 {{ $item['label'] }}
                             </span>
                             @if($isActive)
-                                <div class="absolute left-[-1px] top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-blue-500 rounded-r-md"></div>
+                                <div class="absolute left-[-1px] top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-[var(--coral-500)] rounded-r-md"></div>
                             @endif
                         </a>
                     @endif
@@ -186,7 +186,7 @@
     </nav>
 
     {{-- Footer de Usuario --}}
-    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-[var(--card-color)] border border-[var(--border-color)] flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-lg">
+    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-[var(--card-color)] border border-[var(--panel-border)] flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-lg">
         <div class="flex items-center w-full">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.3)] mx-auto">
                 {{ substr(auth()->user()->nombre ?? 'U', 0, 2) }}
@@ -200,7 +200,7 @@
         <form method="POST" action="{{ route('logout') }}" class="mt-1 w-full flex justify-center">
             @csrf
             {{-- BOTÓN ACTUALIZADO PARA FORMAR EL CUADRADO PERFECTO CUANDO COLAPSA --}}
-            <button type="submit" class="btn-logout w-full h-[44px] px-3 flex items-center bg-gradient-to-tr from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-2xl transition-all duration-300 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 active:scale-95 group overflow-hidden">
+            <button type="submit" class="btn-logout w-full h-[44px] px-3 flex items-center bg-gradient-to-tr from-[var(--coral-700)] to-[var(--coral-500)] hover:from-[var(--coral-500)] hover:to-[var(--coral-400)] text-white rounded-2xl transition-all duration-300 shadow-lg shadow-[var(--coral-700)]/20 hover:shadow-[var(--coral-700)]/30 active:scale-95 group overflow-hidden">
                 <div class="flex items-center justify-center shrink-0 w-6">
                     <i class="fas fa-sign-out-alt text-[15px] transition-transform group-hover:scale-110"></i>
                 </div>

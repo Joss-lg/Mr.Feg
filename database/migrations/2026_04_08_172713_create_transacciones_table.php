@@ -14,18 +14,21 @@ return new class extends Migration
         Schema::create('transacciones', function (Blueprint $table) {
             $table->id(); // PK
 
-        // FK: Conecta con la orden que se está pagando
-        $table->foreignId('orden_id')->constrained('ordenes');
+            // FK: Conecta con la orden que se está pagando
+            $table->foreignId('orden_id')->constrained('ordenes');
 
+            // FK: Conecta con el usuario que tiene el rol de cajero
+            $table->foreignId('cajero_id')->constrained('users');
 
-        // FK: Conecta con el usuario que tiene el rol de cajero
-        $table->foreignId('cajero_id')->constrained('users');
+            $table->string('metodo_pago'); // Ej: Efectivo, Tarjeta, Transferencia
+            $table->decimal('monto', 10, 2); // El total pagado
 
-        $table->string('metodo_pago'); // Ej: Efectivo, Tarjeta, Transferencia
-        $table->decimal('monto', 10, 2); // El total pagado
-        
-        $table->timestamps();
-    });
+            // Tipo de división (add_fields)
+            $table->enum('tipo_division', ['equitativa', 'por_producto', 'personalizado'])
+                ->default('personalizado');
+
+            $table->timestamps();
+        });
     }
 
     /**

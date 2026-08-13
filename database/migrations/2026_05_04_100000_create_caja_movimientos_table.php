@@ -10,22 +10,28 @@ return new class extends Migration
     {
         Schema::create('caja_movimientos', function (Blueprint $table) {
             $table->id();
-            
+
             // Quién abrió y opera esta sesión de caja
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete(); 
-            
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+
             // Turno asignado (Para pintar tus etiquetas: Matutino, Vespertino)
             $table->string('turno')->nullable(); // Ej: 'Matutino', 'Vespertino'
-            
+
             // Estado de la sesión
             $table->enum('estado', ['abierta', 'cerrada'])->default('abierta');
+
+            // Detalles del movimiento (add_metodo_pago_referencia_comprobante)
+            $table->string('tipo')->nullable();
+            $table->string('metodo_pago')->nullable();
+            $table->string('referencia')->nullable();
+            $table->string('comprobante')->nullable();
 
             // Montos de control para el arqueo/corte
             $table->decimal('monto_inicial', 12, 2)->default(0); // Fondo inicial (Ej: $1000.00)
             $table->decimal('monto_final_esperado', 12, 2)->default(0); // Cálculo matemático del sistema
             $table->decimal('monto_final_real', 12, 2)->default(0); // Lo que el cajero contó en físico
             $table->decimal('diferencia', 12, 2)->default(0); // descuadre (Real - Esperado)
-            
+
             $table->text('comentarios')->nullable(); // Anotaciones del corte
             $table->timestamps();
         });

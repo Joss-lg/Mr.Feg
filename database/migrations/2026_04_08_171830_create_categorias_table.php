@@ -14,10 +14,14 @@ return new class extends Migration
         Schema::create('categorias', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+
+            // Área de impresión (add_area_impresion)
+            $table->string('area_impresion')->default('Cocina');
+
             $table->string('slug')->unique();
             $table->string('color')->nullable();
             $table->integer('orden_visualizacion')->default(0);
-            $table->softDeletes(); 
+            $table->softDeletes();
             $table->timestamps();
         });
     }
