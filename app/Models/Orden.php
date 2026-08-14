@@ -57,6 +57,13 @@ class Orden extends Model
         'cancelada_por',
         'cancelada_en',
         'monto_cancelado',
+        
+        // --- MÓDULO DE REPARTIDORES Y CLIENTES ---
+        'tipo_pedido',
+        'cliente_id',
+        'direccion_id',
+        'estado_reparto',
+        'repartidor_id',
     ];
 
     /**
@@ -106,12 +113,30 @@ class Orden extends Model
         return $this->hasMany(OrdenPromocion::class, 'orden_id');
     }
 
+    // --- RELACIONES PARA REPARTIDORES Y CLIENTES ---
+    
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class);
+    }
+
+    public function direccion()
+    {
+        return $this->belongsTo(Direccion::class);
+    }
+
+    public function repartidor()
+    {
+        // Relacionamos con el modelo User, indicando que la llave foránea es repartidor_id
+        return $this->belongsTo(User::class, 'repartidor_id');
+    }
+
+    // --- ACCESORES ---
+
     public function getTotalDescuentosPromocionesAttribute()
     {
         return $this->promocionesAplicadas->sum('monto_descuento');
     }
-
-    // --- ACCESORES ---
 
     public function getTotalConImpuestosAttribute()
     {

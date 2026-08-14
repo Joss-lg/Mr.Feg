@@ -79,6 +79,21 @@
                         </span>
                     @endunless
 
+                    {{-- --- NUEVOS BOTONES: PEDIDOS RÁPIDOS (Sin mesa física) --- --}}
+                    <button type="button" id="btnPedidoLlevar"
+                        class="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-lg text-white bg-green-500 hover:bg-green-600 text-sm sm:text-base font-semibold transition shadow-sm active:scale-95 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                        @unless($cajaAbierta ?? true) disabled title="La caja está cerrada" @else title="Nuevo pedido Para Llevar" @endunless>
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Para Llevar</span>
+                    </button>
+
+                    <button type="button" id="btnPedidoDomicilio"
+                        class="flex-1 sm:flex-none justify-center px-3 sm:px-4 py-2 rounded-lg text-white bg-amber-500 hover:bg-amber-600 text-sm sm:text-base font-semibold transition shadow-sm active:scale-95 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                        @unless($cajaAbierta ?? true) disabled title="La caja está cerrada" @else title="Nuevo pedido A Domicilio" @endunless>
+                        <i class="fas fa-motorcycle"></i>
+                        <span>A Domicilio</span>
+                    </button>
+
                     {{-- --- DELIVERY (Rappi/Uber/DiDi) ---
                          Van en la MISMA fila que los botones de acción a
                          propósito: la cabecera es sticky y su contenedor
@@ -612,6 +627,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             });
+
+            // =========================================================
+            // --- NUEVO: Manejo de clics para Para Llevar y A Domicilio ---
+            // =========================================================
+            function crearPedidoRapido(tipo, boton, nombreAccion) {
+                document.querySelectorAll('#btnPedidoLlevar, #btnPedidoDomicilio, .btn-delivery').forEach(b => b.disabled = true);
+                const textoOriginal = boton.innerHTML;
+                boton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Abriendo...`;
+
+                fetch('{{ route("mesero.pedido.rapido") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ tipo: tipo })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect + '?tipo_pedido=' + tipo;
+                    } else {
+                        alert(data.message || `No se pudo abrir el pedido de ${nombreAccion}.`);
+                        restaurarBotonesRapidos(boton, textoOriginal);
+                    }
+                })
+                .catch(e => {
+                    console.error('Error al crear pedido rápido:', e);
+                    alert(`Error de conexión al abrir el pedido de ${nombreAccion}.`);
+                    restaurarBotonesRapidos(boton, textoOriginal);
+                });
+            }
+
+            function restaurarBotonesRapidos(boton, texto) {
+                document.querySelectorAll('#btnPedidoLlevar, #btnPedidoDomicilio, .btn-delivery').forEach(b => b.disabled = false);
+                boton.innerHTML = texto;
+            }
+
+            const btnLlevar = document.getElementById('btnPedidoLlevar');
+            if (btnLlevar) {
+                btnLlevar.addEventListener('click', () => crearPedidoRapido('llevar', btnLlevar, 'Para Llevar'));
+            }
+
+            const btnDomicilio = document.getElementById('btnPedidoDomicilio');
+            if (btnDomicilio) {
+                btnDomicilio.addEventListener('click', () => crearPedidoRapido('domicilio', btnDomicilio, 'A Domicilio'));
+            }
         });
     </script>
 @endpush

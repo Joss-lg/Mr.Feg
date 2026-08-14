@@ -14,18 +14,28 @@ class ComandaService
     /**
      * Procesa el envío de platillos a cocina, descuenta inventario y actualiza totales.
      */
-    public function procesarEnvio(
+  public function procesarEnvio(
         Mesa $mesa, 
         array $platillos, 
         $usuario, 
         float $totalGeneral = 0, 
         int $personas = 4, 
         float $descuentoPorcentaje = 0,
-        bool $permitirSinStock = true // <-- Parámetro con valor por defecto
+        bool $permitirSinStock = true, 
+        array $datosExtra = []         
     ): Orden {
-        // IMPORTANTE: Se agrega $permitirSinStock en el "use" de la transacción
-        return DB::transaction(function () use ($mesa, $platillos, $usuario, $personas, $descuentoPorcentaje, $permitirSinStock) {
+        return DB::transaction(function () use ($mesa, $platillos, $usuario, $personas, $descuentoPorcentaje, $permitirSinStock, $datosExtra) {
             
+            // --- ACTUALIZACIÓN LIMPIA DE LA MESA VIRTUAL ---
+            // Si es un pedido para llevar y trae nombre temporal, actualizamos 
+            // el número de la mesa virtual existente sin tocar la estructura de la BD.
+            if (!empty($datosExtra['nombre_temporal'])) {
+                $mesa->update([
+                    'numero' => 'LLEVAR - ' . strtoupper($datosExtra['nombre_temporal'])
+                ]);
+            }
+            // ----------------------------------------------
+
             // 1. Buscar orden activa pendiente o crearla
             $orden = Orden::firstOrCreate(
                 ['mesa_id' => $mesa->id, 'estado' => 'pendiente'],
@@ -33,6 +43,9 @@ class ComandaService
                     'numero_orden' => 'ORD-' . now()->format('YmdHis') . '-' . rand(100, 999),
                     'mesero_id'    => $usuario->id,
                     'abierta_el'   => now(),
+                    'tipo_pedido'  => $datosExtra['tipo_pedido'] ?? 'comedor',
+                    'cliente_id'   => $datosExtra['cliente_id'] ?? null,
+                    'direccion_id' => $datosExtra['direccion_id'] ?? null,
                 ]
             );
 
@@ -41,6 +54,12 @@ class ComandaService
             $ordenDataUpdate = [];
             if (Schema::hasColumn('ordenes', 'personas')) $ordenDataUpdate['personas'] = $personas;
             if (Schema::hasColumn('ordenes', 'descuento_porcentaje')) $ordenDataUpdate['descuento_porcentaje'] = $descuentoPorcentaje;
+            
+            // Actualizamos los campos de delivery si la orden ya existía y el cajero los cambió
+            if (!empty($datosExtra['tipo_pedido'])) $ordenDataUpdate['tipo_pedido'] = $datosExtra['tipo_pedido'];
+            if (array_key_exists('cliente_id', $datosExtra)) $ordenDataUpdate['cliente_id'] = $datosExtra['cliente_id'];
+            if (array_key_exists('direccion_id', $datosExtra)) $ordenDataUpdate['direccion_id'] = $datosExtra['direccion_id'];
+
             if (!empty($ordenDataUpdate)) {
                 $orden->update($ordenDataUpdate);
             }

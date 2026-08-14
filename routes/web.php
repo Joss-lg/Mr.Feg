@@ -68,17 +68,13 @@ Route::middleware(['auth'])->group(function () {
         // Requieren un turno de caja abierto. Si la caja está cerrada, lo
         // que se levante aquí no entraría a ningún corte y descuadraría
         // ventas e inventario.
-        //
-        // Se deja FUERA a propósito: ver la comanda, la precuenta, cancelar
-        // un producto ya enviado y transferir entre mesas. Todo eso puede
-        // hacer falta para cerrar cuentas que quedaron abiertas de antes, y
-        // bloquearlo dejaría al mesero atrapado sin poder resolverlas.
         Route::middleware('caja.abierta')->group(function () {
             Route::post('/comanda/enviar', [MesaController::class, 'enviar'])->name('comanda.enviar');
             Route::post('/mesa/store', [MesaController::class, 'store'])->name('mesa.store');
             Route::post('/mesa/reabrir', [ComandaController::class, 'reabrir'])->name('mesa.reabrir');
             Route::post('/delivery/crear', [DeliveryController::class, 'crear'])->name('delivery.crear');
-        Route::delete('/delivery/{mesa}/cancelar-vacio', [DeliveryController::class, 'cancelarVacio'])->name('delivery.cancelar-vacio');
+            Route::delete('/delivery/{mesa}/cancelar-vacio', [DeliveryController::class, 'cancelarVacio'])->name('delivery.cancelar-vacio');
+            Route::match(['get', 'post'], '/pedido-rapido', [ComandaController::class, 'crearPedidoRapido'])->name('pedido.rapido');
         });
 
         // NUEVO: cancelación de un producto individual ya enviado a cocina,
@@ -94,10 +90,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/comanda/transferir', [ComandaController::class, 'transferirProductos'])->name('comanda.transferir');
         Route::patch('/comanda/{mesa}/personas', [MesaController::class, 'actualizarPersonas'])->name('comanda.personas'); 
         Route::get('/comanda/promociones/activas', [MesaController::class, 'promocionesActivas'])->name('comanda.promociones.activas');
-        // NOTA: mesa.store, mesa.reabrir y delivery.crear estaban declaradas
-        // aquí abajo también. Se quitaron porque Laravel se queda con la
-        // ÚLTIMA definición de cada ruta, y esas copias sin el middleware
-        // 'caja.abierta' anulaban el bloqueo. Ahora viven solo arriba.
     });
     
     // ------------------------------------------
@@ -135,7 +127,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [ProductoController::class, 'index'])->name('index');
             Route::get('/api/productos', [ProductoController::class, 'getProductos'])->name('api.productos');
             Route::get('/api/estadisticas', [ProductoController::class, 'getEstadisticas'])->name('api.estadisticas');
-            // La ruta de la imagen fue movida al bloque de RUTAS PÚBLICAS
             Route::post('/api/store', [ProductoController::class, 'store'])->name('api.store')->middleware('permiso:Productos,crear');
             Route::put('/api/{id}', [ProductoController::class, 'update'])->name('api.update')->middleware('permiso:Productos,editar');
             Route::patch('/api/{id}/toggle-disponibilidad', [ProductoController::class, 'toggleDisponibilidad'])->name('api.toggle')->middleware('permiso:Productos,editar');
@@ -148,7 +139,6 @@ Route::middleware(['auth'])->group(function () {
        // --- MÓDULO CAJA ---
         Route::middleware(['permiso:Caja,mostrar'])->prefix('caja')->name('caja.')->group(function () {
             
-            // Dominios Financieros (CajaController)
             Route::get('/', [CajaController::class, 'index'])->name('index');
             Route::get('/flujo', [CajaController::class, 'flujoDeCaja'])->name('flujo');
             Route::get('/reporte-pdf/{id}', [CajaController::class, 'generarReportePdf'])->name('reporte.pdf');
@@ -163,11 +153,10 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/abrir', [CajaController::class, 'abrir'])->name('abrir')->middleware('permiso:Caja,gestionar');
             Route::post('/cerrar', [CajaController::class, 'cerrar'])->name('cerrar')->middleware('permiso:Caja,gestionar');
             Route::post('/api/store', [CajaController::class, 'store'])->name('api.store')->middleware('permiso:Caja,crear');
-            // Dominios Tácticos de Mesa y Cobros (MesaOperacionController)
+            
             Route::get('/cobrar/{id}', [MesaOperacionController::class, 'cobrar'])->name('cobrar');
             Route::post('/api/estado-mesa', [MesaOperacionController::class, 'getEstadoMesa'])->name('api.estado-mesa');
             
-            // CORRECCIÓN: Quitamos el '/api/' de la URL física y limpiamos el nombre para que machee con cobro.js
             Route::post('/procesar-pago', [MesaOperacionController::class, 'procesarPago'])->name('procesar-pago')->middleware('permiso:Caja,crear');
             Route::patch('/orden/{id}/propina', [MesaOperacionController::class, 'actualizarPropina'])->name('orden.propina')->middleware('permiso:Caja,crear');
 
@@ -176,22 +165,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/division/asignar', [MesaOperacionController::class, 'asignarProductoDivision'])->name('division.asignar')->middleware('permiso:Caja,crear');
             Route::post('/division/cancelar', [MesaOperacionController::class, 'cancelarDivision'])->name('division.cancelar')->middleware('permiso:Caja,crear');
 
-            // Cancelar la cuenta COMPLETA sin cobrarla (cliente que se fue sin
-            // pagar, comanda levantada por error, cortesía...).
-            // Exige permiso de ELIMINAR en Caja: es una acción destructiva que
-            // cierra una cuenta sin que entre dinero, así que no debería
-            // poder hacerla cualquier usuario del módulo.
             Route::post('/cuenta/cancelar', [MesaOperacionController::class, 'cancelarCuenta'])->name('cuenta.cancelar')->middleware('permiso:Caja,eliminar');
-
-            // Descuento de la cuenta. Se movió del módulo de Mesas a Caja:
-            // ahora lo autoriza quien cobra, no quien levanta el pedido.
             Route::post('/cuenta/descuento', [MesaOperacionController::class, 'aplicarDescuento'])->name('cuenta.descuento')->middleware('permiso:Caja,editar');
             
             Route::post('/api/liberar-mesa', [MesaOperacionController::class, 'liberarMesa'])->name('api.liberar-mesa')->middleware('permiso:Caja,gestionar');
             Route::post('/api/abrir-mesa', [MesaOperacionController::class, 'abrirMesa'])->name('api.abrir-mesa')->middleware('permiso:Caja,gestionar');
 
-            // CORREGIDO: apunta a ConfiguracionController (guarda en tabla de configuración),
-            // NO a CajaController (ese guardaba en sesión y CajaService nunca lo lee).
             Route::post('/toggle-iva', [ConfiguracionController::class, 'toggleIva'])->name('toggle-iva');
 
             Route::delete('/{id}', [MesaOperacionController::class, 'destroy'])->name('destroy')->middleware('permiso:Caja,eliminar');
@@ -226,14 +205,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [CocinaController::class, 'index'])->name('index');
             Route::get('/api/comandas', [CocinaController::class, 'apiComandas'])->name('api.comandas');
             Route::patch('/orden/{id}/estado', [CocinaController::class, 'actualizarEstado'])->name('orden.estado')->middleware('permiso:Cocina,editar');
-
-            // Historial de comandas: lo que llegó al area al momento del envío.
-            // Es el respaldo inmutable que permite resolver discusiones entre
-            // el mesero y cocina ("yo lo pedí sin cebolla" / "aquí dice con todo").
             Route::get('/historial', [CocinaController::class, 'historial'])->name('historial');
-
-            // Tachar un producto individual (ya listo) sin marcar toda la comanda.
-            // Solo requiere editar porque es una accion operativa del cocinero.
             Route::patch('/detalle/{id}/listo', [CocinaController::class, 'marcarDetalleListoParaCocina'])
                 ->name('detalle.listo')
                 ->middleware('permiso:Cocina,editar');
@@ -265,13 +237,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/corte-mensual/exportar', [FinanzasController::class, 'exportarCorteCSV'])->name('corte.exportar');
             Route::get('/corte-mensual/pdf', [FinanzasController::class, 'exportarCortePDF'])->name('corte.pdf');
 
-            // --- DESGLOSE POR MESERO Y TURNO ---
-            // Ver el desglose y el detalle de mesas solo requiere 'mostrar'.
             Route::get('/meseros', [MeserosFinanzasController::class, 'index'])->name('meseros');
             Route::get('/meseros/detalle', [MeserosFinanzasController::class, 'detalle'])->name('meseros.detalle');
 
-            // Registrar el aporte al fondo de barra y cocina SI mueve dinero,
-            // asi que pide permiso de editar y no solo de ver.
             Route::post('/meseros/aporte', [MeserosFinanzasController::class, 'aplicarAporte'])
                 ->name('meseros.aporte')
                 ->middleware('permiso:Finanzas,editar');
@@ -311,11 +279,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['permiso:Historial de Cajas,mostrar'])->prefix('historial-cajas')->name('historial.')->group(function () {
         Route::get('/', [HistorialCajaController::class, 'index'])->name('index');
         Route::get('/{id}', [HistorialCajaController::class, 'show'])->name('show');
-
-        // PDF del corte desde el historial. Se declara aquí (y no se reutiliza
-        // 'admin.caja.reporte.pdf') porque aquella ruta exige permiso de Caja:
-        // un usuario que solo tiene "Historial de Cajas" podría ver el detalle
-        // en pantalla pero recibiría un 403 al intentar abrir el PDF.
         Route::get('/{id}/pdf', [CajaController::class, 'generarReportePdf'])->name('pdf');
     });
 
@@ -323,6 +286,20 @@ Route::middleware(['auth'])->group(function () {
     // CLIENTES (Nuevo Módulo)
     // ------------------------------------------
     Route::resource('clientes', ClienteController::class);
+
+    // Rutas AJAX para el módulo de Delivery / Clientes en el POS
+    Route::get('/pos/clientes/buscar', [\App\Http\Controllers\PosClienteController::class, 'buscar'])->name('pos.clientes.buscar');
+    Route::post('/pos/clientes/express', [\App\Http\Controllers\PosClienteController::class, 'guardarClienteExpress'])->name('pos.clientes.express');
+    Route::post('/pos/direcciones/express', [\App\Http\Controllers\PosClienteController::class, 'guardarDireccionExpress'])->name('pos.direcciones.express');
+
+    // ==========================================
+    // --- MÓDULO DE REPARTIDORES ---
+    // ==========================================
+    Route::middleware(['auth'])->prefix('admin/repartidores')->name('admin.repartidores.')->group(function () {
+    Route::get('/', [App\Http\Controllers\RepartidorController::class, 'index'])->name('index');
+    Route::post('/{id}/asignar', [App\Http\Controllers\RepartidorController::class, 'asignarRepartidor'])->name('asignar');
+    Route::patch('/{id}/entregado', [App\Http\Controllers\RepartidorController::class, 'marcarEntregado'])->name('entregado');
+    });
 
     // ------------------------------------------
     // LOGOUT

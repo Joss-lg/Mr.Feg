@@ -96,7 +96,14 @@ async function cargarMesas() {
         if (!res.ok) throw new Error('Error en API');
 
         const response = await res.json();
-        estadoGlobal.mesas = response.data || [];
+        const todasLasMesas = response.data || [];
+        
+        // FILTRO ESCUDO: Ignorar las mesas fantasma de Domicilio y Para Llevar
+        estadoGlobal.mesas = todasLasMesas.filter(mesa => {
+            const numeroMesa = (mesa.numero || '').toUpperCase();
+            return !numeroMesa.startsWith('DOM-') && !numeroMesa.startsWith('LLEVAR-');
+        });
+        
         renderizarMapaMesas();
     } catch (e) {
         console.error(e);

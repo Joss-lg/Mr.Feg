@@ -59,7 +59,7 @@ class ComandaController extends Controller
         return view('mesero.index', compact('mesa', 'categorias', 'productos', 'mesasAbiertas', 'esCapitan', 'comandaActiva', 'platillosEnviados', 'ivaHabilitado', 'ivaPorcentaje'));
     }
 
-    public function enviar(Request $request)
+   public function enviar(Request $request)
     {
         $request->validate([
             'mesa_id' => 'required|exists:mesas,id',
@@ -73,6 +73,12 @@ class ComandaController extends Controller
             'total' => 'required|numeric|min:0',
             'personas' => 'required|integer|min:1',
             'descuento_porcentaje' => 'required|numeric|min:0|max:100',
+            
+            // --- CAMPOS DELIVERY / LLEVAR ---
+            'tipo_pedido' => 'nullable|string|in:comedor,llevar,domicilio',
+            'cliente_id' => 'nullable|exists:clientes,id',
+            'direccion_id' => 'nullable|exists:direcciones,id',
+            'nombre_temporal' => 'nullable|string|max:255', 
         ]);
 
         try {
@@ -85,14 +91,29 @@ class ComandaController extends Controller
                 }
             }
 
+            // Pasamos el nombre temporal como un dato extra limpio
+            $datosExtra = [
+                'tipo_pedido' => $request->tipo_pedido ?? 'comedor',
+                'cliente_id' => $request->cliente_id,
+                'direccion_id' => $request->direccion_id,
+                'nombre_temporal' => $request->filled('nombre_temporal') ? strtoupper($request->nombre_temporal) : null,
+            ];
+
             $orden = $this->comandaService->procesarEnvio(
                 $mesa,
                 $request->platillos,
                 $usuario,
                 $request->total,
                 $request->personas,
-                $request->descuento_porcentaje
+                $request->descuento_porcentaje,
+                true,       
+                $datosExtra 
             );
+
+            // --- EL TOQUE FINAL: Si hay nombre temporal, lo guardamos directamente en la Orden ---
+            if ($request->filled('nombre_temporal') && Schema::hasColumn('ordenes', 'nombre_temporal')) {
+                $orden->update(['nombre_temporal' => strtoupper($request->nombre_temporal)]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -314,5 +335,42 @@ public function transferirProductos(Request $request)
             'total'     => $total,
             'fecha'     => now(),
         ]);
+    }
+
+    /**
+     * Crea una mesa virtual temporal para pedidos "Para Llevar" o "A Domicilio"
+     * sin necesidad de dar de alta una mesa física en el plano.
+     */
+    public function crearPedidoRapido(Request $request)
+    {
+        $request->validate([
+            'tipo' => 'required|in:llevar,domicilio'
+        ]);
+
+        try {
+            $prefijo = $request->tipo === 'llevar' ? 'LLEVAR' : 'DOM';
+            $numeroMesa = $prefijo . '-' . now()->format('Hi') . '-' . rand(10, 99);
+
+            $mesa = Mesa::create([
+                'numero'    => $numeroMesa,
+                'capacidad' => 1,
+                'estado'    => 'ocupada',
+                'mesero_id' => auth()->id(),
+                'pos_x'     => 0,
+                'pos_y'     => 0,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                // CORREGIDO AQUÍ (agregamos .show):
+                'redirect' => route('mesero.comanda.show', ['mesa' => $mesa->id])
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al crear pedido rápido: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

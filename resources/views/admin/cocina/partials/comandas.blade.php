@@ -60,7 +60,7 @@
                 <div class="p-4 border-b border-[var(--border-color)] min-w-0 flex items-start justify-between gap-2">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 mb-0.5">
-                            <h3 class="font-black text-lg truncate capitalize">{{ $labelMesa }}</h3>
+                            <h3 class="font-black text-lg break-words uppercase leading-tight">{{ $labelMesa }}</h3>
                             @if($esDelivery)
                                 <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500 text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
                                     <i class="fas fa-motorcycle text-[8px]"></i>

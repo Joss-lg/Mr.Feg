@@ -1,4 +1,3 @@
-
 (function () {
     const config = window.ComandaConfig || {};
 
@@ -26,7 +25,7 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken()
+                'X-CSRF-TOKEN': config.csrfToken
             },
             body: JSON.stringify({ personas: v })
         })
@@ -143,6 +142,46 @@
         const itemsHTML = document.querySelectorAll('.ticket-item');
         if (itemsHTML.length === 0) { mostrarError("¡Agrega platillos!"); return; }
 
+        // --- VALIDACIÓN ESTRICTA (BLINDADA) PARA DELIVERY ---
+        const config = window.ComandaConfig || {};
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const esDomicilio = 
+            (window.tipoPedidoActual === 'domicilio') || 
+            (urlParams.get('tipo_pedido') === 'domicilio') || 
+            (config.mesa && config.mesa.numero && config.mesa.numero.toString().toUpperCase().startsWith('DOM'));
+
+        if (esDomicilio) {
+            // Si hay un nombre temporal de Domicilio Exprés, permitimos saltar la validación estricta de BD
+            const esExpress = Boolean(window.nombreClienteTemporal);
+
+            if (!esExpress) {
+                if (!window.clienteSeleccionadoId || window.clienteSeleccionadoId === 'null') {
+                    mostrarError("¡Debes seleccionar un cliente para el pedido a domicilio!");
+                    if (typeof window.abrirModalDelivery === 'function') window.abrirModalDelivery();
+                    return;
+                }
+
+                if (!window.direccionSeleccionadaId || window.direccionSeleccionadaId === 'null') {
+                    mostrarError("¡Falta la dirección! Selecciona a dónde enviar el pedido.");
+                    if (typeof window.abrirModalDelivery === 'function') window.abrirModalDelivery();
+                    return;
+                }
+            }
+        }
+
+        // --- VALIDACIÓN PARA LLEVAR ---
+        const esLlevar = (window.tipoPedidoActual === 'llevar') || (urlParams.get('tipo_pedido') === 'llevar');
+
+        if (esLlevar) {
+            if (!window.clienteSeleccionadoId && !window.nombreClienteTemporal) {
+                mostrarError("¡Ingresa un nombre para identificar este pedido para llevar!");
+                if (typeof window.abrirModal === 'function') window.abrirModal('modalParaLlevar');
+                return;
+            }
+        }
+        // ----------------------------------------------------------------
+
         const platillosData = [];
         itemsHTML.forEach(item => {
             const nomEl = item.querySelector('.nombre-platillo');
@@ -166,29 +205,49 @@
 
         fetch(config.rutas.comandaEnviar, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken() },
-            body: JSON.stringify({
-                mesa_id: mesaDestinoSeleccionada || (config.mesa && config.mesa.id) || 1,
-                platillos: platillosData,
-                total: totalParseado,
-                personas: numeroPersonas,
-                descuento_porcentaje: descuentoPorcentaje,
-                nota_general: notaGeneral,
-                propina: window.propinaGlobal || 0
-            })
+            headers: { 
+                'Content-Type': 'application/json', 
+                'X-Requested-With': 'XMLHttpRequest', 
+                'X-CSRF-TOKEN': config.csrfToken 
+            },
+           body: JSON.stringify({
+            mesa_id: (typeof mesaDestinoSeleccionada !== 'undefined' ? mesaDestinoSeleccionada : null) || (config.mesa && config.mesa.id) || 1,
+            platillos: platillosData,
+            total: totalParseado,
+            personas: (typeof numeroPersonas !== 'undefined' ? numeroPersonas : 1),
+            descuento_porcentaje: (typeof descuentoPorcentaje !== 'undefined' ? descuentoPorcentaje : 0),
+            nota_general: (typeof notaGeneral !== 'undefined' ? notaGeneral : ''),
+            propina: window.propinaGlobal || 0,
+            
+            tipo_pedido: window.tipoPedidoActual || urlParams.get('tipo_pedido') || 'comedor',
+            cliente_id: window.clienteSeleccionadoId || null,
+            direccion_id: window.direccionSeleccionadaId || null,
+            
+            // --- EL PARCHE BLINDADO ---
+            // Intenta tomar la variable global; si falla, lee el texto del botón azul directamente.
+            nombre_temporal: window.nombreClienteTemporal || 
+                             (document.getElementById('lbl-tipo-pedido-actual') && 
+                              document.getElementById('lbl-tipo-pedido-actual').innerText !== 'Ingresar Nombre' &&
+                              document.getElementById('lbl-tipo-pedido-actual').innerText !== 'Para Llevar' 
+                              ? document.getElementById('lbl-tipo-pedido-actual').innerText.trim() 
+                              : null)
+        })
+
         })
         .then(res => res.json()).then(data => {
             if (data.success) {
                 mostrarExito("¡Enviado a cocina!");
 
-                platillosData.forEach(p => {
-                    platillosEnviadosDB.push({
-                        nombre: p.nombre,
-                        cantidad: p.cantidad,
-                        precio: p.precio,
-                        estado: 'enviado'
+                if (typeof platillosEnviadosDB !== 'undefined') {
+                    platillosData.forEach(p => {
+                        platillosEnviadosDB.push({
+                            nombre: p.nombre,
+                            cantidad: p.cantidad,
+                            precio: p.precio,
+                            estado: 'enviado'
+                        });
                     });
-                });
+                }
 
                 if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
 

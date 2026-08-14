@@ -51,17 +51,26 @@
             <span class="text-[10px] font-medium text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors">Nota</span>
         </button>
 
-        {{-- El botón de Descuento se movió al módulo de Caja: ahora lo
-             autoriza quien cobra, no quien levanta el pedido. --}}
-
-        {{-- Gramaje oculto por solicitud --}}
-
+        {{-- Traspaso movido aquí, a lado de Nota --}}
         <button type="button" onclick="llamarCapitan()" class="flex flex-col items-center justify-center p-3 rounded-[16px] bg-[var(--bg-panel)] border border-[var(--border-color)] hover:bg-[var(--hover-bg)] hover:border-indigo-500/30 hover:shadow-md transition-all duration-150 active:scale-95 group shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50">
             <i class="fas fa-exchange-alt text-[var(--text-muted)] group-hover:text-indigo-500 mb-2 text-sm transition-colors duration-150"></i>
             <span class="text-[10px] font-medium text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors">Traspaso</span>
         </button>
 
-        {{-- Promos oculto por solicitud --}}
+{{-- Tipo Pedido / Cliente (Escritorio) - Solo aparece si es mesa temporal de Llevar o Domicilio --}}
+@php
+    $esMesaVirtual = \Illuminate\Support\Str::startsWith(strtoupper($mesa->numero), ['DOM', 'LLEVAR']);
+@endphp
+
+@if($esMesaVirtual)
+<button type="button" id="btnTipoPedidoDesktop" onclick="manejarClickTipoPedido()" class="col-span-2 mt-1 flex flex-col items-center justify-center py-3 px-4 rounded-[16px] bg-[var(--bg-panel)] border border-[var(--border-color)] hover:bg-[var(--hover-bg)] hover:border-amber-500/30 hover:shadow-md transition-all duration-150 active:scale-95 group shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50">
+    <div class="flex items-center gap-2 mb-1">
+        <i class="fas fa-user-tag text-[var(--text-muted)] group-hover:text-amber-500 text-sm transition-colors duration-150"></i>
+        <span id="lbl-titulo-tarjeta" class="text-[10px] font-medium text-[var(--text-muted)] group-hover:text-[var(--text-main)] transition-colors uppercase tracking-wider">Tipo de Pedido</span>
+    </div>
+    <span id="lbl-tipo-pedido-actual" class="text-[11px] font-black text-blue-500 mt-1">Comedor</span>
+</button>
+@endif
 
         @if($esCapitan ?? false)
             <button type="button" onclick="llamarCapitan()" class="col-span-2 mt-1 h-12 flex items-center justify-center gap-2 rounded-[16px] bg-gradient-to-b from-[var(--accent)] to-[var(--accent)] border border-[var(--border-color)] hover:opacity-90 hover:shadow-lg transition-all duration-150 active:scale-95 group text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)]">
@@ -88,8 +97,18 @@
      class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--bg-base)] border-t border-[var(--border-color)] shadow-[0_-4px_20px_rgba(0,0,0,0.12)]"
      style="padding-bottom: env(safe-area-inset-bottom)">
 
-    {{-- Fila superior: acciones rápidas --}}
-    <div class="flex items-center gap-2 px-3 pt-2.5 pb-1.5 overflow-x-auto hide-scroll">
+  {{-- Botón Móvil: Tipo de Pedido - Solo para Llevar o Domicilio --}}
+@php
+    $esMesaVirtual = \Illuminate\Support\Str::startsWith(strtoupper($mesa->numero), ['DOM', 'LLEVAR']);
+@endphp
+
+@if($esMesaVirtual)
+<button type="button" id="btnTipoPedidoMobile" onclick="manejarClickTipoPedido()"
+    class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-color)] text-[11px] font-bold text-[var(--text-main)] shadow-sm active:scale-95 whitespace-nowrap">
+    <i class="fas fa-shopping-bag text-amber-500 text-[10px]"></i>
+    <span id="lbl-tipo-pedido-mobile">Comedor</span>
+</button>
+@endif
         <button type="button" onclick="ajustarPersonas()"
             class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-color)] text-[11px] font-bold text-[var(--text-main)] shadow-sm active:scale-95 whitespace-nowrap">
             <i class="fas fa-users text-blue-500 text-[10px]"></i>

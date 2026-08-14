@@ -135,6 +135,7 @@
                     ['route' => 'admin.cocina.index', 'icon' => 'fas fa-fire-burner', 'label' => 'Cocina', 'modulo_id' => 8],
                     ['route' => 'admin.mesas.index', 'icon' => 'fas fa-chair', 'label' => 'Mesas', 'modulo_id' => 6],
                     ['route' => 'admin.delivery.index', 'icon' => 'fas fa-motorcycle', 'label' => 'Delivery', 'modulo_id' => 13],
+                    ['route' => 'admin.repartidores.index', 'icon' => 'fas fa-biking', 'label' => 'Repartidores', 'modulo_id' => 15],
                     ['route' => 'clientes.index', 'icon' => 'fas fa-address-book', 'label' => 'Clientes', 'modulo_id' => 14],
                 ],
                 'Caja' => [
@@ -142,7 +143,7 @@
                     ['route' => 'admin.caja.flujo', 'icon' => 'fas fa-money-bill-wave', 'label' => 'Flujo de Caja', 'modulo_id' => 9],
                 ]
             ];
-        @endphp
+@endphp
 
         @foreach($menu as $titulo => $items)
             @php
