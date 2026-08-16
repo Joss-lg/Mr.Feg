@@ -4,80 +4,130 @@
 @section('header-title', 'Dashboard Financiero')
 @section('header-subtitle', 'Visión analítica de operaciones')
 
-@section('content')
-<div class="p-4 sm:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-8 flex-1 flex flex-col overflow-x-hidden bg-transparent">
+@push('styles')
+<style>
+    /* Fondo general del sistema en gris extra claro */
+    body, html, #app, main, .wrapper, .main-content {
+        background-color: #f8fafc !important; 
+    }
     
-    <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6">
+    /* Textos del header superior en oscuro */
+    header, header h1, header h2, header p, header span, .header-title, .header-subtitle {
+        color: #0f172a !important; 
+    }
+
+    /* TAMAÑOS DEL TÍTULO */
+    header h1, .header-title {
+        font-size: 2.2rem !important; 
+        line-height: 1.2 !important;
+        font-weight: 800 !important; 
+    }
+    header p, header span, .header-subtitle {
+        font-size: 1rem !important; 
+        margin-top: 0.25rem !important;
+        font-weight: 500 !important;
+        color: #64748b !important; 
+    }
+
+    /* ANIMACIONES DE ENTRADA */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0; /* Oculto al inicio para que la animación lo muestre */
+    }
+</style>
+@endpush
+
+@section('content')
+<div class="p-4 sm:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-8 flex-1 flex flex-col overflow-x-hidden min-h-screen">
+    
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         
         <!-- Tarjeta 1: Ingresos Brutos -->
-        <div class="bg-[#04243b]/60 backdrop-blur-xl border border-[#8fc1f0]/15 shadow-2xl shadow-black/30 rounded-[1.2rem] sm:rounded-[1.5rem] p-4 sm:p-7 flex flex-col justify-between h-32 sm:h-44 group transition-all duration-300 hover:bg-[#04243b]/80">
+        <div class="group bg-white shadow-sm border border-gray-100/80 rounded-[1.5rem] p-5 sm:p-7 flex flex-col justify-between h-36 sm:h-44 transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/5 hover:border-blue-200 hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 0ms;">
             <div class="flex justify-between items-start">
-                <h3 class="text-[8px] sm:text-[10px] font-bold text-[#8fc1f0] uppercase tracking-[0.1em] sm:tracking-[0.15em] leading-tight">Ingresos Brutos</h3>
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#38b6ff]/20 bg-white/5 flex items-center justify-center shrink-0 group-hover:border-[#f97316] transition-all duration-300">
-                    <i class="fas fa-wallet text-[#93c5fd] text-xs sm:text-sm group-hover:text-[#f97316] group-hover:scale-110 transition-all duration-300"></i>
+                <h3 class="text-[9px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-[0.15em] leading-tight group-hover:text-blue-600 transition-colors">Ingresos Brutos</h3>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border border-blue-100 bg-blue-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-wallet text-blue-600 text-sm sm:text-base"></i>
                 </div>
             </div>
             <div class="mt-2 sm:mt-4">
-                <p class="text-xl sm:text-[2.5rem] leading-none font-black text-white tracking-tighter truncate tabular-nums"><span class="text-white/70 font-bold">$</span>{{ number_format($stats['ventas_dia'] ?? 0, 2) }}</p>
-                <p class="text-[9px] sm:text-[11px] font-bold text-[#fb923c] mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5 opacity-90 tracking-wide">
+                <p class="text-3xl sm:text-[2.75rem] leading-none font-black text-gray-900 tracking-tighter truncate tabular-nums"><span class="text-gray-900 font-bold">$</span>{{ number_format($stats['ventas_dia'] ?? 0, 2) }}</p>
+                <p class="text-[10px] sm:text-xs font-bold text-emerald-500 mt-2 sm:mt-3 flex items-center gap-1 sm:gap-1.5 opacity-90 tracking-wide">
                     <i class="fas fa-arrow-trend-up"></i> +4.2% vs ayer
                 </p>
             </div>
         </div>
 
         <!-- Tarjeta 2: Volumen de Órdenes -->
-        <div class="bg-[#04243b]/60 backdrop-blur-xl border border-[#8fc1f0]/15 shadow-2xl shadow-black/30 rounded-[1.2rem] sm:rounded-[1.5rem] p-4 sm:p-7 flex flex-col justify-between h-32 sm:h-44 group transition-all duration-300 hover:bg-[#04243b]/80">
+        <div class="group bg-white shadow-sm border border-gray-100/80 rounded-[1.5rem] p-5 sm:p-7 flex flex-col justify-between h-36 sm:h-44 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-900/5 hover:border-cyan-200 hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 100ms;">
             <div class="flex justify-between items-start">
-                <h3 class="text-[8px] sm:text-[10px] font-bold text-[#8fc1f0] uppercase tracking-[0.1em] sm:tracking-[0.15em] leading-tight">Volumen de Órdenes</h3>
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#38b6ff]/20 bg-white/5 flex items-center justify-center shrink-0 group-hover:border-[#38b6ff] transition-all duration-300">
-                    <i class="fas fa-receipt text-[#93c5fd] text-xs sm:text-sm group-hover:text-[#38b6ff] group-hover:scale-110 transition-all duration-300"></i>
+                <h3 class="text-[9px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-[0.15em] leading-tight group-hover:text-cyan-600 transition-colors">Volumen de Órdenes</h3>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border border-cyan-100 bg-cyan-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-receipt text-cyan-500 text-sm sm:text-base"></i>
                 </div>
             </div>
             <div class="mt-2 sm:mt-4">
-                <p class="text-xl sm:text-[2.5rem] leading-none font-black text-[#e6f0fa] tracking-tighter truncate tabular-nums">{{ $stats['ordenes_dia'] ?? 0 }}</p>
-                <p class="text-[8px] sm:text-[10px] font-semibold text-[#a8cdf0] opacity-85 mt-1.5 sm:mt-3 uppercase tracking-wide">Transacciones</p>
+                <p class="text-3xl sm:text-[2.75rem] leading-none font-black text-gray-900 tracking-tighter truncate tabular-nums">{{ $stats['ordenes_dia'] ?? 0 }}</p>
+                <p class="text-[9px] sm:text-[11px] font-semibold text-gray-400 mt-2 sm:mt-3 uppercase tracking-widest">Transacciones</p>
             </div>
         </div>
 
         <!-- Tarjeta 3: Ticket Promedio -->
-        <div class="bg-[#04243b]/60 backdrop-blur-xl border border-[#8fc1f0]/15 shadow-2xl shadow-black/30 rounded-[1.2rem] sm:rounded-[1.5rem] p-4 sm:p-7 flex flex-col justify-between h-32 sm:h-44 group transition-all duration-300 hover:bg-[#04243b]/80">
+        <div class="group bg-white shadow-sm border border-gray-100/80 rounded-[1.5rem] p-5 sm:p-7 flex flex-col justify-between h-36 sm:h-44 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-900/5 hover:border-indigo-200 hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 200ms;">
             <div class="flex justify-between items-start">
-                <h3 class="text-[8px] sm:text-[10px] font-bold text-[#8fc1f0] uppercase tracking-[0.1em] sm:tracking-[0.15em] leading-tight">Ticket Promedio</h3>
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#38b6ff]/20 bg-white/5 flex items-center justify-center shrink-0 group-hover:border-[#f97316] transition-all duration-300">
-                    <i class="fas fa-tag text-[#93c5fd] text-xs sm:text-sm group-hover:text-[#f97316] group-hover:scale-110 transition-all duration-300"></i>
+                <h3 class="text-[9px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-[0.15em] leading-tight group-hover:text-indigo-600 transition-colors">Ticket Promedio</h3>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border border-indigo-100 bg-indigo-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-tag text-indigo-500 text-sm sm:text-base"></i>
                 </div>
             </div>
             <div class="mt-2 sm:mt-4">
-                <p class="text-xl sm:text-[2.5rem] leading-none font-black text-white tracking-tighter truncate tabular-nums"><span class="text-white/70 font-bold">$</span>{{ number_format($stats['ticket_promedio'] ?? 0, 2) }}</p>
-                <p class="text-[8px] sm:text-[10px] font-semibold text-[#a8cdf0] opacity-85 mt-1.5 sm:mt-3 uppercase tracking-wide">Por Comensal</p>
+                <p class="text-3xl sm:text-[2.75rem] leading-none font-black text-gray-900 tracking-tighter truncate tabular-nums"><span class="text-gray-900 font-bold">$</span>{{ number_format($stats['ticket_promedio'] ?? 0, 2) }}</p>
+                <p class="text-[9px] sm:text-[11px] font-semibold text-gray-400 mt-2 sm:mt-3 uppercase tracking-widest">Por Comensal</p>
             </div>
         </div>
 
         <!-- Tarjeta 4: Afluencia Total -->
-        <div class="bg-[#04243b]/60 backdrop-blur-xl border border-[#8fc1f0]/15 shadow-2xl shadow-black/30 rounded-[1.2rem] sm:rounded-[1.5rem] p-4 sm:p-7 flex flex-col justify-between h-32 sm:h-44 group transition-all duration-300 hover:bg-[#04243b]/80">
+        <div class="group bg-white shadow-sm border border-gray-100/80 rounded-[1.5rem] p-5 sm:p-7 flex flex-col justify-between h-36 sm:h-44 transition-all duration-300 hover:shadow-lg hover:shadow-sky-900/5 hover:border-sky-200 hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 300ms;">
             <div class="flex justify-between items-start">
-                <h3 class="text-[8px] sm:text-[10px] font-bold text-[#8fc1f0] uppercase tracking-[0.1em] sm:tracking-[0.15em] leading-tight">Afluencia Total</h3>
-                <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#38b6ff]/20 bg-white/5 flex items-center justify-center shrink-0 group-hover:border-[#f97316] transition-all duration-300">
-                    <i class="fas fa-user-friends text-[#93c5fd] text-xs sm:text-sm group-hover:text-[#f97316] group-hover:scale-110 transition-all duration-300"></i>
+                <h3 class="text-[9px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-[0.15em] leading-tight group-hover:text-sky-600 transition-colors">Afluencia Total</h3>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl border border-sky-100 bg-sky-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-user-friends text-sky-500 text-sm sm:text-base"></i>
                 </div>
             </div>
             <div class="mt-2 sm:mt-4">
-                <p class="text-xl sm:text-[2.5rem] leading-none font-black text-[#e6f0fa] tracking-tighter truncate tabular-nums">{{ number_format($stats['clientes'] ?? 0, 0) }}</p>
-                <p class="text-[8px] sm:text-[10px] font-semibold text-[#a8cdf0] opacity-85 mt-1.5 sm:mt-3 uppercase tracking-wide">Registros</p>
+                <p class="text-3xl sm:text-[2.75rem] leading-none font-black text-gray-900 tracking-tighter truncate tabular-nums">{{ number_format($stats['clientes'] ?? 0, 0) }}</p>
+                <p class="text-[9px] sm:text-[11px] font-semibold text-gray-400 mt-2 sm:mt-3 uppercase tracking-widest">Registros</p>
             </div>
         </div>
     </div>
 
     <!-- Gráfica -->
-    <div class="bg-[#04243b]/60 backdrop-blur-xl border border-[#8fc1f0]/15 shadow-2xl shadow-black/30 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-8 lg:p-10 w-full flex-1 flex flex-col min-h-[380px] sm:min-h-[450px]">
-        <div class="flex justify-between items-start mb-5 sm:mb-8">
+    <div class="bg-white shadow-sm border border-gray-100/80 rounded-[2rem] p-6 sm:p-8 lg:p-10 w-full flex-1 flex flex-col min-h-[380px] sm:min-h-[450px] animate-fade-in-up" style="animation-delay: 400ms;">
+        <div class="flex justify-between items-start mb-6 sm:mb-10">
             <div>
-                <h2 class="text-base sm:text-xl font-black tracking-tight text-white">Análisis de Flujo</h2>
-                <p class="text-[9px] sm:text-xs text-[#a8cdf0] font-semibold mt-1.5">Métricas de rendimiento a lo largo de la jornada</p>
+                <h2 class="text-lg sm:text-2xl font-black tracking-tight text-gray-900 flex items-center gap-2">
+                    Análisis de Flujo
+                    <!-- Animación de pulso (bolita viva) -->
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                    </span>
+                </h2>
+                <p class="text-[10px] sm:text-sm text-gray-500 font-medium mt-1.5">Métricas de rendimiento a lo largo de la jornada</p>
             </div>
         </div>
         
-        <div class="w-full relative flex-1 min-h-[230px] sm:min-h-[300px]">
+        <div class="w-full relative flex-1 min-h-[250px] sm:min-h-[300px]">
             <canvas id="salesChart"></canvas>
         </div>
     </div>
@@ -91,28 +141,24 @@
     let myChart; 
 
     function initChart() {
-        const textColor = '#6fa3d8';
-        const gridColor = 'rgba(111, 163, 216, 0.12)';
-        const tooltipBg = '#04243b'; 
-        const tooltipText = '#ffffff'; 
-        const pointBg = '#0a4670'; 
+        const textColor = '#475569'; 
+        const gridColor = '#f1f5f9'; 
+        const tooltipBg = '#ffffff'; 
+        const tooltipText = '#0f172a'; 
+        const pointBg = '#ffffff'; 
 
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.color = textColor; 
 
         const ctx = document.getElementById('salesChart').getContext('2d');
-        
-        const orangeGlow = ctx.createLinearGradient(0, 0, 0, 400);
-        orangeGlow.addColorStop(0, 'rgba(249, 115, 22, 0.25)'); 
-        orangeGlow.addColorStop(1, 'rgba(249, 115, 22, 0)');
 
         if (myChart) {
             myChart.destroy();
         }
 
-        const chartLabels = {!! json_encode($chart['labels'] ?? ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']) !!};
-        const salesValues = {!! json_encode($chart['sales'] ?? [0, 0, 0, 0, 0, 0, 0, 0]) !!};
-        const transactionValues = {!! json_encode($chart['transactions'] ?? [0, 0, 0, 0, 0, 0, 0, 0]) !!};
+        const chartLabels = {!! json_encode($chart['labels'] ?? ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00']) !!};
+        const salesValues = {!! json_encode($chart['sales'] ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) !!};
+        const transactionValues = {!! json_encode($chart['transactions'] ?? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) !!};
 
         myChart = new Chart(ctx, {
             type: 'line',
@@ -121,28 +167,31 @@
                 datasets: [{
                     label: 'Ingresos Brutos',
                     data: salesValues,
-                    borderColor: '#f97316', 
-                    backgroundColor: orangeGlow,
-                    borderWidth: 3,
+                    // Se cambió a azul profundo para hacer match con los detalles
+                    borderColor: '#2563eb', 
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
                     pointBackgroundColor: pointBg, 
-                    pointBorderColor: '#f97316',
-                    pointBorderWidth: 2.5,
-                    pointRadius: window.innerWidth < 768 ? 2 : 4,
-                    pointHoverRadius: 7,
-                    fill: true,
-                    tension: 0.45 
+                    pointBorderColor: '#2563eb',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: false, 
+                    tension: 0.4 
                 }, {
                     label: 'Transacciones',
                     data: transactionValues,
-                    borderColor: '#38b6ff', 
+                    // Se cambió a un celeste/cyan para la segunda línea
+                    borderColor: '#0ea5e9', 
+                    backgroundColor: 'transparent',
                     borderWidth: 2.5,
-                    borderDash: [5, 5], 
+                    borderDash: [5, 5],
                     pointBackgroundColor: pointBg,
-                    pointBorderColor: '#38b6ff', 
+                    pointBorderColor: '#0ea5e9', 
                     pointBorderWidth: 2,
                     pointRadius: 0, 
                     pointHoverRadius: 6,
-                    tension: 0.45
+                    tension: 0.4
                 }]
             },
             options: {
@@ -156,8 +205,8 @@
                         labels: { 
                             usePointStyle: true, 
                             boxWidth: 8, 
-                            font: { size: window.innerWidth < 768 ? 10 : 12, weight: '700' }, 
-                            color: '#ffffff',
+                            font: { size: window.innerWidth < 768 ? 11 : 13, weight: '700' }, 
+                            color: '#334155',
                             padding: window.innerWidth < 768 ? 15 : 25 
                         } 
                     },
@@ -165,28 +214,30 @@
                         backgroundColor: tooltipBg, 
                         titleColor: tooltipText, 
                         bodyColor: tooltipText, 
-                        borderColor: gridColor, 
+                        borderColor: '#e2e8f0', 
                         borderWidth: 1, 
                         padding: 12, 
                         cornerRadius: 12, 
-                        titleFont: { size: 12, weight: '600' }, 
-                        bodyFont: { size: 13, weight: 'bold' }, 
+                        titleFont: { size: 13, weight: '700' }, 
+                        bodyFont: { size: 14, weight: '600' }, 
                         displayColors: true, 
                         boxPadding: 6, 
-                        usePointStyle: true 
+                        usePointStyle: true,
+                        boxHeight: 8,
+                        boxWidth: 8
                     }
                 },
                 scales: {
                     x: { 
                         grid: { display: false }, 
                         border: { display: false }, 
-                        ticks: { font: { weight: '600', size: 10 }, padding: 8 } 
+                        ticks: { font: { weight: '600', size: 11 }, padding: 10, color: '#94a3b8' } 
                     },
                     y: { 
                         beginAtZero: true, 
-                        grid: { color: gridColor, borderDash: [6, 6] }, 
+                        grid: { color: gridColor, drawBorder: false }, 
                         border: { display: false }, 
-                        ticks: { font: { weight: '600', size: 10 }, padding: window.innerWidth < 768 ? 5 : 15 } 
+                        ticks: { font: { weight: '600', size: 11 }, padding: 15, color: '#94a3b8' } 
                     }
                 }
             }

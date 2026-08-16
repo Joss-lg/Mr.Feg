@@ -49,12 +49,12 @@
 
 <div class="py-3 sm:py-6 lg:py-8">
     {{-- CABECERA Y FILTROS --}}
-    <div class="sticky top-0 z-50 bg-[var(--card-color)] border-b border-[var(--border-color)] shadow-sm">
+    <div class="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
         <div class="max-w-full px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-[var(--text-color)]">Plano Espacial de Mesas</h1>
-                    <p class="text-sm sm:text-base text-[var(--text-muted)] mt-1">Gestiona el layout y posición de mesas interactivamente</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Plano Espacial de Mesas</h1>
+                    <p class="text-sm sm:text-base text-slate-500 mt-1">Gestiona el layout y posición de mesas interactivamente</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2">
@@ -63,7 +63,7 @@
                          sticky sobre un contenedor de alto fijo: una fila extra
                          empuja el mapa fuera de la vista. --}}
                     <button type="button" id="btnMisMesas"
-                        class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg bg-[var(--card-color)] border border-[var(--border-color)] text-[var(--text-color)] text-sm font-semibold transition hover:border-blue-500 hover:text-blue-500 flex items-center gap-2 shadow-sm">
+                        class="flex-1 sm:flex-none justify-center px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-800 text-sm font-semibold transition hover:border-blue-500 hover:text-blue-500 flex items-center gap-2 shadow-sm">
                         <i class="fas fa-clipboard-list"></i>
                         <span>Mis mesas</span>
                     </button>
@@ -73,7 +73,7 @@
                          su contenedor padre tiene alto fijo con overflow-hidden:
                          una fila extra empujaría el mapa fuera de la vista. --}}
                     @unless($cajaAbierta ?? true)
-                        <span class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-400 text-xs sm:text-sm font-bold">
+                        <span class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 text-xs sm:text-sm font-bold">
                             <i class="fas fa-triangle-exclamation"></i>
                             Caja cerrada — no se pueden levantar pedidos
                         </span>
@@ -146,7 +146,7 @@
 
             <div class="mt-4 flex flex-wrap gap-3 items-center">
                 <div class="flex items-center gap-2">
-                    <span id="totalMesas" class="text-sm font-semibold text-[var(--text-color)] bg-[var(--input-bg)] border border-[var(--border-color)] px-3 py-2 rounded-lg shadow-sm">Mesas: 0</span>
+                    <span id="totalMesas" class="text-sm font-semibold text-slate-800 bg-white border border-slate-200 px-3 py-2 rounded-lg shadow-sm">Mesas: 0</span>
                 </div>
 
                 {{-- "Agregar" solo aparece si el usuario tiene permiso de crear mesas --}}
@@ -172,17 +172,17 @@
                 {{-- relative: la simbologia flotante se posiciona contra este bloque
                      y NO contra el viewport con scroll, para que se quede fija
                      en su esquina aunque se haga pan del plano. --}}
-                <div class="relative bg-[var(--card-color)] border border-[var(--border-color)] rounded-xl overflow-hidden shadow-lg">
+                <div class="relative bg-white border border-slate-100 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-sm">
 
                     {{-- Barra de zoom --}}
-                    <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--border-color)] bg-[var(--input-bg)]">
-                        <span class="text-xs font-semibold text-[var(--text-muted)] hidden sm:inline">Toca y arrastra para mover el plano</span>
-                        <span class="text-xs font-semibold text-[var(--text-muted)] sm:hidden">Desliza para mover el plano</span>
+                    <div class="flex items-center justify-between gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50">
+                        <span class="text-xs font-semibold text-slate-500 hidden sm:inline">Toca y arrastra para mover el plano</span>
+                        <span class="text-xs font-semibold text-slate-500 sm:hidden">Desliza para mover el plano</span>
                         <div class="flex items-center gap-1 ml-auto">
-                            <button type="button" id="btnZoomOut" class="w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-[var(--card-color)] border border-[var(--border-color)] text-[var(--text-color)] active:scale-95 transition font-bold text-lg">−</button>
-                            <span id="zoomLabel" class="text-xs font-semibold text-[var(--text-color)] w-12 text-center select-none">100%</span>
-                            <button type="button" id="btnZoomIn" class="w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-[var(--card-color)] border border-[var(--border-color)] text-[var(--text-color)] active:scale-95 transition font-bold text-lg">+</button>
-                            <button type="button" id="btnZoomReset" class="h-11 sm:h-9 px-3 flex items-center justify-center rounded-lg bg-[var(--card-color)] border border-[var(--border-color)] text-[var(--text-color)] active:scale-95 transition text-xs font-semibold">Ajustar</button>
+                            <button type="button" id="btnZoomOut" class="w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-800 active:scale-95 transition font-bold text-lg">−</button>
+                            <span id="zoomLabel" class="text-xs font-semibold text-slate-800 w-12 text-center select-none">100%</span>
+                            <button type="button" id="btnZoomIn" class="w-11 h-11 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-800 active:scale-95 transition font-bold text-lg">+</button>
+                            <button type="button" id="btnZoomReset" class="h-11 sm:h-9 px-3 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-800 active:scale-95 transition text-xs font-semibold">Ajustar</button>
                         </div>
                     </div>
 
@@ -194,42 +194,42 @@
                          Se puede plegar porque en telefono tapa mesas. --}}
                     <div class="absolute top-14 right-3 z-20 select-none">
                         <button type="button" id="btnSimbologia"
-                            class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-t-lg bg-[var(--card-color)]/95 backdrop-blur border border-[var(--border-color)] text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-color)] transition-colors">
+                            class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-t-lg bg-white/95 backdrop-blur border border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors">
                             <span><i class="fas fa-palette mr-1"></i> Simbología</span>
                             <i id="iconoSimbologia" class="fas fa-chevron-up text-[9px]"></i>
                         </button>
 
                         <div id="listaSimbologia"
-                             class="bg-[var(--card-color)]/95 backdrop-blur border border-t-0 border-[var(--border-color)] rounded-b-lg px-2.5 py-2 space-y-1.5 shadow-lg">
+                             class="bg-white/95 backdrop-blur border border-t-0 border-slate-200 rounded-b-lg px-2.5 py-2 space-y-1.5 shadow-lg">
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="w-3 h-3 rounded-full bg-green-500 shrink-0 border border-black/10"></span>
-                                <span class="text-[11px] font-semibold text-[var(--text-color)]">Disponible</span>
+                                <span class="text-[11px] font-semibold text-slate-800">Disponible</span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="w-3 h-3 rounded-full bg-yellow-500 shrink-0 border border-black/10"></span>
-                                <span class="text-[11px] font-semibold text-[var(--text-color)]">Mis mesas</span>
+                                <span class="text-[11px] font-semibold text-slate-800">Mis mesas</span>
                             </div>
                             <div class="flex items-center gap-2 whitespace-nowrap">
                                 <span class="w-3 h-3 rounded-full bg-pink-500 shrink-0 border border-black/10"></span>
-                                <span class="text-[11px] font-semibold text-[var(--text-color)]">De otro mesero</span>
+                                <span class="text-[11px] font-semibold text-slate-800">De otro mesero</span>
                             </div>
                             
                         </div>
                     </div>
 
                     <div id="planoContenedor"
-                         class="relative w-full h-[380px] sm:h-[480px] lg:h-[600px] bg-[var(--input-bg)] overflow-auto shadow-inner"
+                         class="relative w-full h-[380px] sm:h-[480px] lg:h-[600px] bg-slate-50 overflow-auto shadow-inner"
                          style="touch-action: pan-x pan-y;">
 
                         {{-- Lienzo real: tamaño fijo, aquí sí tienen sentido las coordenadas x/y de las mesas --}}
                         <div id="planoLienzo" class="relative origin-top-left" style="width:1400px; height:900px; transition: transform 0.15s ease-out;">
                             {{-- Las mesas se inyectan aquí vía JS --}}
                             <div id="planoVacio" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                                <svg class="w-14 h-14 mb-3 text-[var(--text-muted)] opacity-40" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-14 h-14 mb-3 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zm10 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" clip-rule="evenodd"></path>
                                 </svg>
-                                <p class="text-[var(--text-muted)] font-semibold text-sm sm:text-base">Todavía no hay mesas en el plano</p>
-                                <p class="text-[var(--text-muted)] text-xs sm:text-sm mt-1 opacity-80">Toca "Editar" y luego "Agregar" para crear tu primera mesa</p>
+                                <p class="text-slate-500 font-semibold text-sm sm:text-base">Todavía no hay mesas en el plano</p>
+                                <p class="text-slate-400 text-xs sm:text-sm mt-1">Toca "Editar" y luego "Agregar" para crear tu primera mesa</p>
                             </div>
                         </div>
                     </div>
@@ -247,18 +247,18 @@
                 <div id="panelBackdrop" class="hidden lg:hidden fixed inset-0 bg-black/50 z-30"></div>
 
                 <div id="panelPropiedades"
-                     class="fixed inset-x-0 bottom-0 z-40 flex flex-col translate-y-full transition-transform duration-300 ease-out bg-[var(--card-color)] border-t border-[var(--border-color)] rounded-t-2xl shadow-2xl
-                            lg:sticky lg:inset-auto lg:translate-y-0 lg:transition-none lg:z-auto lg:rounded-xl lg:border lg:shadow-lg lg:top-28"
+                     class="fixed inset-x-0 bottom-0 z-40 flex flex-col translate-y-full transition-transform duration-300 ease-out bg-white border-t border-slate-200 rounded-t-2xl shadow-2xl
+                            lg:sticky lg:inset-auto lg:translate-y-0 lg:transition-none lg:z-auto lg:rounded-2xl lg:border lg:border-slate-100 lg:shadow-sm lg:top-28"
                      style="max-height: 85dvh;">
 
                     {{-- Manija de arrastre, solo móvil --}}
                     <div class="lg:hidden flex justify-center pt-2 pb-1 shrink-0">
-                        <span class="w-10 h-1.5 rounded-full bg-[var(--border-color)]"></span>
+                        <span class="w-10 h-1.5 rounded-full bg-slate-200"></span>
                     </div>
 
-                    <div class="flex items-center justify-between px-5 pt-2 lg:pt-5 pb-2 border-b border-[var(--border-color)] shrink-0">
-                        <h3 class="text-lg font-bold text-[var(--text-color)]">Propiedades</h3>
-                        <button type="button" id="btnCerrarPanelMovil" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full text-[var(--text-muted)] active:bg-[var(--input-bg)]">
+                    <div class="flex items-center justify-between px-5 pt-2 lg:pt-5 pb-2 border-b border-slate-200 shrink-0">
+                        <h3 class="text-lg font-bold text-slate-800">Propiedades</h3>
+                        <button type="button" id="btnCerrarPanelMovil" class="lg:hidden w-9 h-9 flex items-center justify-center rounded-full text-slate-500 active:bg-slate-100">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                             </svg>
@@ -267,37 +267,37 @@
 
                     <div class="px-5 py-4 overflow-y-auto flex-1 min-h-0 pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:pb-5">
                         <div id="panelVacio" class="text-center py-8">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-[var(--text-muted)] opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
                             </svg>
-                            <p class="text-[var(--text-muted)] font-medium">Selecciona una mesa</p>
+                            <p class="text-slate-500 font-medium">Selecciona una mesa</p>
                         </div>
 
                         <div id="formularioMesa" class="hidden space-y-4 mt-2">
                             <div>
-                                <label class="block text-sm font-semibold text-[var(--text-color)] mb-1">Número</label>
+                                <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Número</label>
                                 <input type="text" id="propNumero"
                                     autocomplete="off"
                                     data-teclado="texto"
                                     data-teclado-titulo="Número de Mesa"
                                     data-teclado-max="10"
-                                    class="w-full px-3 py-2.5 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner transition-colors">
+                                    class="w-full h-12 px-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-colors">
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-[var(--text-color)] mb-1">No. Comensales</label>
+                                <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">No. Comensales</label>
                                 <input type="text" id="propCapacidad"
                                     inputmode="numeric"
                                     autocomplete="off"
                                     data-teclado="numerico"
                                     data-teclado-titulo="Capacidad"
                                     data-teclado-max="2"
-                                    class="w-full px-3 py-2.5 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner transition-colors">
+                                    class="w-full h-12 px-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-colors">
                             </div>
 
                             @if($puedeEliminarMesa || $puedeEditarMesa)
-                                <div id="botonesAccion" class="pt-4 flex flex-col gap-2 border-t border-[var(--border-color)] mt-2">
+                                <div id="botonesAccion" class="pt-4 flex flex-col gap-2 border-t border-slate-200 mt-2">
                                     @if($puedeEliminarMesa)
                                         <button type="button" id="btnEliminar" class="flex-1 px-3 py-2.5 lg:py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition shadow-sm">
                                             Eliminar
@@ -322,13 +322,13 @@
     <div id="modalCrearMesa" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-[60] p-4 backdrop-blur-sm transition-all duration-300">
 
         {{-- Contenedor del Modal: flex flex-col para permitir scroll interno --}}
-        <div id="modalCrearMesaContent" class="bg-[var(--card-color)] rounded-xl shadow-2xl max-w-md w-full border border-[var(--border-color)] overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200">
+        <div id="modalCrearMesaContent" class="bg-slate-50 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col transition-all duration-200">
 
             {{-- HEADER: shrink-0 --}}
-            <div class="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-color)]/50 shrink-0">
-                <h2 class="text-xl font-bold text-[var(--text-color)]">Crear Nueva Mesa</h2>
-                <button type="button" class="btnCerrarModal text-[var(--text-muted)] hover:text-red-500 transition-colors outline-none">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 shrink-0">
+                <h2 class="text-xl font-black text-slate-800">Crear Nueva Mesa</h2>
+                <button type="button" class="btnCerrarModal w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300 outline-none">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
                 </button>
@@ -337,44 +337,44 @@
             {{-- BODY: overflow-y-auto --}}
             <div class="px-6 py-5 space-y-4 overflow-y-auto">
                 <div>
-                    <label class="block text-sm font-semibold text-[var(--text-color)] mb-1">Número de Mesa <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Número de Mesa <span class="text-rose-500">*</span></label>
                     <input type="text" id="newNumero"
                         autocomplete="off"
                         data-teclado="texto"
                         data-teclado-titulo="Número de Mesa"
                         data-teclado-max="10"
-                        class="w-full px-3 py-2.5 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner transition-all" placeholder="ej: M1, Mesa-1, Table 1" required>
+                        class="w-full h-12 px-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all" placeholder="ej: M1, Mesa-1, Table 1" required>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[var(--text-color)] mb-1">Capacidad <span class="text-red-500">*</span></label>
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Capacidad <span class="text-rose-500">*</span></label>
                     <input type="text" id="newCapacidad"
                         inputmode="numeric"
                         autocomplete="off"
                         data-teclado="numerico"
                         data-teclado-titulo="Capacidad"
                         data-teclado-max="2"
-                        class="w-full px-3 py-2.5 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner transition-all" placeholder="4" required>
+                        class="w-full h-12 px-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all" placeholder="4" required>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-[var(--text-color)] mb-1">Estado Inicial</label>
-                    <select id="newEstado" class="w-full px-3 py-2.5 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg text-[var(--text-color)] focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Estado Inicial</label>
+                    <select id="newEstado" class="w-full h-12 px-3 bg-white border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all">
                         <option value="disponible">Disponible</option>
                         <option value="reservada">Reservada</option>
                         <option value="limpieza">Limpieza</option>
                     </select>
                 </div>
 
-                <p class="text-xs text-[var(--text-muted)] mt-3">La mesa aparecerá en el plano lista para ser posicionada.</p>
+                <p class="text-xs text-slate-500 mt-3">La mesa aparecerá en el plano lista para ser posicionada.</p>
             </div>
 
             {{-- FOOTER: shrink-0 --}}
-            <div class="px-6 py-4 border-t border-[var(--border-color)] flex gap-3 justify-end bg-[var(--bg-color)]/50 shrink-0">
-                <button type="button" class="btnCerrarModal px-4 py-2 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-color)] hover:opacity-80 rounded-lg font-semibold transition shadow-sm">
+            <div class="px-6 py-4 border-t border-slate-200/60 bg-slate-100/50 flex gap-3 justify-end shrink-0" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+                <button type="button" class="btnCerrarModal px-4 py-2 bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 rounded-xl font-black text-xs uppercase tracking-widest transition shadow-sm">
                     Cancelar
                 </button>
-                <button type="button" id="btnConfirmarNueva" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition shadow-sm">
+                <button type="button" id="btnConfirmarNueva" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-widest transition shadow-md shadow-blue-500/20">
                     Crear Mesa
                 </button>
             </div>
@@ -390,18 +390,18 @@
 <div id="modal-mis-mesas" class="hidden fixed inset-0 z-[9998] items-center justify-center p-3 sm:p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-cerrar-mis-mesas></div>
 
-    <div class="relative w-full max-w-2xl bg-[var(--card-color)] rounded-3xl border border-[var(--border-color)] shadow-2xl overflow-hidden max-h-[88vh] flex flex-col">
-        <div class="px-5 py-4 border-b border-[var(--border-color)] flex items-start justify-between gap-3">
+    <div class="relative w-full max-w-2xl bg-slate-50 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 shadow-2xl overflow-hidden max-h-[88vh] flex flex-col">
+        <div class="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-3">
             <div>
-                <h3 class="text-lg font-black text-[var(--text-color)]">Mis mesas</h3>
-                <p class="text-[11px] text-[var(--text-muted)]" id="mis-mesas-fecha"></p>
+                <h3 class="text-xl font-black text-slate-800">Mis mesas</h3>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest" id="mis-mesas-fecha"></p>
             </div>
             <button type="button" data-cerrar-mis-mesas
-                class="w-8 h-8 rounded-lg border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-color)] shrink-0">&times;</button>
+                class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300 shrink-0">&times;</button>
         </div>
 
         <div class="overflow-y-auto flex-1" id="mis-mesas-contenido">
-            <p class="p-8 text-center text-sm text-[var(--text-muted)]">Cargando...</p>
+            <p class="p-8 text-center text-sm text-slate-500">Cargando...</p>
         </div>
     </div>
 </div>
@@ -429,28 +429,28 @@ document.addEventListener('DOMContentLoaded', () => {
             + '<div class="space-y-2">';
 
         filas.forEach(f => {
-            html += '<div class="border border-[var(--border-color)] rounded-xl overflow-hidden">'
-                + '<button type="button" class="btn-mi-mesa w-full px-3 py-2.5 flex items-center justify-between gap-2 text-left hover:bg-[var(--input-bg)] transition-colors" data-orden="' + f.orden_id + '">'
+            html += '<div class="border border-slate-200 rounded-xl overflow-hidden">'
+                + '<button type="button" class="btn-mi-mesa w-full px-3 py-2.5 flex items-center justify-between gap-2 text-left hover:bg-blue-50/50 transition-colors" data-orden="' + f.orden_id + '">'
                 + '<div class="min-w-0">'
-                + '<span class="font-black text-[var(--text-color)]">Mesa ' + f.mesa + '</span>'
-                + '<span class="text-[10px] text-[var(--text-muted)] ml-2">' + (f.numero || '') + '</span>'
-                + '<div class="text-[10px] text-[var(--text-muted)] mt-0.5">'
+                + '<span class="font-black text-slate-800">Mesa ' + f.mesa + '</span>'
+                + '<span class="text-[10px] text-slate-500 ml-2">' + (f.numero || '') + '</span>'
+                + '<div class="text-[10px] text-slate-500 mt-0.5">'
                 + (f.personas ? f.personas + ' pers. · ' : '')
                 + 'abierta ' + (f.abierta || '--')
                 + (f.cerrada ? ' · cerrada ' + f.cerrada : '')
                 + (tipo === 'canceladas' && f.motivo ? '<br><span class="text-rose-500">' + f.motivo + '</span>' : '')
                 + '</div></div>'
                 + '<div class="text-right shrink-0">'
-                + '<div class="font-black text-[var(--text-color)]">' + dinero(f.total) + '</div>'
+                + '<div class="font-black text-slate-800">' + dinero(f.total) + '</div>'
                 + (tipo === 'cobradas'
-                    ? '<div class="text-[9px] text-[var(--text-muted)]">'
+                    ? '<div class="text-[9px] text-slate-500">'
                         + (f.efectivo > 0 ? 'efvo ' + dinero(f.efectivo) + ' ' : '')
                         + (f.tarjeta > 0 ? 'tarj ' + dinero(f.tarjeta) + ' ' : '')
                         + (f.transferencia > 0 ? 'transf ' + dinero(f.transferencia) : '')
                         + '</div>'
                     : '')
                 + '</div></button>'
-                + '<div class="detalle-mi-mesa hidden border-t border-[var(--border-color)]"></div>'
+                + '<div class="detalle-mi-mesa hidden border-t border-slate-200"></div>'
                 + '</div>';
         });
 
@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function abrirDetalle(bloque, ordenId) {
         bloque.classList.remove('hidden');
-        bloque.innerHTML = '<p class="px-3 py-3 text-xs text-[var(--text-muted)]">Cargando...</p>';
+        bloque.innerHTML = '<p class="px-3 py-3 text-xs text-slate-500">Cargando...</p>';
 
         try {
             const res = await fetch(URL_DETALLE_BASE + '/' + ordenId + '/detalle', { headers: {'Accept':'application/json'} });
@@ -471,24 +471,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!d.productos.length) {
-                bloque.innerHTML = '<p class="px-3 py-3 text-xs text-[var(--text-muted)]">Sin productos capturados todavía.</p>';
+                bloque.innerHTML = '<p class="px-3 py-3 text-xs text-slate-500">Sin productos capturados todavía.</p>';
                 return;
             }
 
-            let html = '<table class="w-full text-xs"><tbody class="divide-y divide-[var(--border-color)]">';
+            let html = '<table class="w-full text-xs"><tbody class="divide-y divide-slate-100">';
             d.productos.forEach(p => {
                 html += '<tr class="' + (p.cancelado ? 'line-through opacity-50' : '') + '">'
-                    + '<td class="py-2 px-3 text-[var(--text-color)]">' + p.producto
+                    + '<td class="py-2 px-3 text-slate-800">' + p.producto
                     + (p.cancelado ? ' <span class="text-rose-500 font-bold text-[9px] no-underline">CANCELADO</span>' : '')
-                    + (p.notas ? '<div class="text-[10px] text-[var(--text-muted)] italic">' + p.notas + '</div>' : '')
+                    + (p.notas ? '<div class="text-[10px] text-slate-500 italic">' + p.notas + '</div>' : '')
                     + '</td>'
-                    + '<td class="py-2 px-2 text-center w-12 text-[var(--text-muted)]">x' + p.cantidad + '</td>'
-                    + '<td class="py-2 px-3 text-right w-24 font-bold text-[var(--text-color)]">' + dinero(p.importe) + '</td>'
+                    + '<td class="py-2 px-2 text-center w-12 text-slate-500">x' + p.cantidad + '</td>'
+                    + '<td class="py-2 px-3 text-right w-24 font-bold text-slate-800">' + dinero(p.importe) + '</td>'
                     + '</tr>';
             });
-            html += '</tbody><tfoot><tr class="border-t border-[var(--border-color)]">'
-                + '<td colspan="2" class="py-2 px-3 text-right text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">Consumo</td>'
-                + '<td class="py-2 px-3 text-right font-black text-[var(--text-color)]">' + dinero(d.consumo) + '</td></tr>';
+            html += '</tbody><tfoot><tr class="border-t border-slate-200">'
+                + '<td colspan="2" class="py-2 px-3 text-right text-[10px] font-black uppercase tracking-wider text-slate-500">Consumo</td>'
+                + '<td class="py-2 px-3 text-right font-black text-slate-800">' + dinero(d.consumo) + '</td></tr>';
             if (d.propina > 0) {
                 html += '<tr><td colspan="2" class="py-1.5 px-3 text-right text-[10px] font-black uppercase tracking-wider text-emerald-500">Propina</td>'
                     + '<td class="py-1.5 px-3 text-right font-black text-emerald-500">' + dinero(d.propina) + '</td></tr>';
@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', async () => {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        contenido.innerHTML = '<p class="p-8 text-center text-sm text-[var(--text-muted)]">Cargando...</p>';
+        contenido.innerHTML = '<p class="p-8 text-center text-sm text-slate-500">Cargando...</p>';
 
         try {
             const res = await fetch(URL_MIS_MESAS, { headers: {'Accept':'application/json'} });
@@ -520,10 +520,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const t = d.totales;
 
             let html = '<div class="px-4 pt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">'
-                + '<div class="rounded-xl border border-[var(--border-color)] p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Atendidas</p><p class="text-lg font-black text-[var(--text-color)]">' + t.mesas_atendidas + '</p></div>'
-                + '<div class="rounded-xl border border-[var(--border-color)] p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Abiertas</p><p class="text-lg font-black text-amber-500">' + t.abiertas + '</p></div>'
-                + '<div class="rounded-xl border border-[var(--border-color)] p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Vendido</p><p class="text-lg font-black text-emerald-500">' + dinero(t.vendido) + '</p></div>'
-                + '<div class="rounded-xl border border-[var(--border-color)] p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)]">Por cobrar</p><p class="text-lg font-black text-blue-500">' + dinero(t.por_cobrar) + '</p></div>'
+                + '<div class="rounded-xl border border-slate-200 p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Atendidas</p><p class="text-lg font-black text-slate-800">' + t.mesas_atendidas + '</p></div>'
+                + '<div class="rounded-xl border border-slate-200 p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Abiertas</p><p class="text-lg font-black text-amber-500">' + t.abiertas + '</p></div>'
+                + '<div class="rounded-xl border border-slate-200 p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Vendido</p><p class="text-lg font-black text-emerald-500">' + dinero(t.vendido) + '</p></div>'
+                + '<div class="rounded-xl border border-slate-200 p-2.5 text-center"><p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Por cobrar</p><p class="text-lg font-black text-blue-500">' + dinero(t.por_cobrar) + '</p></div>'
                 + '</div>';
 
             html += pintarGrupo('Atendiendo ahora', 'fa-utensils', 'text-amber-500', d.grupos.atendiendo, 'atendiendo');
@@ -531,8 +531,8 @@ document.addEventListener('DOMContentLoaded', () => {
             html += pintarGrupo('Canceladas', 'fa-ban', 'text-rose-500', d.grupos.canceladas, 'canceladas');
 
             if (t.mesas_atendidas === 0) {
-                html += '<div class="p-10 text-center"><i class="fas fa-mug-hot text-3xl text-[var(--text-muted)] opacity-30 mb-2"></i>'
-                    + '<p class="text-sm font-bold text-[var(--text-muted)]">Todavía no has abierto mesas hoy</p></div>';
+                html += '<div class="p-10 text-center"><i class="fas fa-mug-hot text-3xl text-slate-300 mb-2"></i>'
+                    + '<p class="text-sm font-bold text-slate-500">Todavía no has abierto mesas hoy</p></div>';
             }
 
             html += '<div class="h-4"></div>';

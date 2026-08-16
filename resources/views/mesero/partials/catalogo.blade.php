@@ -2,29 +2,29 @@
      CATÁLOGO — Panel de productos (Minimalista, sin imágenes)
      ============================================================ --}}
 <section id="col-catalogo"
-    class="col-mobile-panel flex w-full md:flex-1 md:min-w-[280px] h-full flex-col bg-[var(--bg-base)] border-l md:border-l-0 md:border-r border-[var(--border-color)] z-20">
+    class="col-mobile-panel flex w-full md:flex-1 md:min-w-[280px] h-full flex-col bg-slate-50 border-l md:border-l-0 md:border-r border-slate-200 z-20">
 
     {{-- Encabezado: título + categorías --}}
-    <div class="p-3 sm:p-4 border-b border-[var(--border-color)] bg-[var(--bg-base)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--bg-base)]/80 sticky top-0 z-10">
+    <div class="p-3 sm:p-4 border-b border-slate-200 bg-slate-50/95 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80 sticky top-0 z-10">
         <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
-                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Menú</p>
-                <h2 class="text-base sm:text-lg font-black text-[var(--text-main)] leading-tight truncate">Catálogo</h2>
+                <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Menú</p>
+                <h2 class="text-base sm:text-lg font-black text-slate-800 leading-tight truncate">Catálogo</h2>
             </div>
-            <div class="flex-shrink-0 rounded-full border border-[var(--border-color)] bg-[var(--bg-panel)] px-3 py-1.5 text-[10px] font-semibold text-[var(--text-muted)] whitespace-nowrap">
+            <div class="flex-shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-semibold text-slate-500 whitespace-nowrap">
                 <i class="fas fa-utensils mr-1"></i> {{ count($productos ?? []) }} Productos
             </div>
         </div>
 
         {{-- BUSCADOR --}}
         <div class="mt-3 relative">
-            <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-xs pointer-events-none"></i>
+            <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
             <input type="text" id="buscadorProductos"
                    placeholder="Buscar platillo..."
                    autocomplete="off"
-                   class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-panel)] text-sm font-semibold text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none focus:border-[#3b82f6] transition-colors">
+                   class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-[#3b82f6] transition-colors">
             <button type="button" id="limpiarBusquedaProductos"
-                    class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+                    class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full text-slate-400 hover:text-slate-800 transition-colors"
                     title="Limpiar búsqueda">
                 <i class="fas fa-xmark text-xs"></i>
             </button>
@@ -39,9 +39,9 @@
 
     {{-- Aviso sin resultados --}}
     <div id="catalogoSinResultados" class="hidden px-4 py-10 text-center">
-        <i class="fas fa-magnifying-glass text-3xl text-[var(--text-muted)] opacity-30 mb-2"></i>
-        <p class="text-sm font-bold text-[var(--text-muted)]">Sin resultados</p>
-        <p class="text-xs text-[var(--text-muted)] opacity-70 mt-0.5">Prueba con otras letras o cambia de categoría.</p>
+        <i class="fas fa-magnifying-glass text-3xl text-slate-300 opacity-30 mb-2"></i>
+        <p class="text-sm font-bold text-slate-500">Sin resultados</p>
+        <p class="text-xs text-slate-500 opacity-70 mt-0.5">Prueba con otras letras o cambia de categoría.</p>
     </div>
 
     {{-- Cuadrícula de productos --}}
@@ -94,12 +94,12 @@
         </button>
         @empty
         <div class="col-span-full flex flex-col items-center justify-center gap-3 py-16 text-center">
-            <span class="w-14 h-14 rounded-full bg-[var(--bg-panel)] border border-[var(--border-color)] flex items-center justify-center">
-                <i class="fas fa-box-open text-xl text-[var(--text-muted)]"></i>
+            <span class="w-14 h-14 rounded-full bg-white border border-slate-200 flex items-center justify-center">
+                <i class="fas fa-box-open text-xl text-slate-400"></i>
             </span>
             <div>
-                <p class="text-sm font-bold text-[var(--text-main)]">Sin productos en esta categoría</p>
-                <p class="text-xs text-[var(--text-muted)] mt-1">Prueba con otra categoría del menú superior.</p>
+                <p class="text-sm font-bold text-slate-800">Sin productos en esta categoría</p>
+                <p class="text-xs text-slate-500 mt-1">Prueba con otra categoría del menú superior.</p>
             </div>
         </div>
         @endforelse
@@ -108,12 +108,12 @@
     {{-- MINI-BARRA DE ORDEN ACTIVA (solo móvil) --}}
     <button type="button" id="miniCartBar" onclick="toggleOrdenMobile()"
         class="hidden md:hidden fixed left-3 right-3 z-40 items-center justify-between gap-3
-               rounded-2xl bg-[var(--text-main)] text-[var(--bg-base)]
+               rounded-2xl bg-slate-900 text-white
                px-4 py-3 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.4)]
                active:scale-[0.98] transition-transform duration-150"
         style="bottom: calc(68px + env(safe-area-inset-bottom));">
         <span class="flex items-center gap-2 min-w-0">
-            <span id="miniCartCount" class="shrink-0 w-6 h-6 rounded-full bg-[var(--bg-base)] text-[var(--text-main)] text-[11px] font-black flex items-center justify-center">0</span>
+            <span id="miniCartCount" class="shrink-0 w-6 h-6 rounded-full bg-white text-slate-900 text-[11px] font-black flex items-center justify-center">0</span>
             <span class="text-[12px] font-bold truncate">Ver orden</span>
         </span>
         <span class="flex items-center gap-2 shrink-0">
@@ -128,17 +128,17 @@
      onclick="if(event.target===this) cerrarTecladoVirtual()">
 
     <div id="teclado-virtual"
-         class="absolute bottom-0 inset-x-0 bg-[var(--bg-base)] border-t border-[var(--border-color)] shadow-2xl rounded-t-3xl pb-safe">
+         class="absolute bottom-0 inset-x-0 bg-slate-50 border-t border-slate-200 shadow-2xl rounded-t-3xl pb-safe">
 
         {{-- Barra superior --}}
-        <div class="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-[var(--border-color)]">
-            <div class="flex-1 flex items-center gap-2 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 min-h-[40px]">
-                <i class="fas fa-magnifying-glass text-[var(--text-muted)] text-xs shrink-0"></i>
-                <span id="tv-display" class="flex-1 text-sm font-semibold text-[var(--text-main)] break-all"></span>
+        <div class="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
+            <div class="flex-1 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2.5 min-h-[40px]">
+                <i class="fas fa-magnifying-glass text-slate-400 text-xs shrink-0"></i>
+                <span id="tv-display" class="flex-1 text-sm font-semibold text-slate-800 break-all"></span>
                 <span class="w-0.5 h-4 bg-blue-500 animate-pulse rounded-full"></span>
             </div>
             <button type="button" onclick="cerrarTecladoVirtual()"
-                class="w-10 h-10 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-color)] text-[var(--text-muted)] flex items-center justify-center shrink-0 active:scale-95">
+                class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center shrink-0 active:scale-95">
                 <i class="fas fa-xmark text-sm"></i>
             </button>
         </div>
@@ -158,7 +158,7 @@
                     @foreach($fila as $letra)
                         <button type="button"
                             onclick="tvEscribir('{{ $letra }}')"
-                            class="tv-key flex-1 max-w-[38px] h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 active:bg-blue-100 dark:active:bg-blue-500/20 transition-all duration-75">
+                            class="tv-key flex-1 max-w-[38px] h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 active:bg-blue-100 transition-all duration-75">
                             {{ $letra }}
                         </button>
                     @endforeach
@@ -167,18 +167,18 @@
 
             {{-- Fila inferior --}}
             <div class="flex justify-center gap-1 mt-1">
-                <button type="button" onclick="tvEscribir('1')" class="tv-key w-10 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">1</button>
-                <button type="button" onclick="tvEscribir('2')" class="tv-key w-10 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">2</button>
-                <button type="button" onclick="tvEscribir('3')" class="tv-key w-10 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">3</button>
+                <button type="button" onclick="tvEscribir('1')" class="tv-key w-10 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">1</button>
+                <button type="button" onclick="tvEscribir('2')" class="tv-key w-10 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">2</button>
+                <button type="button" onclick="tvEscribir('3')" class="tv-key w-10 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">3</button>
                 <button type="button" onclick="tvEscribir(' ')"
-                    class="tv-key flex-1 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 font-bold text-xs shadow-sm active:scale-95 transition-all duration-75">
+                    class="tv-key flex-1 h-11 rounded-xl bg-white border border-slate-200 text-slate-500 font-bold text-xs shadow-sm active:scale-95 transition-all duration-75">
                     ESPACIO
                 </button>
-                <button type="button" onclick="tvEscribir('4')" class="tv-key w-10 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">4</button>
-                <button type="button" onclick="tvEscribir('5')" class="tv-key w-10 h-11 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">5</button>
+                <button type="button" onclick="tvEscribir('4')" class="tv-key w-10 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">4</button>
+                <button type="button" onclick="tvEscribir('5')" class="tv-key w-10 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">5</button>
                 <button type="button"
                     onclick="tvBorrar()"
-                    class="tv-key w-14 h-11 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-500 shadow-sm active:scale-95 flex items-center justify-center transition-all duration-75">
+                    class="tv-key w-14 h-11 rounded-xl bg-red-50 border border-red-200 text-red-500 shadow-sm active:scale-95 flex items-center justify-center transition-all duration-75">
                     <i class="fas fa-delete-left text-base"></i>
                 </button>
             </div>

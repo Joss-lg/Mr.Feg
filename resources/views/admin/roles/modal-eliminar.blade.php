@@ -1,52 +1,59 @@
-{{-- resources/views/admin/roles/modal-eliminar.blade.php --}}
-<div id="modalEliminarRol" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
-    
-    {{-- Capa de cierre al hacer clic fuera --}}
-    <div class="absolute inset-0" onclick="cerrarModalEliminar()"></div>
+{{-- Estilos para manejo de teclado virtual en PC --}}
+<style>
+    @media (min-width: 768px) {
+        body.teclado-virtual-abierto #modalEliminarRol {
+            align-items: flex-start !important;
+            padding-top: 15px !important;
+        }
+        body.teclado-virtual-abierto #deleteModalContent {
+            transform: translateY(0) scale(0.98) !important;
+            max-height: calc(100dvh - 340px) !important; 
+        }
+    }
+</style>
 
-    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 dynamic-modal-content z-10 max-h-[92vh] flex flex-col">
+<div id="modalEliminarRol" class="fixed inset-0 z-[99999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
+    
+    {{-- Tarjeta Estilo Soft Light --}}
+    <div class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="deleteModalContent">
         
         {{-- Header con aviso de peligro --}}
-        <div class="p-5 sm:p-8 border-b border-rose-100 dark:border-rose-900/20 bg-rose-50/50 dark:bg-rose-500/5 shrink-0">
-            <div class="flex items-start gap-3 sm:gap-4">
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center flex-shrink-0 text-rose-600 dark:text-rose-400">
-                    <i class="fas fa-exclamation-triangle text-base sm:text-lg"></i>
-                </div>
-                <div>
-                    <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">¿Eliminar Puesto?</h2>
-                    <p class="text-xs text-rose-600 dark:text-rose-400 mt-1 font-semibold">Esta acción es irreversible</p>
-                </div>
+        <div class="p-6 pb-4 border-b border-rose-100 bg-rose-50/50 flex items-start gap-4 shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center flex-shrink-0 text-rose-600 shadow-sm">
+                <i class="fas fa-exclamation-triangle text-lg"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-slate-900 tracking-tight">¿Eliminar Rol?</h3>
+                <p class="text-[9px] text-rose-600 font-bold uppercase tracking-widest mt-1">Esta acción es irreversible</p>
             </div>
         </div>
 
-        {{-- Cuerpo --}}
-        <div class="p-5 sm:p-8 space-y-4 sm:space-y-5 overflow-y-auto">
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                Estás a punto de eliminar el puesto 
-                <span class="font-bold text-gray-900 dark:text-white px-2 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 break-words" id="nombreRolEliminar"></span>.
+        {{-- Cuerpo del modal --}}
+        <div class="p-6 flex-1 overflow-y-auto space-y-4 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
+            <p class="text-sm text-slate-600 font-medium leading-relaxed">
+                Estás a punto de eliminar el rol 
+                <span class="font-black text-slate-900 px-2.5 py-1 rounded-lg bg-white border border-slate-200 inline-block my-1 shadow-sm break-words" id="nombreRolEliminar"></span>.
             </p>
             
-            <div class="p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20">
-                <p class="text-xs text-amber-700 dark:text-amber-400 font-semibold flex items-start gap-2 leading-relaxed">
-                    <i class="fas fa-info-circle mt-0.5"></i>
-                    Asegúrate de que no haya empleados activos asignados a este nivel antes de proceder.
+            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200/60 shadow-sm">
+                <p class="text-xs text-amber-800 font-bold flex items-start gap-2.5 leading-relaxed">
+                    <i class="fas fa-info-circle mt-0.5 text-amber-600 text-sm"></i>
+                    Asegúrate de que no haya empleados activos asignados a este rol antes de proceder.
                 </p>
             </div>
         </div>
 
-        {{-- Footer con acciones --}}
-        <div class="p-5 sm:p-8 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 shrink-0">
-            <button type="button" onclick="cerrarModalEliminar()" 
-                    class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-full text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-800 active:scale-95 transition-colors">
+        {{-- Footer --}}
+        <div class="px-6 py-5 border-t border-slate-200/60 bg-slate-100/50 flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-3 shrink-0" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+            <button type="button" onclick="cerrarModalEliminar()" class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors outline-none active:scale-95">
                 Cancelar
             </button>
             
-            <form id="formEliminarRol" method="POST" class="w-full sm:w-auto sm:inline">
+            <form id="formEliminarRol" method="POST" class="w-full sm:w-auto">
                 @csrf
                 @method('DELETE')
-                <button type="submit" 
-                        class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-rose-600 text-white rounded-full text-xs font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
-                    <i class="fas fa-trash-alt"></i> Confirmar Eliminación
+                <button type="submit" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white px-6 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-rose-500/20 hover:shadow-lg transition-all active:scale-95 outline-none flex items-center justify-center gap-2">
+                    <i class="fas fa-trash-alt text-xs"></i> Confirmar Eliminación
                 </button>
             </form>
         </div>
@@ -56,28 +63,30 @@
 <script>
     window.abrirModalEliminar = function(btn) {
         const modal = document.getElementById('modalEliminarRol');
-        const content = modal.querySelector('.dynamic-modal-content');
+        const content = document.getElementById('deleteModalContent');
         
         // Asignar acción al formulario y nombre al span
         const form = document.getElementById('formEliminarRol');
-        form.action = `{{ url('roles') }}/${btn.getAttribute('data-id')}`;
-        document.getElementById('nombreRolEliminar').innerText = btn.getAttribute('data-nombre');
+        form.action = `{{ url('admin/roles') }}/${btn.getAttribute('data-id')}`;
+        
+        // Asigna el nombre correctamente
+        document.getElementById('nombreRolEliminar').innerText = btn.getAttribute('data-nombre') || 'Rol';
         
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        requestAnimationFrame(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        });
+        setTimeout(() => {
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
     }
 
     window.cerrarModalEliminar = function() {
         const modal = document.getElementById('modalEliminarRol');
-        const content = modal.querySelector('.dynamic-modal-content');
+        const content = document.getElementById('deleteModalContent');
         
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
         
         setTimeout(() => {
             modal.classList.remove('flex');

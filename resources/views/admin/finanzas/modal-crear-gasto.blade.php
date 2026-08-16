@@ -13,95 +13,119 @@
     }
 </style>
 
-<div id="modalCrearGasto" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 transition-all duration-300">
+<div id="modalCrearGasto" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-opacity duration-300">
     
-    <div id="createGastoContainer" class="bg-zinc-950 modo-crema:bg-white border border-zinc-800 modo-crema:border-zinc-200 w-full max-w-md rounded-2xl sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-500 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
+    <div id="createGastoContainer" class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
 
-        <div class="p-5 sm:p-8 pb-4 flex justify-between items-center border-b border-zinc-800 modo-crema:border-zinc-100 flex-shrink-0 gap-3">
-            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-rose-600/10 flex items-center justify-center text-rose-500 border border-rose-500/20 shrink-0">
-                    <i class="fas fa-money-bill-wave text-lg sm:text-xl"></i>
-                </div>
-                <div class="min-w-0">
-                    <h3 class="text-lg sm:text-xl font-black text-zinc-100 modo-crema:text-zinc-900 tracking-tight uppercase truncate">Nuevo Gasto</h3>
-                    <p class="text-[10px] sm:text-xs text-zinc-400 modo-crema:text-zinc-500 font-bold uppercase tracking-[0.2em]">Registrar egreso</p>
-                </div>
+        {{-- CABECERA MODAL --}}
+        <div class="px-6 pt-6 pb-4 flex justify-between items-start flex-shrink-0">
+            <div>
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    Nuevo Gasto <i class="fas fa-money-bill-wave text-blue-600 text-sm"></i>
+                </h3>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Registrar egreso del sistema</p>
             </div>
-            <button onclick="closeCreateGastoModal()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 modo-crema:bg-zinc-100 text-zinc-400 modo-crema:text-zinc-500 hover:text-rose-500 modo-crema:hover:text-rose-600 hover:bg-rose-500/10 modo-crema:hover:bg-rose-50 transition-all outline-none flex-shrink-0">
-                <i class="fas fa-times text-sm"></i>
+            <button type="button" onclick="closeModal('modalCrearGasto', 'createGastoContainer')" class="text-slate-400 hover:text-rose-500 hover:rotate-90 transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 outline-none flex-shrink-0 shadow-sm active:scale-95">
+                <i class="fas fa-times text-lg"></i>
             </button>
         </div>
 
-        <form action="{{ route('admin.gastos.store') }}" method="POST" class="flex flex-col flex-1 min-h-0">
+        <form action="{{ route('admin.gastos.store') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
             @csrf
 
-            <div class="p-5 sm:p-8 pt-5 sm:pt-6 space-y-4 overflow-y-auto flex-1 overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+            <div class="px-6 pb-6 space-y-4 overflow-y-auto flex-1 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
 
-                {{-- Campo Concepto: Teclado Texto --}}
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-pen opacity-40"></i> Concepto
-                    </label>
-                    <input type="text" name="concepto" required data-teclado="texto"
-                        class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 focus:bg-zinc-800 modo-crema:focus:bg-white focus:border-rose-600 modo-crema:focus:border-rose-500 focus:ring-4 focus:ring-rose-600/10 outline-none transition-all placeholder:text-zinc-600 modo-crema:placeholder:text-zinc-400"
-                        placeholder="Ej: Compra de tomates">
+                {{-- Campo Concepto --}}
+                <div>
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Concepto</label>
+                    <div class="relative group">
+                        <i class="fas fa-pen absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-500 transition-colors"></i>
+                        <input type="text" name="concepto" required data-teclado="texto"
+                            class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-semibold text-slate-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400"
+                            placeholder="Ej. Compra de insumos">
+                    </div>
                 </div>
 
-                {{-- Selects (no llevan teclado virtual) --}}
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-folder opacity-40"></i> Categoría
-                    </label>
-                    <select name="categoria" required class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 focus:bg-zinc-800 modo-crema:focus:bg-white focus:border-rose-600 modo-crema:focus:border-rose-500 focus:ring-4 focus:ring-rose-600/10 outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Selecciona una categoría</option>
-                        <option value="Compra Insumos">Compra de Insumos</option>
-                        <option value="Servicios">Servicios</option>
-                        <option value="Renta">Renta</option>
-                        <option value="Mantenimiento">Mantenimiento</option>
-                        <option value="Otro">Otro</option>
-                    </select>
+                {{-- Categoria --}}
+                <div class="relative">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Categoría</label>
+                    <input type="hidden" name="categoria" id="gasto_categoria_input" required>
+                    <button type="button" onclick="toggleDropdown('gastoCategoriaMenu', event)" 
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-4 text-sm font-semibold text-slate-800 outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-folder text-slate-400 text-sm"></i>
+                            <span id="gastoCategoriaSelected" class="text-slate-400">Seleccionar categoría...</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </button>
+                    <div id="gastoCategoriaMenu" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-2">
+                        @foreach(['Compra Insumos', 'Servicios', 'Renta', 'Mantenimiento', 'Otro'] as $cat)
+                            <button type="button" onclick="selectGastoOption('gastoCategoriaSelected', 'gasto_categoria_input', '{{ $cat }}', '{{ $cat }}')" 
+                                class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
+                                {{ $cat }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
 
-                {{-- Campo Monto: Teclado Numérico --}}
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-dollar-sign opacity-40"></i> Monto
-                    </label>
-                    <input type="text" name="monto" required data-teclado="numerico" data-teclado-decimales="true"
-                        class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 focus:bg-zinc-800 modo-crema:focus:bg-white focus:border-rose-600 modo-crema:focus:border-rose-500 focus:ring-4 focus:ring-rose-600/10 outline-none transition-all"
-                        placeholder="0.00">
+                {{-- Monto --}}
+                <div>
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Monto</label>
+                    <div class="relative group">
+                        <i class="fas fa-dollar-sign absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-500 transition-colors"></i>
+                        <input type="text" name="monto" required data-teclado="numerico" data-teclado-decimales="true"
+                            class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-black text-slate-800 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400"
+                            placeholder="0.00">
+                    </div>
                 </div>
 
-                {{-- Otros campos... --}}
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-credit-card opacity-40"></i> Método de Pago
-                    </label>
-                    <select name="metodo_pago" required class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 focus:bg-zinc-800 modo-crema:focus:bg-white focus:border-rose-600 modo-crema:focus:border-rose-500 focus:ring-4 focus:ring-rose-600/10 outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Selecciona método</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Tarjeta">Tarjeta</option>
-                        <option value="Transferencia">Transferencia</option>
-                    </select>
+                {{-- Metodo Pago --}}
+                <div class="relative">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Método de Pago</label>
+                    <input type="hidden" name="metodo_pago" id="gasto_metodo_input" required>
+                    <button type="button" onclick="toggleDropdown('gastoMetodoMenu', event)" 
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-4 text-sm font-semibold text-slate-800 outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-credit-card text-slate-400 text-sm"></i>
+                            <span id="gastoMetodoSelected" class="text-slate-400">Seleccionar método...</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </button>
+                    <div id="gastoMetodoMenu" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-2">
+                        @foreach(['Efectivo', 'Tarjeta', 'Transferencia'] as $metodo)
+                            <button type="button" onclick="selectGastoOption('gastoMetodoSelected', 'gasto_metodo_input', '{{ $metodo }}', '{{ $metodo }}')" 
+                                class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
+                                {{ $metodo }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
-              {{-- Campo Estado del Pago (independiente) --}}
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-check-circle opacity-40"></i> Estado del Pago
-                    </label>
-                    <select name="estado" required class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 outline-none transition-all appearance-none cursor-pointer">
-                        <option value="pagado">Pagado (afecta caja hoy)</option>
-                        <option value="pendiente">Pendiente de pago</option>
-                    </select>
+
+                {{-- Estado --}}
+                <div class="relative">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Estado del Pago</label>
+                    <input type="hidden" name="estado" id="gasto_estado_input" value="pagado" required>
+                    <button type="button" onclick="toggleDropdown('gastoEstadoMenu', event)" 
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-4 text-sm font-semibold text-slate-800 outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-slate-400 text-sm"></i>
+                            <span id="gastoEstadoSelected" class="text-slate-800">Pagado (afecta caja hoy)</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </button>
+                    <div id="gastoEstadoMenu" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-2">
+                        <button type="button" onclick="selectGastoOption('gastoEstadoSelected', 'gasto_estado_input', 'pagado', 'Pagado (afecta caja hoy)')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">Pagado (afecta caja hoy)</button>
+                        <button type="button" onclick="selectGastoOption('gastoEstadoSelected', 'gasto_estado_input', 'pendiente', 'Pendiente de pago')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">Pendiente de pago</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 border-t border-zinc-800 modo-crema:border-zinc-100 flex-shrink-0" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-                <button type="button" onclick="closeCreateGastoModal()" class="flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 modo-crema:text-zinc-500 hover:text-white transition-all outline-none">
+            <div class="px-6 py-4 border-t border-slate-200/60 bg-slate-100/50 flex items-center justify-between flex-shrink-0" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+                <button type="button" onclick="closeModal('modalCrearGasto', 'createGastoContainer')" class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors outline-none active:scale-95">
                     Cancelar
                 </button>
-                <button type="submit" class="flex-[1.5] h-12 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-rose-600/20 transition-all active:scale-95 outline-none">
-                    Guardar Gasto
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-blue-500/20 hover:shadow-lg transition-all active:scale-95 outline-none">
+                    Guardar
                 </button>
             </div>
         </form>
@@ -110,16 +134,19 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof TecladoVirtual !== 'undefined') {
-            TecladoVirtual.attachAll();
-        }
+        // Movemos el modal al final del body para evitar problemas de Z-index
+        const modalElement = document.getElementById('modalCrearGasto');
+        if (modalElement) document.body.appendChild(modalElement);
+        
+        if (typeof TecladoVirtual !== 'undefined') TecladoVirtual.attachAll();
     });
 
-    function closeCreateGastoModal() {
-        const modal = document.getElementById('modalCrearGasto');
-        const container = document.getElementById('createGastoContainer');
-        container.classList.remove('scale-100', 'opacity-100');
-        container.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
+    // Función auxiliar minimalista para actualizar UI de selects
+    function selectGastoOption(labelId, inputId, valor, texto) {
+        const label = document.getElementById(labelId);
+        label.innerText = texto;
+        label.classList.remove('text-slate-400');
+        label.classList.add('text-slate-800');
+        document.getElementById(inputId).value = valor;
     }
 </script>

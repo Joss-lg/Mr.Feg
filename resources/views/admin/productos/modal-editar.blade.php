@@ -1,13 +1,10 @@
 <style>
-    /* Solo aplicamos el truco de subir el modal en pantallas grandes (computadoras/punto de venta) */
+    /* Ajuste para pantallas grandes */
     @media (min-width: 768px) {
-        /* 1. Mandamos el modal a la parte de arriba de la pantalla */
         body.teclado-virtual-abierto #modal-editar-wrapper {
             align-items: flex-start !important;
             padding-top: 15px !important;
         }
-
-        /* 2. Hacemos que el modal sea más corto para que no choque con el teclado y active el scroll interno */
         body.teclado-virtual-abierto #modal-editar-panel {
             transform: translateY(0) scale(0.98) !important;
             max-height: calc(100dvh - 340px) !important;
@@ -18,98 +15,94 @@
 
 {{-- MODAL EDITAR ALIMENTO --}}
 <div id="modal-editar-alimento" class="fixed inset-y-0 right-0 left-[74px] sm:left-0 sm:inset-0 z-[100] overflow-y-auto overscroll-contain hidden opacity-0 transition-all duration-300">
-    <div class="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm -ml-[74px] sm:ml-0" onclick="closeModalEditar()"></div>
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm -ml-[74px] sm:ml-0" onclick="closeModalEditar()"></div>
+    
     <div id="modal-editar-wrapper" class="flex min-h-screen items-center justify-center p-3 sm:p-4">
-        <div class="relative bg-white/95 dark:bg-zinc-800/95 backdrop-blur-xl border border-zinc-200 dark:border-zinc-700 w-full max-w-2xl rounded-[1.5rem] sm:rounded-[2.5rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300" id="modal-editar-panel">
-            <div class="p-5 sm:p-10">
-                <div class="flex justify-between items-start mb-6 sm:mb-8">
-                    <div>
-                        <h2 class="text-xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight">Editar Platillo</h2>
-                        <p class="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">Actualiza la información y receta del platillo</p>
+        {{-- Panel principal en diseño Soft Light --}}
+        <div class="relative bg-white border border-slate-200 w-full max-w-2xl rounded-[2rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300" id="modal-editar-panel">
+            
+            <div class="p-6 sm:p-8 pb-4 sm:pb-6 border-b border-slate-100 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Editar Platillo</h2>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Actualiza la información y receta del platillo</p>
+                </div>
+                <button type="button" onclick="closeModalEditar()" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:rotate-90 transition-all duration-300 rounded-xl bg-slate-50 border border-slate-200 hover:border-rose-100 hover:bg-rose-50 outline-none active:scale-95 shrink-0">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <form id="formulario-editar-alimento" onsubmit="actualizarProducto(event)" class="p-6 sm:p-8 pt-4 bg-slate-50">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    
+                    {{-- Nombre --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Nombre del Platillo</label>
+                        <input type="text" id="edit-nombre" name="nombre" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition shadow-sm" required>
                     </div>
-                    <button type="button" onclick="closeModalEditar()" class="w-9 h-9 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition rounded-full active:scale-95 shrink-0">
-                        <i class="fas fa-times text-lg sm:text-2xl"></i>
-                    </button>
+
+                    {{-- Toggle Peso --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="flex items-center justify-between gap-3 bg-orange-50 border border-orange-100 rounded-2xl p-4 cursor-pointer select-none shadow-sm">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-weight-hanging text-orange-500 text-sm"></i>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800">Se vende por peso</span>
+                            </span>
+                            <span class="relative inline-flex items-center">
+                                <input type="checkbox" id="edit-se_vende_por_peso" name="se_vende_por_peso" class="peer sr-only" onchange="toggleModoVentaPeso('editar')">
+                                <span class="w-11 h-6 rounded-full bg-slate-200 peer-checked:bg-orange-500 transition-colors"></span>
+                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    {{-- Precio Fijo --}}
+                    <div class="col-span-1" id="grupo-precio-fijo-editar">
+                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Precio</label>
+                        <input type="text" id="edit-precio" name="precio" pattern="[0-9]*\.?[0-9]*" data-teclado="numerico" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-black text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition shadow-sm">
+                    </div>
+
+                    {{-- Precio por Peso --}}
+                    <div class="col-span-1 hidden" id="grupo-precio-peso-editar">
+                        <label class="text-[10px] font-black text-orange-600 uppercase tracking-widest ml-1 mb-1.5 block">Precio por 100g</label>
+                        <input type="text" id="edit-precio_por_100g" name="precio_por_100g" pattern="[0-9]*\.?[0-9]*" data-teclado="numerico" inputmode="none" class="w-full bg-white border border-orange-200 rounded-xl p-4 text-sm font-black text-slate-800 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition shadow-sm">
+                    </div>
+
+                    {{-- Categoría --}}
+                    <div class="col-span-1 relative">
+                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Categoría</label>
+                        <input type="text" id="edit-categoria_nombre" name="categoria_nombre" list="lista-categorias-editar" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition shadow-sm" autocomplete="off" required>
+                        <input type="hidden" id="edit-categoria_id" name="categoria_id">
+                        <datalist id="lista-categorias-editar">
+                            @foreach($categorias as $categoria)
+                                <option value="{{ $categoria->nombre }}"></option>
+                            @endforeach
+                        </datalist>
+                    </div>
+
+                    {{-- Descripción --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Descripción</label>
+                        <textarea id="edit-descripcion" name="descripcion" rows="3" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition resize-none shadow-sm"></textarea>
+                    </div>
+
+                    {{-- Ingredientes --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">Ingredientes de la Receta</label>
+                            <button type="button" onclick="agregarIngrediente('editar')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition shadow-md active:scale-95">
+                                <i class="fas fa-plus"></i> AGREGAR
+                            </button>
+                        </div>
+                        <div id="ingredientes-container-editar" class="space-y-3"></div>
+                    </div>
                 </div>
 
-                {{-- La subida de imágenes quedó desactivada temporalmente. --}}
-                <form id="formulario-editar-alimento" onsubmit="actualizarProducto(event)">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        {{-- Nombre (TECLADO VIRTUAL DE TEXTO) --}}
-                        <div class="col-span-1 sm:col-span-2">
-                            <label class="text-[11px] sm:text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Nombre del Platillo</label>
-                            <input type="text" id="edit-nombre" name="nombre"  data-teclado="texto" inputmode="none" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-3 sm:p-4 mt-1.5 sm:mt-2 text-base text-zinc-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required>
-                        </div>
-
-                        {{-- Toggle: Se vende por peso --}}
-                        <div class="col-span-1 sm:col-span-2">
-                            <label class="flex items-center justify-between gap-3 bg-orange-500/5 border border-orange-500/20 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none">
-                                <span class="flex items-center gap-2.5">
-                                    <i class="fas fa-weight-hanging text-orange-500 text-sm"></i>
-                                    <span class="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white">Se vende por peso</span>
-                                </span>
-                                <span class="relative inline-flex items-center">
-                                    <input type="checkbox" id="edit-se_vende_por_peso" name="se_vende_por_peso" class="peer sr-only" onchange="toggleModoVentaPeso('editar')">
-                                    <span class="w-11 h-6 rounded-full bg-zinc-300 dark:bg-zinc-600 peer-checked:bg-orange-500 transition-colors"></span>
-                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
-                                </span>
-                            </label>
-                        </div>
-
-                        {{-- Precio fijo (se oculta si es por peso) — TECLADO VIRTUAL NUMÉRICO --}}
-                        <div class="col-span-1" id="grupo-precio-fijo-editar">
-                            <label class="text-[11px] sm:text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Precio</label>
-                            <input type="text" id="edit-precio" name="precio" pattern="[0-9]*\.?[0-9]*" data-teclado="numerico" inputmode="none" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-3 sm:p-4 mt-1.5 sm:mt-2 text-base text-zinc-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required>
-                        </div>
-
-                        {{-- Precio por 100g (solo visible si es por peso) — TECLADO VIRTUAL NUMÉRICO --}}
-                        <div class="col-span-1 hidden" id="grupo-precio-peso-editar">
-                            <label class="text-[11px] sm:text-xs font-black text-orange-500 uppercase tracking-widest ml-1">Precio por cada 100g</label>
-                            <div class="flex items-center bg-zinc-50 dark:bg-zinc-900/50 border border-orange-500/30 rounded-2xl mt-1.5 sm:mt-2 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500 transition">
-                                <span class="pl-4 pr-1.5 text-zinc-400 text-base font-bold select-none">$</span>
-                                <input type="text" id="edit-precio_por_100g" name="precio_por_100g" pattern="[0-9]*\.?[0-9]*" autocomplete="off" data-teclado="numerico" inputmode="none" class="flex-1 min-w-0 bg-transparent p-3 sm:p-4 pl-0 text-base text-zinc-900 dark:text-white placeholder:text-zinc-400 outline-none transition" placeholder="50.00">
-                            </div>
-                            <p class="text-[9px] text-zinc-400 mt-1 ml-1">Ej: $50 por 100g → 700g = $350</p>
-                        </div>
-
-                        {{-- Categoría — TECLADO VIRTUAL DE TEXTO --}}
-                        <div class="col-span-1 relative">
-                            <label class="text-[11px] sm:text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Categoría</label>
-                            <input type="text" id="edit-categoria_nombre" name="categoria_nombre" list="lista-categorias-editar" data-teclado="texto" inputmode="none" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-3 sm:p-4 mt-1.5 sm:mt-2 text-base text-zinc-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" autocomplete="off" required>
-                            <input type="hidden" id="edit-categoria_id" name="categoria_id">
-                            <datalist id="lista-categorias-editar">
-                                @foreach($categorias as $categoria)
-                                    <option value="{{ $categoria->nombre }}"></option>
-                                @endforeach
-                            </datalist>
-                        </div>
-
-                        {{-- Descripción — TECLADO VIRTUAL DE TEXTO --}}
-                        <div class="col-span-1 sm:col-span-2">
-                            <label class="text-[11px] sm:text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Descripción</label>
-                            <textarea id="edit-descripcion" name="descripcion" rows="3" data-teclado="texto" inputmode="none" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-3 sm:p-4 mt-1.5 sm:mt-2 text-base text-zinc-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
-                        </div>
-
-                        {{-- Ingredientes --}}
-                        <div class="col-span-1 sm:col-span-2">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
-                                <div>
-                                    <label class="text-[11px] sm:text-xs font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest ml-1">Ingredientes de la Receta</label>
-                                </div>
-                                <button type="button" onclick="agregarIngrediente('editar')" class="inline-flex items-center justify-center gap-2 w-full sm:w-auto self-start bg-blue-600 hover:bg-blue-500 active:scale-95 text-white px-4 py-2.5 sm:py-2 rounded-2xl font-black transition text-[11px] sm:text-sm shadow-sm">
-                                    <i class="fas fa-plus"></i> Agregar ingrediente
-                                </button>
-                            </div>
-                            <div id="ingredientes-container-editar" class="space-y-3 sm:space-y-4 mt-3 sm:mt-4"></div>
-                        </div>
-                    </div>
-
-                    <div class="mt-8 sm:mt-10 flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
-                        <button type="button" onclick="closeModalEditar()" class="flex-1 bg-zinc-100 dark:bg-zinc-700/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 text-zinc-500 dark:text-zinc-400 font-black py-3 sm:py-4 rounded-2xl transition text-sm">CANCELAR</button>
-                        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-black py-3 sm:py-4 rounded-2xl transition shadow-lg shadow-emerald-900/20 dark:shadow-emerald-900/40 text-sm" id="btn-actualizar">ACTUALIZAR PLATILLO</button>
-                    </div>
-                </form>
-            </div>
+                {{-- Footer --}}
+                <div class="mt-8 pt-6 border-t border-slate-200 flex gap-4">
+                    <button type="button" onclick="closeModalEditar()" class="flex-1 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 transition py-4 rounded-2xl outline-none">Cancelar</button>
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-500/20 text-xs uppercase tracking-widest active:scale-95 transition outline-none" id="btn-actualizar">ACTUALIZAR PLATILLO</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

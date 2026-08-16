@@ -13,19 +13,15 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        // Usamos with('direcciones') para evitar el problema N+1 consultas
-        // Filtramos solo los clientes activos (status = 1) si lo deseas
-        $clientes = Cliente::with('direcciones')->where('status', 1)->paginate(10);
-        
-        return view('clientes.index', compact('clientes'));
-    }
+        // Usamos with('direcciones') para evitar el problema N+1 consultas.
+        // NOTA: quitamos el ->where('status', 1) para que el listado muestre
+        // tanto clientes activos como inactivos (el badge de estatus en la
+        // vista ya distingue visualmente entre ambos). Si prefieres que los
+        // clientes inactivos desaparezcan del listado por completo, vuelve a
+        // agregar ->where('status', 1) aquí.
+        $clientes = Cliente::with('direcciones')->paginate(10);
 
-    /**
-     * Muestra el formulario para crear un nuevo cliente (Show the form for creating a new resource).
-     */
-    public function create()
-    {
-        return view('clientes.create');
+        return view('clientes.index', compact('clientes'));
     }
 
     /**
@@ -85,11 +81,25 @@ class ClienteController extends Controller
 
     /**
      * Muestra el formulario para editar un cliente (Show the form for editing the specified resource).
+     *
+     * Si la petición pide JSON (fetch desde el modal de edición), devolvemos
+     * los datos del cliente y su dirección en JSON. Si no, mantenemos el
+     * comportamiento original: renderizar la vista completa de edición
+     * (por si algún día se navega directo a /clientes/{id}/edit).
      */
     public function edit(Cliente $cliente)
     {
         // Cargamos la primera dirección asociada para llenar el formulario de edición
         $direccion = $cliente->direcciones()->first();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success'   => true,
+                'cliente'   => $cliente,
+                'direccion' => $direccion,
+            ]);
+        }
+
         return view('clientes.edit', compact('cliente', 'direccion'));
     }
 
@@ -102,7 +112,8 @@ class ClienteController extends Controller
             'nombre'     => 'required|string|max:255',
             'apellido'   => 'nullable|string|max:255',
             'telefono'   => 'nullable|string|max:20',
-            
+            'status'     => 'nullable|boolean',
+
             'calle'      => 'required|string|max:100',
             'manzana'    => 'nullable|string|max:100',
             'lote'       => 'nullable|string|max:100',
@@ -112,11 +123,13 @@ class ClienteController extends Controller
 
         try {
             DB::transaction(function () use ($request, $cliente) {
-                // Actualizamos los datos principales del cliente
+                // Actualizamos los datos principales del cliente, incluyendo
+                // el estatus (activo/inactivo) que se controla desde el switch.
                 $cliente->update([
                     'nombre'   => $request->nombre,
                     'apellido' => $request->apellido,
                     'telefono' => $request->telefono,
+                    'status'   => $request->boolean('status'),
                 ]);
 
                 // Buscamos la primera dirección asociada al cliente para actualizarla
@@ -145,10 +158,24 @@ class ClienteController extends Controller
                 }
             });
 
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cliente actualizado correctamente.',
+                ]);
+            }
+
             return redirect()->route('clientes.index')
                              ->with('success', 'Cliente actualizado correctamente.');
 
         } catch (\Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ocurrió un error al actualizar: ' . $e->getMessage(),
+                ], 500);
+            }
+
             return back()->withInput()
                          ->with('error', 'Ocurrió un error al actualizar: ' . $e->getMessage());
         }

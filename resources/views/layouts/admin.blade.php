@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es"> <!-- QUITO LA CLASE "dark" AQUÍ -->
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
@@ -7,96 +7,57 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Mr. Feg')</title>
 
-    <!-- Favicon tradicional (para la pestaña del navegador) -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-
-    <!-- Iconos de alta resolución para Web Apps, Barra de tareas y Accesos directos -->
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/mrlogo.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/mrlogo.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/mrlogo.png') }}">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     @vite(['resources/js/app.js'])
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        'luxury-bg': 'var(--bg-color)',      
-                        'luxury-card': 'var(--card-color)',    
-                        'luxury-border': 'var(--border-color)',  
-                        'luxury-accent': '#3B82F6',  
-                        'luxury-text': 'var(--text-color)',    
-                        'luxury-muted': 'var(--text-muted)',   
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
+        /* 1. VARIABLES PARA MODO CLARO (Por defecto) */
         :root {
-            /* Paleta principal azul */
-            --blue-950: #020617;
-            --blue-900: #0b1e3f;
-            --blue-800: #123064;
-            --blue-700: #1a4694;
-            --blue-500: #2f7bf0;
-            --blue-400: #5b9bff;
+            --bg-color: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --card-color: #ffffff;
+            --text-color: #0f172a; /* Slate 900 */
+            --text-muted: #64748b; /* Slate 500 */
+            --border-color: #e2e8f0;
+            --header-bg: rgba(255, 255, 255, 0.8);
+            --panel-card: #ffffff;
+            --panel-border: #e2e8f0;
+        }
 
-            /* Paleta naranja/acento */
-            --coral-400: #fb923c;
-            --coral-500: #f97316;
-            --coral-700: #c2410c;
-
-            --bg-gradient: linear-gradient(to bottom, #38b6ff 0%, #1573b0 50%, #0a4670 100%);
-
-            --bg-color: var(--blue-950);
-            --sidebar-bg: var(--blue-900);
-            --header-bg: rgba(11,30,63,0.6); /* Ajustado para cristal oscuro */
-            --card-color: var(--blue-900);
-            --text-color: #F8FAFC; /* text-slate-100 */
-            --text-muted: #bfdbfe; /* azul claro / text-blue-200 */
+        /* 2. VARIABLES SI SE ACTIVA MODO OSCURO (Solo si agregas la clase .dark al html) */
+        .dark {
+            --bg-color: #020617;
+            --sidebar-bg: #0b1e3f;
+            --card-color: #0b1e3f;
+            --text-color: #F8FAFC;
+            --text-muted: #bfdbfe;
             --border-color: rgba(18,48,100,0.18);
-            --glass-bg: linear-gradient(145deg, rgba(11,30,63,0.88) 0%, rgba(2,6,23,0.72) 100%);
-            --glass-hover: linear-gradient(145deg, rgba(15,36,66,0.95) 0%, rgba(6,18,40,0.85) 100%);
-            --input-bg: rgba(11,30,63,0.6);
+            --header-bg: rgba(11,30,63,0.6);
             --panel-card: rgba(11,30,63,0.85);
             --panel-border: rgba(18,48,100,0.20);
-
-            /* Texto cálido para el header claro (no toca ningún azul,
-               solo se usa donde el texto va sobre el degradado azul claro) */
-            --header-text: #fff7ed;
-            --header-text-hover: #fee8cc;
         }
 
-        body { background: var(--bg-gradient); min-height: 100vh; font-family: 'Inter', sans-serif; color: var(--text-color); overflow-x: hidden; margin: 0; padding: 0; }
-        
-        .glass-card { backdrop-filter: blur(14px); border: 1px solid var(--blue-800); background-color: rgba(11,30,63,0.75); box-shadow: 0 12px 30px rgba(0,0,0,0.25); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { 
+            background-color: var(--bg-color) !important; 
+            min-height: 100vh; 
+            font-family: 'Inter', sans-serif; 
+            color: var(--text-color); 
+            overflow-x: hidden; 
+        }
+
+        /* Aplicar las variables a las clases de Tailwind */
+        .bg-luxury-bg { background-color: var(--bg-color); }
+        .bg-luxury-card { background-color: var(--card-color); }
+        .border-luxury-border { border-color: var(--border-color); }
         
         ::-webkit-scrollbar { width: 4px; } 
-        ::-webkit-scrollbar-track { background: transparent; } 
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-
-        /* ===== ESTILOS DEL TOAST GLOBAL ===== */
-        @keyframes shrink-bar {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-        .animate-shrink {
-            animation: shrink-bar 3s linear forwards;
-        }
     </style>
 
     @stack('styles')
 </head>
-
 <body class="selection:bg-[#3B82F6]/30 selection:text-[var(--text-color)]"
       data-usuario-id="{{ auth()->id() }}">
 
@@ -108,9 +69,7 @@
         }
     </script>
 
-    <!-- Fondos desenfocados decorativos -->
-    <div class="fixed top-[-20%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-blue-600/5 blur-[150px] pointer-events-none z-0"></div>
-    <div class="fixed bottom-[-20%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-orange-600/5 blur-[150px] pointer-events-none z-0"></div>
+    
 
     {{-- ===== TOAST GLOBAL DE ALERTAS ===== --}}
     <div id="toastContainerGlobal" class="fixed top-6 right-6 z-[100] flex flex-col gap-4">
@@ -201,6 +160,85 @@
     @yield('modals')
 
     <script>
+        /**
+         * Función global para alternar dropdowns personalizados en todo el sistema.
+         */
+        function toggleDropdown(menuId, event) {
+            if (event) event.stopPropagation();
+
+            // Cierra cualquier otro menú que termine en 'Menu'
+            const allMenus = document.querySelectorAll('[id$="Menu"]');
+            const targetMenu = document.getElementById(menuId);
+            if (!targetMenu) return;
+
+            const isOpen = !targetMenu.classList.contains('hidden');
+
+            // Oculta todos los menús abiertos
+            allMenus.forEach(menu => menu.classList.add('hidden'));
+
+            // Alterna el estado del menú seleccionado
+            if (!isOpen) {
+                targetMenu.classList.remove('hidden');
+            }
+        }
+
+        // Cierre global al hacer clic fuera de cualquier dropdown
+        window.addEventListener('click', () => {
+            document.querySelectorAll('[id$="Menu"]').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        });
+
+        /**
+         * Abre cualquier modal de forma genérica con su animación Soft Light
+         */
+        window.openModal = function(modalId, containerId) {
+            const modal = document.getElementById(modalId);
+            const container = document.getElementById(containerId);
+            if (!modal || !container) return;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        /**
+         * Cierra cualquier modal de forma genérica
+         */
+        window.closeModal = function(modalId, containerId) {
+            const modal = document.getElementById(modalId);
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                if (modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }, 300);
+        };
+
+        // Cierre automático de modales con la tecla ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modalesVisibles = document.querySelectorAll('.fixed.inset-0:not(.hidden)');
+                modalesVisibles.forEach(modal => {
+                    const btnCancelar = modal.querySelector('button[onclick*="close"], button[onclick*="cerrar"]');
+                    if (btnCancelar) {
+                        btnCancelar.click();
+                    } else {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+                });
+            }
+        });
+
         // --- GESTIÓN DEL SIDEBAR ---
         function toggleSidebar() {
             const body = document.body;

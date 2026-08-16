@@ -1,4 +1,4 @@
-<aside id="sidebar" class="w-[260px] bg-[var(--sidebar-bg)] backdrop-blur-2xl border-r border-[var(--border-color)] flex flex-col justify-between z-50 shrink-0 shadow-2xl overflow-x-hidden relative">
+<aside id="sidebar" class="w-[260px] bg-white backdrop-blur-2xl border-r border-slate-100 flex flex-col justify-between z-50 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-x-hidden relative">
     
     {{-- LÓGICA CSS PURA (Adiós bugs visuales al contraer) --}}
     <style>
@@ -8,41 +8,24 @@
         /* --- ESTADO COLAPSADO (MEMORIA) --- */
         #sidebar.colapsado { width: 88px !important; }
         
-        /* 1. Textos se esfuman y no empujan las cajas */
+        /* Textos se esfuman y no empujan las cajas */
         #sidebar.colapsado .sidebar-text { width: 0 !important; opacity: 0 !important; margin: 0 !important; pointer-events: none; }
         
-        /* 2. Menú de navegación: Centramos los iconos perfectos */
+        /* Menú de navegación: Centramos los iconos perfectos */
         #sidebar.colapsado .menu-link { padding-left: 0 !important; padding-right: 0 !important; justify-content: center !important; }
         
-        /* 3. Header: Ocultamos el logo suavemente y centramos la hamburguesa vertical y horizontalmente */
+        /* Header: Ocultamos el logo suavemente y centramos la hamburguesa */
         #sidebar.colapsado .logo-wrapper { opacity: 0; pointer-events: none; position: absolute; }
         #sidebar.colapsado #toggleSidebar { right: 0; left: 0; margin: 0 auto; top: 50%; transform: translateY(-50%); }
         
-        /* 4. Footer: Modo mini y transparente */
+        /* Footer: Modo mini y transparente */
         #sidebar.colapsado .user-footer { padding-left: 0; padding-right: 0; background: transparent; border-color: transparent; box-shadow: none; align-items: center; margin-bottom: 1rem; }
         
-        /* --- AJUSTE PERFECTO PARA EL BOTÓN ROJO CUADRADO --- */
+        /* Ajuste para el botón rojo cuadrado */
         #sidebar.colapsado .btn-logout { width: 44px !important; height: 44px !important; padding: 0 !important; justify-content: center !important; }
 
-        /* Modo crema: contraste y fondo limpio en sidebar */
-        body.modo-crema #sidebar { background: rgba(255, 255, 255, 0.96); border-color: rgba(15, 23, 42, 0.08); box-shadow: 0 30px 70px rgba(15, 23, 42, 0.08); }
-        body.modo-crema #sidebar .logo-wrapper { color: #111827; }
-        body.modo-crema #sidebar .logo-wrapper .sidebar-text span:first-child { color: #111827; }
-        body.modo-crema #sidebar .logo-wrapper .sidebar-text span:last-child { color: #6b7280; }
-        body.modo-crema #sidebar .menu-link { border-color: rgba(15, 23, 42, 0.08); }
-        body.modo-crema #sidebar .menu-link:hover { background: rgba(15, 23, 42, 0.04); }
-        body.modo-crema #sidebar .menu-link .sidebar-text { color: #4b5563; }
-        body.modo-crema #sidebar .menu-link .menu-icon { background: rgba(248, 250, 252, 0.96); border-color: rgba(15, 23, 42, 0.08); color: #374151; }
-        body.modo-crema #sidebar .menu-link.active { background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.18); box-shadow: 0 12px 30px rgba(59, 130, 246, 0.12); }
-        body.modo-crema .user-footer { background: #ffffff; border-color: rgba(15, 23, 42, 0.08); box-shadow: 0 25px 50px rgba(15, 23, 42, 0.06); }
-        
-        /* Modificado para que el degradado rojo siga activo en modo crema */
-        body.modo-crema .btn-logout { border-color: rgba(15, 23, 42, 0.08); }
-
         /* =========================================================
-           MODO MÓVIL: el sidebar se convierte en un drawer que se
-           desliza y se oculta, en vez de empujar/tapar el contenido.
-           Solo aplica debajo de 1024px; en desktop no cambia nada.
+           MODO MÓVIL (Drawer)
         ========================================================= */
         @media (max-width: 1023.98px) {
             #sidebar {
@@ -55,33 +38,40 @@
                 transform: translateX(-100%);
                 transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
             }
-            /* En móvil ignoramos el estado "colapsado" de desktop (88px) */
             #sidebar.colapsado { width: 84vw; max-width: 300px; }
             #sidebar.colapsado .sidebar-text { width: auto !important; opacity: 1 !important; margin: 0 0 0 0.75rem !important; pointer-events: auto; }
             #sidebar.colapsado .logo-wrapper { opacity: 1; pointer-events: auto; position: relative; }
             #sidebar.colapsado .menu-link { padding-left: 0.75rem !important; padding-right: 0.75rem !important; justify-content: flex-start !important; }
 
-            /* Estado abierto del drawer */
             #sidebar.abierto { transform: translateX(0); }
 
             #sidebarOverlay {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0, 0, 0, 0.5);
+                background: rgba(15, 23, 42, 0.4); /* slate-900 con opacidad */
+                backdrop-filter: blur(2px);
                 z-index: 40;
                 opacity: 0;
                 transition: opacity 0.3s ease;
             }
             #sidebarOverlay.visible { display: block; opacity: 1; }
         }
+
+        /* ANIMACIONES DE ENTRADA CASCADA PARA EL MENÚ */
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(-15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slide-in {
+            animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0; 
+        }
     </style>
 
-    {{-- Script en línea para aplicar el estado ANTES de que renderice la página (evita parpadeo) --}}
+    {{-- Script para evitar parpadeo del sidebar --}}
     <script>
         (function() {
-            // El estado "colapsado" (ancho 88px) solo debe recordarse/aplicarse en desktop.
-            // En móvil el sidebar siempre arranca oculto (drawer cerrado).
             if (window.matchMedia('(min-width: 1024px)').matches && localStorage.getItem('sidebarState') === 'collapsed') {
                 document.getElementById('sidebar').classList.add('colapsado');
             }
@@ -90,32 +80,40 @@
 
     {{-- Header del Logo --}}
     <div class="h-24 flex items-center px-5 relative shrink-0 w-full transition-all">
-        <div class="absolute top-1/2 left-10 -translate-y-1/2 w-20 h-20 bg-blue-500/10 blur-[30px] rounded-full pointer-events-none"></div>
+        <!-- Resplandor sutil azul detrás del logo -->
+        <div class="absolute top-1/2 left-10 -translate-y-1/2 w-20 h-20 bg-blue-400/10 blur-[25px] rounded-full pointer-events-none"></div>
         
         <div class="logo-wrapper flex items-center relative z-10 w-full transition-opacity duration-300">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px] shadow-[0_0_15px_rgba(59,130,246,0.3)] shrink-0">
-                <div class="w-full h-full bg-[var(--card-color)] rounded-[11px] flex items-center justify-center">
-                    <img src="{{ asset('images/mrlogo.png') }}" alt="Logo" class="w-6 h-6 object-contain">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px] shadow-[0_0_15px_rgba(59,130,246,0.2)] shrink-0 group hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <div class="w-full h-full bg-white rounded-[11px] flex items-center justify-center">
+                    <img src="{{ asset('images/mrlogo.png') }}" alt="Logo" class="w-6 h-6 object-contain group-hover:rotate-12 transition-transform duration-300">
                 </div>
             </div>
             <div class="sidebar-text ml-3 flex flex-col">
-                <span class="font-black tracking-[0.15em] text-[15px] text-[var(--text-color)] leading-none">
-                    Mr. Feg <span class="text-blue-500"></span>
+                <span class="font-black tracking-[0.15em] text-[15px] text-slate-900 leading-none">
+                    Mr. Feg
                 </span>
-                <span class="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-[0.25em] mt-1.5">Sistema Ventas</span>
+                <span class="text-[9px] text-blue-500 font-bold uppercase tracking-[0.25em] mt-1.5">Sistema Ventas</span>
             </div>
         </div>
         
-        {{-- SE AGREGÓ top-7 AQUÍ PARA ALINEAR CON EL TÍTULO --}}
-        {{-- En desktop: colapsa/expande. En móvil: cierra el drawer. --}}
-        <button id="toggleSidebar" class="absolute right-4 top-7 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--input-bg)] text-[var(--text-muted)] hover:text-[var(--text-color)] transition-all cursor-pointer z-50 shrink-0">
+        {{-- Botón colapsar --}}
+        <button id="toggleSidebar" class="absolute right-4 top-7 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer z-50 shrink-0 border border-slate-100 hover:border-blue-100">
             <i class="fas fa-bars text-sm"></i>
         </button>
     </div>
 
    {{-- Navegación --}}
-    <nav class="py-4 px-3 space-y-6 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-14rem)] scrollbar-hide relative z-10 flex-1" id="nav-container">
+    <nav class="py-4 px-3 space-y-5 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-14rem)] relative z-10 flex-1" id="nav-container">
         
+        {{-- Estilos para la barra de scroll --}}
+        <style>
+            #nav-container::-webkit-scrollbar { width: 4px; }
+            #nav-container::-webkit-scrollbar-track { background: transparent; }
+            #nav-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+            #nav-container:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
+        </style>
+
         @php
             $menu = [
                 'Administración' => [
@@ -143,7 +141,8 @@
                     ['route' => 'admin.caja.flujo', 'icon' => 'fas fa-money-bill-wave', 'label' => 'Flujo de Caja', 'modulo_id' => 9],
                 ]
             ];
-@endphp
+            $animationDelayCounter = 0; // Para el efecto cascada
+        @endphp
 
         @foreach($menu as $titulo => $items)
             @php
@@ -151,72 +150,77 @@
             @endphp
 
             @if($mostrarSeccion)
-                {{-- Título de la Sección --}}
-                <div class="px-3 pt-2">
-                    <span class="text-xs font-black uppercase tracking-[0.2em] sidebar-text transition-all duration-300 text-[var(--coral-400)]">
-                        {{ $titulo }}
-                    </span>
+                <div class="space-y-1">
+                    {{-- Título de la Sección --}}
+                    <div class="px-3 pt-3 pb-1">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] sidebar-text text-slate-400">
+                            {{ $titulo }}
+                        </span>
+                    </div>
+
+                    @foreach($items as $item)
+                        @if(auth()->user()->tienePermiso($item['modulo_id'], 'mostrar'))
+                            @php
+                                try {
+                                    $url = route($item['route']);
+                                    $isActive = request()->routeIs(str_replace('.index', '.*', $item['route'])) || request()->routeIs($item['route']);
+                                } catch (Exception $e) {
+                                    $url = '#';
+                                    $isActive = false;
+                                }
+                                $animationDelayCounter += 50; // Incrementar delay en ms
+                            @endphp
+
+                            <a href="{{ $url }}" 
+                               class="menu-link animate-slide-in relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-blue-50/80 border border-blue-100/50 shadow-sm shadow-blue-900/5' : 'border border-transparent hover:bg-slate-50 hover:translate-x-1' }}"
+                               style="animation-delay: {{ $animationDelayCounter }}ms;">
+                                
+                                <div class="menu-icon flex h-9 w-9 items-center justify-center rounded-[10px] transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white border border-slate-200 text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200 group-hover:bg-blue-50/50' }}">
+                                    <i class="{{ $item['icon'] }} text-[14px]"></i>
+                                </div>
+                                
+                                <span class="sidebar-text ml-3 text-[13.5px] tracking-wide {{ $isActive ? 'text-blue-700 font-bold' : 'text-slate-600 font-medium group-hover:text-blue-600' }}">
+                                    {{ $item['label'] }}
+                                </span>
+                                
+                                @if($isActive)
+                                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-[4px] h-[50%] bg-blue-600 rounded-r-full shadow-[0_0_8px_rgba(37,99,235,0.6)]"></div>
+                                @endif
+                            </a>
+                        @endif
+                    @endforeach
                 </div>
-
-                @foreach($items as $item)
-                    @if(auth()->user()->tienePermiso($item['modulo_id'], 'mostrar'))
-                        @php
-                            try {
-                                $url = route($item['route']);
-                                $isActive = request()->routeIs(str_replace('.index', '.*', $item['route'])) || request()->routeIs($item['route']);
-                            } catch (Exception $e) {
-                                $url = '#';
-                                $isActive = false;
-                            }
-                        @endphp
-
-                        <a href="{{ $url }}" class="menu-link relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-[var(--coral-500)]/10 border border-[var(--coral-500)]/20' : 'border border-transparent hover:bg-[var(--input-bg)]' }}">
-                            <div class="menu-icon flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-[var(--coral-500)] text-white' : 'bg-[var(--card-color)] border border-[var(--panel-border)] text-[var(--text-muted)] group-hover:text-[var(--text-color)]' }}">
-                                <i class="{{ $item['icon'] }} text-[15px]"></i>
-                            </div>
-                            <span class="sidebar-text ml-4 text-[14px] tracking-wide {{ $isActive ? 'text-[var(--text-color)] font-bold' : 'text-[var(--text-muted)] font-medium group-hover:text-[var(--text-color)]' }}">
-                                {{ $item['label'] }}
-                            </span>
-                            @if($isActive)
-                                <div class="absolute left-[-1px] top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-[var(--coral-500)] rounded-r-md"></div>
-                            @endif
-                        </a>
-                    @endif
-                @endforeach
             @endif
         @endforeach
     </nav>
 
     {{-- Footer de Usuario --}}
-    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-[var(--card-color)] border border-[var(--panel-border)] flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-lg">
+    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-white border border-slate-100 flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-sm hover:shadow-md">
         <div class="flex items-center w-full">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.3)] mx-auto">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md mx-auto">
                 {{ substr(auth()->user()->nombre ?? 'U', 0, 2) }}
             </div>
             <div class="sidebar-text ml-3 flex flex-col justify-center">
-                <p class="text-[13px] font-bold text-[var(--text-color)]">{{ auth()->user()->nombre ?? 'Usuario' }}</p>
-                <p class="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-black mt-1">{{ optional(auth()->user()->rol)->nombre ?? 'Rol' }}</p>
+                <p class="text-[13px] font-bold text-slate-900">{{ auth()->user()->nombre ?? 'Usuario' }}</p>
+                <p class="text-[10px] text-blue-500 uppercase tracking-widest font-black mt-0.5">{{ optional(auth()->user()->rol)->nombre ?? 'Rol' }}</p>
             </div>
         </div>
 
         <form method="POST" action="{{ route('logout') }}" class="mt-1 w-full flex justify-center">
             @csrf
-            {{-- BOTÓN ACTUALIZADO PARA FORMAR EL CUADRADO PERFECTO CUANDO COLAPSA --}}
-            <button type="submit" class="btn-logout w-full h-[44px] px-3 flex items-center bg-gradient-to-tr from-[var(--coral-700)] to-[var(--coral-500)] hover:from-[var(--coral-500)] hover:to-[var(--coral-400)] text-white rounded-2xl transition-all duration-300 shadow-lg shadow-[var(--coral-700)]/20 hover:shadow-[var(--coral-700)]/30 active:scale-95 group overflow-hidden">
+            {{-- Botón de logout ahora usa un gradiente rojo moderno (Rose a Red) --}}
+            <button type="submit" class="btn-logout w-full h-[40px] px-3 flex items-center bg-gradient-to-r from-rose-500 to-red-600 hover:from-red-500 hover:to-rose-600 text-white rounded-xl transition-all duration-300 shadow-md shadow-red-500/20 hover:shadow-red-500/40 active:scale-95 group overflow-hidden border border-red-400/50">
                 <div class="flex items-center justify-center shrink-0 w-6">
-                    <i class="fas fa-sign-out-alt text-[15px] transition-transform group-hover:scale-110"></i>
+                    <i class="fas fa-sign-out-alt text-[14px] transition-transform group-hover:translate-x-1"></i>
                 </div>
-                <span class="sidebar-text ml-2 text-[11px] font-bold tracking-widest mt-[2px]">CERRAR SESIÓN</span>
+                <span class="sidebar-text ml-2 text-[11px] font-bold tracking-widest mt-[1px]">CERRAR SESIÓN</span>
             </button>
         </form>
     </div>
 </aside>
 
-{{-- Fondo oscuro detrás del drawer en móvil. Tocarlo lo cierra. --}}
+{{-- Fondo oscuro detrás del drawer en móvil --}}
 <div id="sidebarOverlay"></div>
-
-{{-- Nota: el botón de menú (#mobileMenuBtn) ahora vive dentro del header
-     en layouts/admin.blade.php, junto al botón de tema (sol/luna). --}}
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -227,13 +231,11 @@
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const esMovil = () => window.matchMedia('(max-width: 1023.98px)').matches;
 
-        // 1. Revisar posición guardada del scroll en el menú
         if (navContainer) {
             const savedScrollPos = localStorage.getItem('sidebarScrollPosition');
             if (savedScrollPos) {
                 navContainer.scrollTop = savedScrollPos;
             }
-
             navContainer.addEventListener('scroll', () => {
                 localStorage.setItem('sidebarScrollPosition', navContainer.scrollTop);
             });
@@ -251,22 +253,15 @@
             document.body.style.overflow = '';
         }
 
-        // 2. Botón flotante: abre el drawer en móvil
         mobileMenuBtn?.addEventListener('click', abrirDrawerMovil);
-
-        // 3. Tocar el fondo oscuro cierra el drawer
         overlay?.addEventListener('click', cerrarDrawerMovil);
 
-        // 4. Elegir una ruta del menú cierra el drawer automáticamente en móvil
         document.querySelectorAll('#nav-container .menu-link').forEach(link => {
             link.addEventListener('click', () => {
                 if (esMovil()) cerrarDrawerMovil();
             });
         });
 
-        // 5. Click en el botón de hamburguesa (dentro del sidebar)
-        //    - En desktop: colapsa/expande (comportamiento original).
-        //    - En móvil: cierra el drawer.
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 if (esMovil()) {
@@ -283,8 +278,6 @@
             });
         }
 
-        // 6. Si el usuario rota el dispositivo o cambia de tamaño de ventana
-        //    y cruza el breakpoint, aseguramos un estado limpio.
         window.addEventListener('resize', () => {
             if (!esMovil()) {
                 cerrarDrawerMovil();

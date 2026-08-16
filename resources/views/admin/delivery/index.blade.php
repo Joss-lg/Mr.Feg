@@ -1,70 +1,84 @@
 @extends('layouts.admin')
 
 @section('title', 'Delivery | Ollintem Pro')
-@section('header-title', 'Configuración de Delivery')
-@section('header-subtitle', 'Comisión + IVA que cobra cada plataforma')
 
 @section('content')
-<div class="px-3 sm:px-6 lg:px-8 py-5 sm:py-8 w-full max-w-4xl mx-auto space-y-5 sm:space-y-8 relative z-10">
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-4xl mx-auto space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
 
-    <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 shadow-[0_4px_14px_rgba(234,88,12,0.35)] shrink-0">
-            <i class="fas fa-motorcycle text-white text-sm"></i>
+    {{-- ENCABEZADO PREMIUM --}}
+    <div class="flex items-center gap-4 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+        <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-orange-50 border border-orange-100 text-orange-600 shrink-0 shadow-sm">
+            <i class="fas fa-motorcycle text-lg"></i>
         </div>
-        <div>
-            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Plataformas de Delivery</h1>
-            <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div class="space-y-1">
+            <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Plataformas de Delivery</h1>
+            <p class="text-xs sm:text-sm font-medium text-slate-500">
                 Estos porcentajes se negocian directamente con cada plataforma. Ajústalos aquí cuando cambie tu contrato.
             </p>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-[#15151a] border border-slate-100 dark:border-slate-800/60 rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-3">
+    {{-- CONTENEDOR DE PLATAFORMAS --}}
+    <div class="bg-white border border-slate-200 rounded-[2rem] p-5 sm:p-6 shadow-sm space-y-4">
         @foreach($plataformas as $plataforma)
-            <div class="plataforma-card p-3.5 sm:p-4 rounded-xl border border-slate-100 dark:border-slate-800/60 bg-slate-50/60 dark:bg-white/[0.02]"
+            <div class="plataforma-card p-4 sm:p-5 rounded-2xl border border-slate-200 bg-slate-50/50 transition-all hover:border-slate-300"
                  data-id="{{ $plataforma->id }}">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <div class="flex items-center gap-2.5 sm:w-40 shrink-0">
-                        <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $plataforma->color }}"></span>
-                        <span class="font-black text-sm text-slate-900 dark:text-white">{{ $plataforma->nombre }}</span>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    
+                    {{-- Nombre e Identificador de Color --}}
+                    <div class="flex items-center gap-3 sm:w-48 shrink-0">
+                        <span class="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm" style="background-color: {{ $plataforma->color }}"></span>
+                        <span class="font-black text-sm text-slate-800">{{ $plataforma->nombre }}</span>
                     </div>
 
-                    <div class="flex-1 grid grid-cols-2 gap-3">
-                        <label class="block">
-                            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">% Comisión</span>
-                            <input type="text" inputmode="decimal" data-teclado="numerico"
-                                   class="input-comision mt-0.5 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0f0f13] text-sm font-bold text-slate-900 dark:text-white"
+                    {{-- Entradas de Porcentajes --}}
+                    <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                                % Comisión
+                            </label>
+                            <input type="text" inputmode="decimal" data-teclado="numerico" data-teclado-decimales="true" autocomplete="off"
+                                   class="input-comision w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
                                    value="{{ number_format($plataforma->comision_porcentaje, 2, '.', '') }}">
-                        </label>
-                        <label class="block">
-                            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">% IVA sobre comisión</span>
-                            <input type="text" inputmode="decimal" data-teclado="numerico"
-                                   class="input-iva mt-0.5 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0f0f13] text-sm font-bold text-slate-900 dark:text-white"
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                                % IVA sobre comisión
+                            </label>
+                            <input type="text" inputmode="decimal" data-teclado="numerico" data-teclado-decimales="true" autocomplete="off"
+                                   class="input-iva w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
                                    value="{{ number_format($plataforma->iva_comision_porcentaje, 2, '.', '') }}">
-                        </label>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2 sm:w-auto shrink-0">
+                    {{-- Controles de Estado y Guardado --}}
+                    <div class="flex items-center justify-between sm:justify-end gap-4 sm:w-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200">
+                        {{-- Switch Tipo iOS --}}
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" class="input-activo sr-only peer" {{ $plataforma->activo ? 'checked' : '' }}>
-                            <div class="w-9 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:bg-emerald-600 transition-colors"></div>
-                            <div class="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-slate-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:border-transparent shadow-inner"></div>
                         </label>
-                        <button type="button" class="btn-guardar px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-wide transition-colors">
-                            Guardar
+
+                        <button type="button" class="btn-guardar px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest shadow-md shadow-blue-500/20 transition-all active:scale-95 outline-none flex items-center gap-2">
+                            <i class="fas fa-save"></i> Guardar
                         </button>
                     </div>
                 </div>
-                <p class="mensaje-guardado hidden text-[11px] font-bold text-emerald-500 mt-2"></p>
+                <p class="mensaje-guardado hidden text-[11px] font-bold mt-2 ml-1"></p>
             </div>
         @endforeach
 
         @if($plataformas->isEmpty())
-            <p class="text-center text-sm text-slate-400 py-8">No hay plataformas configuradas todavía.</p>
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto border border-slate-200 text-slate-400 mb-3">
+                    <i class="fas fa-motorcycle text-2xl"></i>
+                </div>
+                <p class="text-sm font-bold text-slate-700">No hay plataformas configuradas todavía.</p>
+            </div>
         @endif
     </div>
 
-    <p class="text-[11px] text-slate-400 dark:text-slate-500 text-center">
+    <p class="text-[11px] text-slate-500 text-center font-medium px-4">
         La comisión se calcula sobre el precio de venta (subtotal + IVA del producto) y se suma al total que paga el cliente en el pedido de delivery.
     </p>
 </div>
@@ -77,12 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
         card.querySelector('.btn-guardar').addEventListener('click', async () => {
             const id = card.dataset.id;
             const mensaje = card.querySelector('.mensaje-guardado');
+            const btnGuardar = card.querySelector('.btn-guardar');
 
-            // Los campos son de texto (para que el teclado táctil pueda
-            // escribir el punto decimal), así que la validación de rango
-            // que antes hacía el navegador con min/max ahora va aquí.
-            // También se acepta la coma como separador decimal: es común
-            // teclear "25,5" y así no se pierde el valor.
             const leerPorcentaje = (selector) => {
                 const el = card.querySelector(selector);
                 const crudo = (el.value || '').trim().replace(',', '.');
@@ -97,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mostrarError = (texto) => {
                 mensaje.textContent = texto;
                 mensaje.classList.remove('hidden', 'text-emerald-500');
-                mensaje.classList.add('text-red-500');
+                mensaje.classList.add('text-rose-500');
                 setTimeout(() => mensaje.classList.add('hidden'), 3000);
             };
 
@@ -110,13 +120,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Se normaliza lo que quedó en pantalla, para que el usuario vea
-            // exactamente el valor que se guardó.
             card.querySelector('.input-comision').value = comision.toFixed(2);
             card.querySelector('.input-iva').value = iva.toFixed(2);
 
+            const textoOriginal = btnGuardar.innerHTML;
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
             try {
-                const res = await fetch(`/delivery/${id}`, {
+                // Ruta dinámica con prefijo admin blindada para evitar errores 404
+                const res = await fetch("{{ url('admin/delivery') }}/" + id, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -134,17 +147,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (res.ok && data.success) {
                     mensaje.textContent = 'Guardado correctamente';
-                    mensaje.classList.remove('hidden', 'text-red-500');
+                    mensaje.classList.remove('hidden', 'text-rose-500');
                     mensaje.classList.add('text-emerald-500');
                 } else {
                     mensaje.textContent = data.message || 'Error al guardar';
                     mensaje.classList.remove('hidden', 'text-emerald-500');
-                    mensaje.classList.add('text-red-500');
+                    mensaje.classList.add('text-rose-500');
                 }
             } catch (e) {
                 mensaje.textContent = 'Error de conexión al guardar';
                 mensaje.classList.remove('hidden', 'text-emerald-500');
-                mensaje.classList.add('text-red-500');
+                mensaje.classList.add('text-rose-500');
+            } finally {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = textoOriginal;
             }
 
             setTimeout(() => mensaje.classList.add('hidden'), 2500);
@@ -152,4 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+
+{{-- Inclusión del Teclado Virtual --}}
+@include('partials.teclado-virtual')
+<script src="{{ asset('js/teclado-virtual.js') }}"></script>
 @endsection

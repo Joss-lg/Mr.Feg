@@ -1,58 +1,60 @@
-{{-- resources/views/admin/roles/modal-editar.blade.php --}}
+{{-- Estilos para manejo de teclado virtual --}}
 <style>
-    /* Efecto para que el teclado no tape el modal en pantallas grandes */
     @media (min-width: 768px) {
         body.teclado-virtual-abierto #modalEditarRol {
             align-items: flex-start !important;
             padding-top: 15px !important;
         }
-        body.teclado-virtual-abierto #modalEditarRol .dynamic-modal-content {
+        body.teclado-virtual-abierto #editModalContent {
             transform: translateY(0) scale(0.98) !important;
             max-height: calc(100dvh - 340px) !important; 
         }
     }
 </style>
 
-<div id="modalEditarRol" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+<div id="modalEditarRol" class="fixed inset-0 z-[99999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
     
-    {{-- Capa de cierre al hacer clic fuera --}}
-    <div class="absolute inset-0" onclick="cerrarModalEditar()"></div>
-
-    {{-- Contenido del Modal --}}
-    <div class="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 dynamic-modal-content z-10 max-h-[92vh] flex flex-col">
+    {{-- Tarjeta Estilo Soft Light --}}
+    <div class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="editModalContent">
         
-        {{-- Header --}}
-        <div class="p-5 sm:p-8 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 flex justify-between items-center shrink-0">
-            <div>
-                <h2 class="text-lg sm:text-xl font-black text-gray-900 dark:text-white tracking-tight">Editar Puesto</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Actualiza los datos del puesto en el sistema</p>
-            </div>
-            <button type="button" onclick="cerrarModalEditar()" 
-                    class="w-9 h-9 flex items-center justify-center shrink-0 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500 hover:text-gray-900 dark:hover:text-white active:scale-95 transition-colors outline-none">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        {{-- Formulario --}}
-        <form id="formEditarRol" method="POST" class="p-5 sm:p-8 space-y-5 overflow-y-auto">
+        <form id="formEditarRol" method="POST" class="flex flex-col h-full relative z-10 bg-slate-50">
             @csrf
             @method('PUT')
-
-            <div>
-                <label for="editNombre" class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Nombre del Puesto</label>
-                {{-- AQUÍ SE AGREGÓ data-teclado="texto" --}}
-                <input type="text" id="editNombre" name="nombre" required data-teclado="texto"
-                       class="w-full h-12 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl px-4 text-base font-medium text-gray-900 dark:text-white outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10">
+            
+            {{-- Encabezado con X animada --}}
+            <div class="px-6 pt-6 pb-2 flex justify-between items-start gap-3 flex-shrink-0">
+                <div>
+                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                        Editar Rol <i class="fas fa-user-edit text-blue-600 text-base"></i>
+                    </h3>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Actualiza los datos del rol</p>
+                </div>
+                <button type="button" onclick="cerrarModalEditar()" class="text-slate-400 hover:text-rose-500 hover:rotate-90 transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 outline-none flex-shrink-0 shadow-sm active:scale-95">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
             </div>
 
-            <div class="pt-6 mt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-                <button type="button" onclick="cerrarModalEditar()" 
-                        class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-full text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 active:scale-95 transition-colors">
+            {{-- Cuerpo del modal --}}
+            <div class="p-6 flex-1 overflow-y-auto space-y-4 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
+                <div>
+                    <label for="editNombre" class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Nombre del Rol</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-user-shield text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
+                        </div>
+                        <input type="text" id="editNombre" name="nombre" required data-teclado="texto"
+                            class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400 shadow-sm">
+                    </div>
+                </div>
+            </div>
+
+            {{-- Pie del modal --}}
+            <div class="px-6 py-5 border-t border-slate-200/60 bg-slate-100/50 flex items-center justify-between flex-shrink-0" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+                <button type="button" onclick="cerrarModalEditar()" class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors outline-none active:scale-95">
                     Cancelar
                 </button>
-                <button type="submit" 
-                        class="w-full sm:w-auto px-6 py-3 sm:py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-full text-xs font-bold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
-                    <i class="fas fa-save"></i> Guardar Cambios
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-blue-500/20 hover:shadow-lg transition-all active:scale-95 outline-none">
+                    Guardar Cambios
                 </button>
             </div>
         </form>
@@ -60,15 +62,19 @@
 </div>
 
 <script>
-    // Se asegura de que la animación sea consistente con el modal de creación
-    // Estas funciones ya están en el stack de scripts, pero asegúrate de que el selector sea este:
+    // Asegurar que el modal esté en el body
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('modalEditarRol');
+        if(modal) document.body.appendChild(modal);
+    });
+
     window.abrirModalEditar = function(btn) {
         const modal = document.getElementById('modalEditarRol');
-        const content = modal.querySelector('.dynamic-modal-content');
+        const content = document.getElementById('editModalContent');
         
         // Asignar acción al form
         const form = document.getElementById('formEditarRol');
-        form.action = `{{ url('roles') }}/${btn.getAttribute('data-id')}`;
+        form.action = `{{ url('admin/roles') }}/${btn.getAttribute('data-id')}`;
         
         // Asignar valor
         document.getElementById('editNombre').value = btn.getAttribute('data-nombre');
@@ -76,18 +82,19 @@
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        requestAnimationFrame(() => {
-            content.classList.remove('scale-95', 'opacity-0');
-            content.classList.add('scale-100', 'opacity-100');
-        });
+        // Timeout para activar la transición
+        setTimeout(() => {
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
     }
 
     window.cerrarModalEditar = function() {
         const modal = document.getElementById('modalEditarRol');
-        const content = modal.querySelector('.dynamic-modal-content');
+        const content = document.getElementById('editModalContent');
         
-        content.classList.remove('scale-100', 'opacity-100');
-        content.classList.add('scale-95', 'opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
         
         setTimeout(() => {
             modal.classList.remove('flex');

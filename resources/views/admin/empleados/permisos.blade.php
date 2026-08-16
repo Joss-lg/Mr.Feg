@@ -1,27 +1,72 @@
 @extends('layouts.admin')
 
 @section('title', 'Privilegios de Acceso | Ollintem Pro')
+@section('header-title', 'Privilegios de Acceso')
+@section('header-subtitle', 'Administra los permisos del equipo')
+
+@push('styles')
+<style>
+    /* Fondo general del sistema en gris extra claro */
+    body, html, #app, main, .wrapper, .main-content {
+        background-color: #f8fafc !important; /* slate-50 */
+    }
+    
+    /* Textos del header superior en oscuro */
+    header, header h1, header h2, header p, header span, .header-title, .header-subtitle {
+        color: #0f172a !important; /* slate-900 */
+    }
+
+    /* Aumentamos tamaños del header */
+    header h1, .header-title {
+        font-size: 2.2rem !important; 
+        line-height: 1.2 !important;
+        font-weight: 800 !important; 
+    }
+    header p, header span, .header-subtitle {
+        font-size: 1rem !important; 
+        margin-top: 0.25rem !important;
+        font-weight: 500 !important;
+        color: #64748b !important; /* slate-500 */
+    }
+
+    /* ANIMACIONES DE ENTRADA */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0; 
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="p-3 sm:p-6 lg:p-12 max-w-[1500px] mx-auto w-full space-y-6 sm:space-y-8">
+<div class="p-3 sm:p-6 lg:p-8 xl:p-12 max-w-[1600px] mx-auto w-full space-y-6 sm:space-y-8 flex-1 flex flex-col transition-all duration-300 relative z-10">
     
-    <div class="rounded-2xl sm:rounded-[2rem] lg:rounded-[3rem] shadow-2xl overflow-hidden border" style="background-color: var(--card-color); border-color: var(--border-color);">
+    <div class="bg-white border border-slate-100 rounded-2xl sm:rounded-[2rem] shadow-sm overflow-hidden animate-fade-in-up" style="animation-delay: 0ms;">
         <form action="{{ route('admin.empleados.permisos.update', $empleado->id) }}" method="POST" id="permisosForm">
             @csrf
             
-            <div class="overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full" style="scrollbar-color: var(--border-color) transparent; -webkit-overflow-scrolling: touch;">
+            <div class="overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full" style="-webkit-overflow-scrolling: touch;">
                 <table class="w-full min-w-[640px] sm:min-w-[760px] border-collapse">
                     <thead>
-                        <tr class="border-b" style="background-color: var(--input-bg); border-color: var(--border-color);">
-                            <th class="py-4 px-4 sm:py-6 sm:px-6 lg:py-10 lg:px-10 text-[8px] sm:text-[9px] lg:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] lg:tracking-[0.4em] text-left whitespace-nowrap" style="color: var(--text-color);">Módulos</th>
+                        <tr class="border-b border-slate-100 bg-slate-50/70">
+                            <th class="py-4 px-4 sm:py-5 sm:px-6 lg:py-6 lg:px-8 text-[9px] sm:text-[10px] lg:text-[11px] font-black uppercase tracking-widest text-left whitespace-nowrap text-slate-500">Módulos</th>
                             @php $permisosHeader = ['Mostrar', 'Crear', 'Editar', 'Eliminar', 'Gestionar']; @endphp
                             @foreach($permisosHeader as $p)
-                            <th class="py-4 px-2 sm:py-6 sm:px-3 lg:py-10 lg:px-4 text-[8px] sm:text-[9px] lg:text-[11px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] lg:tracking-[0.4em] text-center whitespace-nowrap" style="color: var(--text-color);">{{ $p }}</th>
+                            <th class="py-4 px-2 sm:py-5 sm:px-3 lg:py-6 lg:px-4 text-[9px] sm:text-[10px] lg:text-[11px] font-black uppercase tracking-widest text-center whitespace-nowrap text-slate-500">{{ $p }}</th>
                             @endforeach
-                            <th class="py-4 px-4 sm:py-6 sm:px-6 lg:py-10 lg:px-10 text-[8px] sm:text-[9px] lg:text-[11px] font-black text-blue-500 uppercase tracking-[0.15em] sm:tracking-[0.25em] lg:tracking-[0.4em] text-center whitespace-nowrap">Acción</th>
+                            <th class="py-4 px-4 sm:py-5 sm:px-6 lg:py-6 lg:px-8 text-[9px] sm:text-[10px] lg:text-[11px] font-black text-blue-600 uppercase tracking-widest text-center whitespace-nowrap">Acción</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y" style="border-color: var(--border-color);">
+                    <tbody class="divide-y divide-slate-50">
                         @php
                             // Mapeo dinámico de iconos basado en el nombre del módulo (en minúsculas)
                             $iconos = [
@@ -45,16 +90,16 @@
                         @foreach($modulos as $modulo)
                             @php
                                 $nombreModulo = strtolower($modulo->nombre);
-                                $icono = $iconos[$nombreModulo] ?? 'fa-circle'; // Fallback a fa-circle si no encuentra el icono
+                                $icono = $iconos[$nombreModulo] ?? 'fa-circle';
                             @endphp
 
-                            <tr class="modulo-row group hover:bg-blue-500/[0.03] transition-all duration-300">
-                                <td class="py-3 px-4 sm:py-5 sm:px-6 lg:py-8 lg:px-10">
-                                    <div class="flex items-center gap-2.5 sm:gap-4 lg:gap-6">
-                                        <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl border flex items-center justify-center shrink-0 group-hover:text-blue-500 group-hover:border-blue-500/40 group-hover:shadow-lg transition-all duration-500" style="background-color: var(--bg-color); border-color: var(--border-color); color: var(--text-muted);">
-                                            <i class="fas {{ $icono }} text-xs sm:text-sm lg:text-lg"></i>
+                            <tr class="modulo-row group hover:bg-blue-50/50 transition-all duration-300">
+                                <td class="py-3 px-4 sm:py-4 sm:px-6 lg:py-5 lg:px-8">
+                                    <div class="flex items-center gap-3 sm:gap-4 lg:gap-5">
+                                        <div class="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 group-hover:text-blue-600 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all duration-300 text-slate-400">
+                                            <i class="fas {{ $icono }} text-xs sm:text-sm lg:text-base"></i>
                                         </div>
-                                        <span class="text-[10px] sm:text-[11px] lg:text-[13px] font-black uppercase tracking-wide sm:tracking-widest whitespace-nowrap" style="color: var(--text-color);">{{ $modulo->nombre }}</span>
+                                        <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 group-hover:text-blue-900 transition-colors whitespace-nowrap">{{ $modulo->nombre }}</span>
                                     </div>
                                 </td>
 
@@ -64,7 +109,7 @@
                                 @endphp
 
                                 @foreach(['mostrar', 'crear', 'editar', 'eliminar', 'gestionar'] as $accion)
-                                    <td class="py-3 px-2 sm:py-5 sm:px-3 lg:py-8 lg:px-4">
+                                    <td class="py-3 px-2 sm:py-4 sm:px-3 lg:py-5 lg:px-4">
                                         <label class="relative flex items-center justify-center cursor-pointer group/check">
                                             <input type="checkbox" 
                                                 name="permisos[{{ $modulo->id }}][{{ $accion }}]" 
@@ -72,24 +117,24 @@
                                                 class="permiso-checkbox peer sr-only"
                                                 {{ ($permisoActual && $permisoActual->$accion) ? 'checked' : '' }}>
                                             
-                                            {{-- Contenedor con alto contraste adaptativo y efecto Glow --}}
-                                            <div class="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-lg lg:rounded-xl border-2 transition-all duration-300 ease-out 
+                                            {{-- Contenedor con efecto visual moderno --}}
+                                            <div class="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-xl border-2 transition-all duration-300 ease-out 
                                                 flex items-center justify-center
-                                                bg-slate-500/10 border-slate-400/40 
-                                                peer-checked:bg-blue-500 peer-checked:border-blue-400 
-                                                peer-checked:shadow-[0_0_15px_rgba(59,130,246,0.6)] 
-                                                peer-checked:scale-110 
-                                                group-hover/check:border-blue-400/80">
+                                                bg-slate-100 border-slate-200 
+                                                peer-checked:bg-blue-600 peer-checked:border-blue-600 
+                                                peer-checked:shadow-md peer-checked:shadow-blue-500/20
+                                                peer-checked:scale-105 
+                                                group-hover/check:border-blue-300 group-hover/check:bg-blue-50/50">
                                                 
-                                                {{-- Icono Check animado con escala --}}
-                                                <i class="fas fa-check text-white text-[10px] sm:text-xs lg:text-sm font-black opacity-0 scale-50 transition-all duration-300 peer-checked:opacity-100 peer-checked:scale-100"></i>
+                                                {{-- Icono Check animado --}}
+                                                <i class="fas fa-check text-white text-[10px] sm:text-xs font-black opacity-0 scale-50 transition-all duration-300 peer-checked:opacity-100 peer-checked:scale-100"></i>
                                             </div>
                                         </label>
                                     </td>
                                 @endforeach
 
-                                <td class="py-3 px-4 sm:py-5 sm:px-6 lg:py-8 lg:px-10 text-center">
-                                    <button type="button" class="toggle-row text-[8px] sm:text-[9px] font-black uppercase tracking-wide sm:tracking-widest hover:text-blue-500 transition-colors outline-none whitespace-nowrap" style="color: var(--text-muted);">
+                                <td class="py-3 px-4 sm:py-4 sm:px-6 lg:py-5 lg:px-8 text-center">
+                                    <button type="button" class="toggle-row text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400 hover:text-blue-600 transition-colors outline-none whitespace-nowrap bg-slate-50 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-200">
                                         Todos
                                     </button>
                                 </td>
@@ -99,20 +144,20 @@
                 </table>
             </div>
 
-            <div class="p-4 sm:p-6 lg:p-10 border-t flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 sm:gap-6 lg:gap-8" style="background-color: var(--input-bg); border-color: var(--border-color);">
-                <div class="flex items-center gap-3 sm:gap-4 order-2 md:order-1">
-                    <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0"></div>
-                    <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]" style="color: var(--text-muted);">
-                        Seguridad de Acceso Nivel: <span style="color: var(--text-color);">Granular</span>
+            <div class="p-4 sm:p-6 lg:p-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-slate-50/50">
+                <div class="flex items-center gap-3 order-2 md:order-1">
+                    <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0"></div>
+                    <p class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-500">
+                        Seguridad de Acceso Nivel: <span class="text-slate-800">Granular</span>
                     </p>
                 </div>
                 
-                <div class="flex gap-3 sm:gap-4 w-full md:w-auto order-1 md:order-2">
-                    <button type="reset" class="flex-1 md:flex-none px-6 py-3.5 sm:px-10 sm:py-4 lg:px-10 lg:py-5 rounded-xl lg:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-wide sm:tracking-widest hover:text-rose-500 transition-all border border-transparent hover:border-rose-500/20" style="color: var(--text-muted);">
+                <div class="flex gap-3 w-full md:w-auto order-1 md:order-2">
+                    <button type="reset" class="flex-1 md:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all border border-slate-200">
                         Limpiar
                     </button>
-                    <button type="submit" class="flex-1 md:flex-none px-6 py-3.5 sm:px-12 sm:py-4 lg:px-14 lg:py-5 bg-blue-500 text-white rounded-xl lg:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] shadow-[0_20px_40px_-10px_rgba(59,130,246,0.5)] hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 sm:gap-3">
-                        <i class="fas fa-save text-xs sm:text-sm"></i>
+                    <button type="submit" class="flex-1 md:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-save text-xs"></i>
                         Confirmar Privilegios
                     </button>
                 </div>
@@ -132,8 +177,10 @@
                 cb.checked = !allChecked;
             });
             
-            this.classList.add('text-blue-500');
-            setTimeout(() => { this.classList.remove('text-blue-500'); }, 300);
+            this.classList.add('text-blue-600', 'bg-blue-50', 'border-blue-200');
+            setTimeout(() => { 
+                this.classList.remove('text-blue-600', 'bg-blue-50', 'border-blue-200'); 
+            }, 300);
         });
     });
 </script>

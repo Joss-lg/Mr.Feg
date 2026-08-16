@@ -285,13 +285,13 @@ Route::middleware(['auth'])->group(function () {
     // ------------------------------------------
     // CLIENTES (Nuevo Módulo)
     // ------------------------------------------
-    Route::resource('clientes', ClienteController::class);
+    Route::resource('clientes', ClienteController::class)->except(['create']);
 
     // Rutas AJAX para el módulo de Delivery / Clientes en el POS
     Route::get('/pos/clientes/buscar', [\App\Http\Controllers\PosClienteController::class, 'buscar'])->name('pos.clientes.buscar');
     Route::post('/pos/clientes/express', [\App\Http\Controllers\PosClienteController::class, 'guardarClienteExpress'])->name('pos.clientes.express');
     Route::post('/pos/direcciones/express', [\App\Http\Controllers\PosClienteController::class, 'guardarDireccionExpress'])->name('pos.direcciones.express');
-
+    
     // ==========================================
     // --- MÓDULO DE REPARTIDORES ---
     // ==========================================

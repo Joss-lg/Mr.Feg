@@ -5,7 +5,6 @@
             align-items: flex-start !important;
             padding-top: 15px !important;
         }
-        
         body.teclado-virtual-abierto #createNominaContainer {
             transform: translateY(0) scale(0.98) !important;
             max-height: calc(100dvh - 340px) !important; 
@@ -13,116 +12,156 @@
     }
 </style>
 
-<div id="modalCrearNomina" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4 transition-all duration-300">
-    <div id="createNominaContainer" class="bg-zinc-950 modo-crema:bg-white border border-zinc-800 modo-crema:border-zinc-200 w-full max-w-lg rounded-2xl sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-500 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
+<div id="modalCrearNomina" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-opacity duration-300">
+    
+    <div id="createNominaContainer" class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
 
-        <div class="p-5 sm:p-8 pb-4 sm:pb-5 flex justify-between items-center border-b border-zinc-800 modo-crema:border-zinc-100 flex-shrink-0 gap-3">
-            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-600/10 flex items-center justify-center text-purple-600 border border-purple-600/20 shadow-sm shrink-0">
-                    <i class="fas fa-users text-lg sm:text-xl"></i>
-                </div>
-                <div class="min-w-0">
-                    <h3 class="text-lg sm:text-xl font-black text-zinc-100 modo-crema:text-zinc-900 tracking-tighter uppercase truncate">Pago de Nómina</h3>
-                    <p class="text-[8px] sm:text-[9px] text-zinc-400 modo-crema:text-zinc-500 font-bold uppercase tracking-[0.2em]">Registrar pago a empleado</p>
-                </div>
+        {{-- CABECERA MODAL --}}
+        <div class="px-6 pt-6 pb-4 flex justify-between items-start flex-shrink-0">
+            <div>
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    Pago de Nómina <i class="fas fa-users text-blue-600 text-base"></i>
+                </h3>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-1">Registrar pago a empleado</p>
             </div>
-            <button type="button" onclick="closeCreateNominaModal()" class="w-9 h-9 rounded-xl flex items-center justify-center bg-white/5 modo-crema:bg-zinc-100 text-zinc-400 modo-crema:text-zinc-500 hover:text-purple-500 modo-crema:hover:text-purple-600 hover:bg-purple-500/10 modo-crema:hover:bg-purple-50 transition-all outline-none flex-shrink-0">
-                <i class="fas fa-times text-sm"></i>
+            <button type="button" onclick="closeModal('modalCrearNomina', 'createNominaContainer')" class="text-slate-400 hover:text-rose-500 hover:rotate-90 transition-all duration-300 w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 outline-none flex-shrink-0 shadow-sm active:scale-95">
+                <i class="fas fa-times text-lg"></i>
             </button>
         </div>
         
-        <form action="{{ route('admin.pagos-nomina.store') }}" method="POST" class="flex flex-col flex-1 min-h-0">
+        <form action="{{ route('admin.pagos-nomina.store') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
             @csrf
-            <div class="p-5 sm:p-8 pt-5 sm:pt-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+            <div class="px-6 pb-4 space-y-4 overflow-y-auto flex-1 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                            <i class="fas fa-user opacity-40"></i> Empleado
-                        </label>
-                        <select name="user_id" required id="empleadoSelect" onchange="actualizarSueldo()"
-                            class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 outline-none transition-all appearance-none cursor-pointer">
-                            <option value="">Selecciona un empleado</option>
-                            @foreach($empleados ?? [] as $empleado)
-                                <option value="{{ $empleado->id }}" data-sueldo="{{ $empleado->sueldo_base ?? 0 }}">
-                                    {{ $empleado->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
+                {{-- Empleado Dropdown Personalizado --}}
+                <div class="relative">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Empleado</label>
+                    
+                    <input type="hidden" name="user_id" id="empleado_id_input" required>
+                    
+                    <button type="button" onclick="toggleDropdown('empleadoMenu', event)" 
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-4 text-sm font-semibold text-slate-800 outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-user text-slate-400 text-sm"></i>
+                            <span id="empleadoSelected" class="text-slate-400">Seleccionar empleado...</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </button>
+                    
+                    <div id="empleadoMenu" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-2 max-h-60 overflow-y-auto">
+                        @foreach($empleados ?? [] as $empleado)
+                            <button type="button" 
+                                onclick="selectEmpleado('{{ $empleado->id }}', '{{ $empleado->nombre }}', '{{ $empleado->sueldo_base ?? 0 }}')" 
+                                class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
+                                {{ $empleado->nombre }}
+                            </button>
+                        @endforeach
                     </div>
+                </div>
 
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                            <i class="fas fa-calendar opacity-40"></i> Período
-                        </label>
+                {{-- Período --}}
+                <div>
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Período</label>
+                    <div class="relative group">
+                        <i class="fas fa-calendar absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-600 transition-colors"></i>
                         <input type="text" name="periodo" required data-teclado="texto"
-                            class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 outline-none transition-all"
+                            class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 text-sm font-semibold text-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                             placeholder="Ej: 1-15 Mayo 2026">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 sm:gap-3 bg-zinc-900/50 modo-crema:bg-zinc-50/80 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-transparent modo-crema:border-zinc-200/60">
+                {{-- Grid de Sueldos y Bonos --}}
+                <div class="grid grid-cols-3 gap-2 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                     <div class="space-y-1.5 min-w-0">
-                        <label class="text-[7px] sm:text-[8px] font-black text-zinc-400 uppercase tracking-wider text-center block">Sueldo Base</label>
+                        <label class="text-[8px] font-black text-slate-500 uppercase tracking-widest text-center block">Sueldo Base</label>
                         <input type="text" name="sueldo_base" required id="sueldoBase" data-teclado="numerico" data-teclado-decimales="true"
-                            class="w-full h-11 sm:h-10 bg-zinc-950 modo-crema:bg-white rounded-lg text-sm sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 text-center outline-none" placeholder="0.00">
+                            class="w-full h-10 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold text-slate-800 text-center outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:text-slate-400" placeholder="0.00" oninput="calcularMonto()">
                     </div>
                     <div class="space-y-1.5 min-w-0">
-                        <label class="text-[7px] sm:text-[8px] font-black text-emerald-600 uppercase tracking-wider text-center block">+ Bonos</label>
+                        <label class="text-[8px] font-black text-emerald-500 uppercase tracking-widest text-center block">+ Bonos</label>
                         <input type="text" name="bonos" value="0" data-teclado="numerico" data-teclado-decimales="true"
-                            class="w-full h-11 sm:h-10 bg-zinc-950 modo-crema:bg-white rounded-lg text-sm sm:text-xs font-bold text-emerald-600 text-center outline-none" placeholder="0.00" oninput="calcularMonto()">
+                            class="w-full h-10 bg-slate-50 border border-emerald-100 rounded-lg text-xs font-bold text-emerald-600 text-center outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder:text-emerald-300" placeholder="0.00" oninput="calcularMonto()">
                     </div>
                     <div class="space-y-1.5 min-w-0">
-                        <label class="text-[7px] sm:text-[8px] font-black text-rose-600 uppercase tracking-wider text-center block">- Descuentos</label>
+                        <label class="text-[8px] font-black text-rose-500 uppercase tracking-widest text-center block">- Descuentos</label>
                         <input type="text" name="deducciones" value="0" data-teclado="numerico" data-teclado-decimales="true"
-                            class="w-full h-11 sm:h-10 bg-zinc-950 modo-crema:bg-white rounded-lg text-sm sm:text-xs font-bold text-rose-600 text-center outline-none" placeholder="0.00" oninput="calcularMonto()">
+                            class="w-full h-10 bg-slate-50 border border-rose-100 rounded-lg text-xs font-bold text-rose-600 text-center outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-500/20 transition-all placeholder:text-rose-300" placeholder="0.00" oninput="calcularMonto()">
                     </div>
                 </div>
 
-                {{-- El pago de nómina siempre se registra como PAGADO (afecta caja hoy). No se maneja estado pendiente. --}}
                 <input type="hidden" name="estado" value="pagado">
 
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 text-[10px] font-black text-zinc-400 modo-crema:text-zinc-500 uppercase tracking-[0.2em] ml-1">
-                        <i class="fas fa-credit-card opacity-40"></i> Método de Pago
-                    </label>
-                    <select name="metodo_pago" required class="w-full h-11 bg-zinc-900 modo-crema:bg-zinc-50 border border-transparent modo-crema:border-zinc-200/60 rounded-xl px-5 text-base sm:text-xs font-bold text-zinc-100 modo-crema:text-zinc-900 outline-none transition-all appearance-none cursor-pointer">
-                        <option value="">Selecciona método</option>
-                        <option value="Efectivo">Efectivo</option>
-                        <option value="Tarjeta">Tarjeta</option>
-                        <option value="Transferencia">Transferencia</option>
-                    </select>
+                {{-- Método de Pago --}}
+                <div class="relative">
+                    <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Método de Pago</label>
+                    <input type="hidden" name="metodo_pago" id="pago_metodo_input" required>
+                    <button type="button" onclick="toggleDropdown('pagoMetodoMenu', event)" 
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-4 text-sm font-semibold text-slate-800 outline-none hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-credit-card text-slate-400 text-sm"></i>
+                            <span id="pagoMetodoSelected" class="text-slate-400">Seleccionar método...</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-slate-400 text-xs"></i>
+                    </button>
+                    <div id="pagoMetodoMenu" class="absolute w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-2">
+                        @foreach(['Efectivo', 'Tarjeta', 'Transferencia'] as $metodo)
+                            <button type="button" onclick="selectPagoOption('pagoMetodoSelected', 'pago_metodo_input', '{{ $metodo }}', '{{ $metodo }}')" 
+                                class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
+                                {{ $metodo }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
 
-                {{-- Tarjeta de Monto Neto (limpia, sin el select adentro) --}}
-                <div class="bg-purple-500/5 border border-purple-500/20 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                {{-- Tarjeta de Monto Neto --}}
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex items-center justify-between gap-3 mt-2 shadow-sm">
                     <div class="min-w-0">
-                        <label class="text-[8px] sm:text-[9px] font-black text-purple-600 uppercase tracking-[0.2em] ml-1">Monto Neto a Pagar</label>
+                        <label class="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Monto Neto a Pagar</label>
                     </div>
-                    <div class="text-xl sm:text-3xl font-black text-purple-600 tracking-tight">$ <span id="montoNeto">0.00</span></div>
+                    <div class="text-2xl font-black text-blue-600 tracking-tight tabular-nums">$ <span id="montoNeto">0.00</span></div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3 sm:gap-4 px-5 sm:px-8 py-4 border-t border-zinc-800 modo-crema:border-zinc-100 flex-shrink-0" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-                <button type="button" onclick="closeCreateNominaModal()" class="flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-all outline-none">Cancelar</button>
-                <button type="submit" class="flex-[1.4] h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-purple-600/20 transition-all active:scale-95 outline-none">Guardar Nómina</button>
+            {{-- FOOTER --}}
+            <div class="px-6 py-5 border-t border-slate-200/60 bg-slate-100/50 flex items-center justify-between flex-shrink-0" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+                <button type="button" onclick="closeModal('modalCrearNomina', 'createNominaContainer')" class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors outline-none active:scale-95">
+                    Cancelar
+                </button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md shadow-blue-500/20 hover:shadow-lg transition-all active:scale-95 outline-none">
+                    Guardar
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof TecladoVirtual !== 'undefined') {
-            TecladoVirtual.attachAll();
-        }
-    });
+    function selectEmpleado(id, nombre, sueldo) {
+        document.getElementById('empleadoSelected').innerText = nombre;
+        document.getElementById('empleadoSelected').classList.remove('text-slate-400');
+        document.getElementById('empleadoSelected').classList.add('text-slate-800');
+        document.getElementById('empleado_id_input').value = id;
+        
+        const sueldoInput = document.getElementById('sueldoBase');
+        sueldoInput.value = parseFloat(sueldo).toFixed(2);
+        
+        document.getElementById('empleadoMenu').classList.add('hidden');
+        calcularMonto();
+    }
 
-    function closeCreateNominaModal() {
-        const modal = document.getElementById('modalCrearNomina');
-        const container = document.getElementById('createNominaContainer');
-        container.classList.remove('scale-100', 'opacity-100');
-        container.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 300);
+    function selectPagoOption(labelId, inputId, valor, texto) {
+        document.getElementById(labelId).innerText = texto;
+        document.getElementById(labelId).classList.remove('text-slate-400');
+        document.getElementById(labelId).classList.add('text-slate-800');
+        document.getElementById(inputId).value = valor;
+        document.getElementById('pagoMetodoMenu').classList.add('hidden');
+    }
+
+    function calcularMonto() {
+        const base = parseFloat(document.getElementById('sueldoBase').value) || 0;
+        const bonos = parseFloat(document.querySelector('input[name="bonos"]').value) || 0;
+        const deducciones = parseFloat(document.querySelector('input[name="deducciones"]').value) || 0;
+        const neto = base + bonos - deducciones;
+        document.getElementById('montoNeto').innerText = Math.max(0, neto).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 </script>

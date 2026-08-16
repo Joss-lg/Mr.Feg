@@ -1,157 +1,189 @@
 @extends('layouts.admin')
 
-@section('title', 'Módulo de Repartidores')
+@section('title', 'Módulo de Repartidores | Ollintem Pro')
 
 @section('content')
-<div class="px-3 sm:px-6 lg:px-8 py-6 w-full max-w-7xl mx-auto space-y-6">
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
 
-    {{-- Título de la sección --}}
-    <div class="flex items-center justify-between">
-        <h1 class="text-2xl sm:text-3xl font-black text-[var(--text-main)] tracking-tight">
-            Control de Repartos a Domicilio
-        </h1>
+    {{-- ENCABEZADO PREMIUM --}}
+    <div class="flex items-center justify-between bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 flex items-center justify-center rounded-2xl bg-orange-50 border border-orange-100 text-orange-600 shrink-0 shadow-sm">
+                <i class="fas fa-motorcycle text-lg"></i>
+            </div>
+            <div class="space-y-1">
+                <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+                    Control de Repartos a Domicilio
+                </h1>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">
+                    Administra los pedidos pendientes de envío y supervisa los pedidos que van en camino.
+                </p>
+            </div>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
 
         {{-- ========================================================= --}}
-        {{-- COLUMNA 1: PENDIENTES DE ASIGNAR (IMAGEN 1)                --}}
+        {{-- COLUMNA 1: PENDIENTES DE ASIGNAR --}}
         {{-- ========================================================= --}}
         <div class="space-y-4">
-            <h2 class="text-lg font-black text-[var(--text-main)] flex items-center gap-2">
-                <i class="fas fa-box-open text-orange-500"></i> Pedidos Listos para Enviar ({{ count($ordenesPendientes) }})
-            </h2>
+            <div class="flex items-center justify-between px-1">
+                <h2 class="text-base font-black text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-box-open text-orange-500"></i> Pedidos Listos para Enviar
+                </h2>
+                <span class="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-[10px] font-black text-orange-600 uppercase tracking-widest border border-orange-100">
+                    {{ count($ordenesPendientes) }} Pendientes
+                </span>
+            </div>
 
             @forelse($ordenesPendientes as $orden)
-                <div class="bg-[var(--bg-panel)] border border-[var(--border-color)] border-l-4 border-l-orange-500 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="bg-white border border-slate-200 border-l-4 border-l-orange-500 rounded-[1.5rem] p-5 sm:p-6 shadow-sm space-y-4 hover:border-slate-300 transition-all">
                     
                     {{-- Cabecera Ticket --}}
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="font-black text-lg text-[var(--text-main)]">
+                            <h3 class="font-black text-base sm:text-lg text-slate-800 tracking-tight">
                                 Ticket #{{ $orden->id }}
                             </h3>
-{{-- Nombre del cliente (Soporta registrado, temporal o general) --}}
-<p class="font-bold text-orange-500 text-sm">
-    @if($orden->cliente)
-        {{ $orden->cliente->nombre }}
-    @elseif(!empty($orden->nombre_temporal))
-        {{ $orden->nombre_temporal }} (Temporal)
-    @else
-        Cliente General
-    @endif
-</p>
+                            <p class="font-bold text-orange-600 text-sm mt-0.5">
+                                @if($orden->cliente)
+                                    {{ $orden->cliente->nombre }}
+                                @elseif(!empty($orden->nombre_temporal))
+                                    {{ $orden->nombre_temporal }} <span class="text-xs font-semibold text-slate-400">(Temporal)</span>
+                                @else
+                                    Cliente General
+                                @endif
+                            </p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-500 text-xs font-black">
+                        <span class="px-3 py-1 rounded-xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-wider border border-rose-100">
                             Espera: {{ round(\Carbon\Carbon::parse($orden->created_at)->diffInMinutes(now())) }} min
                         </span>
                     </div>
 
-{{-- Dirección y Contacto --}}
-<div class="bg-[var(--bg-base)] p-3.5 rounded-xl border border-[var(--border-color)] space-y-1.5 text-xs text-[var(--text-muted)]">
-    <p class="flex items-start gap-2">
-        <i class="fas fa-map-marker-alt mt-0.5 text-orange-500"></i>
-        <span class="text-[var(--text-main)]">
-            @if($orden->direccion)
-                <strong>{{ $orden->direccion->calle ?? 'Sin calle' }}</strong><br>
-                @if(!empty($orden->direccion->manzana)) Mz: {{ $orden->direccion->manzana }} @endif
-                @if(!empty($orden->direccion->lote)) | Lt: {{ $orden->direccion->lote }} @endif<br>
-                Col: {{ $orden->direccion->colonia ?? '-' }}<br>
-                <em class="text-[var(--text-muted)]">Ref: {{ $orden->direccion->referencia ?? 'Ninguna' }}</em>
-            @else
-                <strong>Sin dirección registrada (Pedido Rápido / Para Llevar)</strong>
-            @endif
-        </span>
-    </p>
-    <p class="flex items-center gap-2 pt-1 font-bold text-[var(--text-main)]">
-        <i class="fas fa-phone text-[var(--text-muted)]"></i> 
-        {{ $orden->cliente->telefono ?? 'S/N' }}
-    </p>
-</div>
+                    {{-- Dirección y Contacto --}}
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs text-slate-600 shadow-inner">
+                        <p class="flex items-start gap-2.5">
+                            <i class="fas fa-map-marker-alt mt-0.5 text-orange-500 shrink-0"></i>
+                            <span class="text-slate-800 font-medium leading-relaxed">
+                                @if($orden->direccion)
+                                    <strong class="text-slate-900 font-bold">{{ $orden->direccion->calle ?? 'Sin calle' }}</strong><br>
+                                    @if(!empty($orden->direccion->manzana)) Mz: {{ $orden->direccion->manzana }} @endif
+                                    @if(!empty($orden->direccion->lote)) | Lt: {{ $orden->direccion->lote }} @endif
+                                    @if(!empty($orden->direccion->manzana) || !empty($orden->direccion->lote)) <br> @endif
+                                    Col: {{ $orden->direccion->colonia ?? '-' }}<br>
+                                    <em class="text-slate-400">Ref: {{ $orden->direccion->referencia ?? 'Ninguna' }}</em>
+                                @else
+                                    <strong class="text-slate-900 font-bold">Sin dirección registrada (Pedido Rápido / Para Llevar)</strong>
+                                @endif
+                            </span>
+                        </p>
+                        <p class="flex items-center gap-2.5 pt-1 font-bold text-slate-800 border-t border-slate-200/60">
+                            <i class="fas fa-phone text-slate-400"></i> 
+                            {{ $orden->cliente->telefono ?? 'S/N' }}
+                        </p>
+                    </div>
 
                     {{-- Total --}}
-                    <div class="text-emerald-500 font-black text-base">
-                        Total: ${{ number_format($orden->total, 2) }}
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Monto Total</span>
+                        <span class="text-emerald-600 font-black text-lg tracking-tight">
+                            ${{ number_format($orden->total, 2) }}
+                        </span>
                     </div>
 
                     {{-- Formulario para asignar repartidor --}}
-                    <form action="{{ route('admin.repartidores.asignar', $orden->id) }}" method="POST" class="flex gap-2 pt-2 border-t border-[var(--border-color)] form-async">
+                    <form action="{{ route('admin.repartidores.asignar', $orden->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-slate-100 form-async">
                         @csrf
-                        <select name="repartidor_id" required class="flex-1 bg-[var(--bg-base)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 text-xs font-bold text-[var(--text-main)] focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="">Seleccionar Repartidor...</option>
-                            @foreach($repartidores as $rep)
-                                <option value="{{ $rep->id }}">{{ $rep->nombre ?? $rep->name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 shrink-0 active:scale-95">
+                        <div class="relative flex-1">
+                            <select name="repartidor_id" required class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-10 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer shadow-sm">
+                                <option value="">Seleccionar Repartidor...</option>
+                                @foreach($repartidores as $rep)
+                                    <option value="{{ $rep->id }}">{{ $rep->nombre ?? $rep->name }}</option>
+                                @endforeach
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                        </div>
+                        <button type="submit" class="h-12 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none shrink-0">
                             <i class="fas fa-paper-plane"></i> Enviar
                         </button>
                     </form>
 
                 </div>
             @empty
-                <div class="text-center py-12 bg-[var(--bg-panel)] rounded-2xl border border-[var(--border-color)]">
-                    <i class="fas fa-check-circle text-4xl text-emerald-500 mb-2"></i>
-                    <p class="font-bold text-[var(--text-muted)] text-sm">No hay pedidos pendientes de reparto</p>
+                <div class="text-center py-12 bg-white rounded-[2rem] border border-slate-200 shadow-sm">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto border border-emerald-100 text-emerald-600 mb-3 shadow-sm">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                    </div>
+                    <p class="font-black text-slate-800 text-sm">No hay pedidos pendientes de reparto</p>
+                    <p class="text-xs text-slate-400 mt-1">Los nuevos pedidos listos aparecerán aquí automáticamente.</p>
                 </div>
             @endforelse
         </div>
 
         {{-- ========================================================= --}}
-        {{-- COLUMNA 2: EN CAMINO (IMAGEN 2)                          --}}
+        {{-- COLUMNA 2: EN CAMINO --}}
         {{-- ========================================================= --}}
         <div class="space-y-4">
-            <h2 class="text-lg font-black text-[var(--text-main)] flex items-center gap-2">
-                <i class="fas fa-motorcycle text-blue-500"></i> En Camino ({{ count($ordenesEnCamino) }})
-            </h2>
+            <div class="flex items-center justify-between px-1">
+                <h2 class="text-base font-black text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-motorcycle text-blue-500"></i> Pedidos en Camino
+                </h2>
+                <span class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black text-blue-600 uppercase tracking-widest border border-blue-100">
+                    {{ count($ordenesEnCamino) }} En Ruta
+                </span>
+            </div>
 
             @forelse($ordenesEnCamino as $orden)
-                <div class="bg-[var(--bg-panel)] border border-[var(--border-color)] border-l-4 border-l-blue-500 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="bg-white border border-slate-200 border-l-4 border-l-blue-500 rounded-[1.5rem] p-5 sm:p-6 shadow-sm space-y-4 hover:border-slate-300 transition-all">
                     
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="font-black text-lg text-[var(--text-main)]">
+                            <h3 class="font-black text-base sm:text-lg text-slate-800 tracking-tight">
                                 Ticket #{{ $orden->id }}
                             </h3>
-                            <p class="font-bold text-blue-500 text-sm">
+                            <p class="font-bold text-blue-600 text-sm mt-0.5">
                                 {{ $orden->cliente->nombre ?? 'Cliente General' }}
                             </p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-500 text-xs font-black">
+                        <span class="px-3 py-1 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-100">
                             {{ round(\Carbon\Carbon::parse($orden->updated_at)->diffInMinutes(now())) }} min totales
                         </span>
                     </div>
 
                     {{-- Info del Repartidor Asignado --}}
-                    <div class="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl space-y-0.5">
-                        <p class="text-xs font-black text-blue-500 flex items-center gap-1.5">
+                    <div class="bg-blue-50 border border-blue-100 p-3.5 rounded-2xl space-y-1 shadow-sm">
+                        <p class="text-xs font-black text-blue-700 flex items-center gap-2">
                             <i class="fas fa-user-tie"></i> Repartidor: {{ $orden->repartidor->nombre ?? $orden->repartidor->name ?? 'Asignado' }}
                         </p>
-                        <p class="text-[11px] text-[var(--text-muted)]">
-                            Se fue a las {{ \Carbon\Carbon::parse($orden->updated_at)->format('h:i A') }}
+                        <p class="text-[11px] font-medium text-slate-500">
+                            Salió a las {{ \Carbon\Carbon::parse($orden->updated_at)->format('h:i A') }}
                         </p>
                     </div>
 
                     {{-- Dirección breve --}}
-                    <div class="text-xs text-[var(--text-muted)] bg-[var(--bg-base)] p-3 rounded-xl border border-[var(--border-color)]">
-                        <strong class="text-[var(--text-main)]">{{ $orden->direccion->calle ?? '' }}</strong><br>
-                        Col: {{ $orden->direccion->colonia ?? '' }}<br>
-                        <em class="text-[var(--text-muted)]">Ref: {{ $orden->direccion->referencia ?? '' }}</em>
+                    <div class="text-xs text-slate-600 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-1 shadow-inner">
+                        <strong class="text-slate-900 font-bold block">{{ $orden->direccion->calle ?? 'Sin dirección' }}</strong>
+                        <span class="block">Col: {{ $orden->direccion->colonia ?? '-' }}</span>
+                        <em class="text-slate-400 block">Ref: {{ $orden->direccion->referencia ?? 'Ninguna' }}</em>
                     </div>
 
                     {{-- Botón Marcar como Entregado --}}
-                    <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async">
+                    <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async pt-1">
                         @csrf @method('PATCH')
-                        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2 active:scale-95">
+                        <button type="submit" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
                             <i class="fas fa-check"></i> Marcar como Entregado
                         </button>
                     </form>
 
                 </div>
             @empty
-                <div class="text-center py-12 bg-[var(--bg-panel)] rounded-2xl border border-[var(--border-color)]">
-                    <i class="fas fa-road text-4xl text-[var(--text-muted)] opacity-40 mb-2"></i>
-                    <p class="font-bold text-[var(--text-muted)] text-sm">No hay repartos en camino en este momento</p>
+                <div class="text-center py-12 bg-white rounded-[2rem] border border-slate-200 shadow-sm">
+                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto border border-slate-200 text-slate-400 mb-3 shadow-sm">
+                        <i class="fas fa-road text-2xl"></i>
+                    </div>
+                    <p class="font-black text-slate-800 text-sm">No hay repartos en camino en este momento</p>
+                    <p class="text-xs text-slate-400 mt-1">Los pedidos despachados se mostrarán en esta sección.</p>
                 </div>
             @endforelse
         </div>
@@ -159,7 +191,7 @@
     </div>
 </div>
 
-{{-- Script opcional para hacer que los botones actúen de manera fluida sin recargar completo (AJAX básico) --}}
+{{-- Script dinámico para manejo asíncrono y fluidez sin recargas completas --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.form-async').forEach(form => {
@@ -181,13 +213,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const result = await response.json();
                 if (result.success) {
-                    location.reload(); // Recarga para actualizar las listas visuales
+                    location.reload(); 
                 } else {
                     alert(result.message || 'Ocurrió un error');
                 }
             } catch (err) {
                 console.error(err);
-                // Si falla el fetch por alguna razón, ejecutamos envío tradicional
                 this.submit();
             }
         });

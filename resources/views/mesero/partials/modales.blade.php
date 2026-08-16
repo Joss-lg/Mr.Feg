@@ -15,37 +15,37 @@
      1. MODAL NIP CAPITÁN (Teclado Numérico Virtual)
      ========================================== --}}
 <div id="modalNip" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-blue-500/5 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-lock text-blue-500 text-xs"></i>
+                <span class="w-8 h-8 rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-lock text-white text-xs"></i>
                 </span>
-                <h2 class="text-base sm:text-lg font-bold text-[var(--text-main)] tracking-tight">NIP Administrador</h2>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">NIP Administrador</h2>
             </div>
-            <button type="button" onclick="cerrarModal('modalNip')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalNip')" class="w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
         
         <input type="password" id="nipInput"
                maxlength="6" autocomplete="off"
                data-solo-numeros="true"
                data-teclado-virtual="true"
-               class="w-full min-h-[64px] rounded-xl border border-[var(--border-color)] bg-[var(--input-bg)] shadow-inner p-4 text-2xl sm:text-xl font-black text-center text-[var(--text-main)] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 tracking-[0.3em]"
+               class="w-full min-h-[64px] rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-2xl sm:text-xl font-black text-center text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 tracking-[0.3em]"
                placeholder="••••">
                
         {{-- Teclado Numérico --}}
         <div class="grid grid-cols-3 gap-1.5 mt-4">
             @foreach(['1','2','3','4','5','6','7','8','9'] as $key)
-                <button type="button" onclick="escribirNumVirtual('nipInput', '{{ $key }}')" class="min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-blue-500/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">{{ $key }}</button>
+                <button type="button" onclick="escribirNumVirtual('nipInput', '{{ $key }}')" class="min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">{{ $key }}</button>
             @endforeach
-            <button type="button" onclick="escribirNumVirtual('nipInput', '0')" class="col-span-2 min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-blue-500/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">0</button>
-            <button type="button" onclick="borrarNumVirtual('nipInput')" class="min-h-[44px] rounded-lg bg-red-500/10 border border-red-500/15 text-red-500 hover:bg-red-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
+            <button type="button" onclick="escribirNumVirtual('nipInput', '0')" class="col-span-2 min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">0</button>
+            <button type="button" onclick="borrarNumVirtual('nipInput')" class="min-h-[44px] rounded-xl bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
         </div>
 
         <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="cerrarModal('modalNip')" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 text-xs font-bold transition-all duration-150">Cancelar</button>
-            <button type="button" onclick="confirmarNipCapitan()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white text-xs font-bold active:scale-95 shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-150">Aceptar</button>
+            <button type="button" onclick="cerrarModal('modalNip')" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 text-xs font-black uppercase tracking-widest transition-all duration-150">Cancelar</button>
+            <button type="button" onclick="confirmarNipCapitan()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-150">Aceptar</button>
         </div>
     </div>
 </div>
@@ -55,23 +55,23 @@
      ========================================== --}}
 <div id="modalCapitan" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
     @php $mesasAbiertas = $mesasAbiertas ?? collect(); @endphp
-    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3 min-w-0">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br from-indigo-500/15 to-indigo-500/5 border border-indigo-500/20 flex items-center justify-center">
-                    <i class="fas fa-shield-alt text-indigo-500 text-xs"></i>
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-indigo-600 shadow-md shadow-indigo-500/20 flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-xs"></i>
                 </span>
                 <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">Autorización</p>
-                    <h2 class="text-lg sm:text-xl font-semibold text-[var(--text-main)] leading-tight">Selecciona mesero destino</h2>
+                    <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Autorización</p>
+                    <h2 class="text-xl font-black text-slate-800 leading-tight">Selecciona mesero destino</h2>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModal('modalCapitan')" class="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalCapitan')" class="flex-shrink-0 w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
         <div id="capitanMeserosContainer" class="grid gap-2 max-h-[45vh] sm:max-h-[300px] overflow-y-auto hide-scroll pb-2"></div>
         <div class="mt-5 flex justify-end">
-            <button type="button" onclick="cerrarModal('modalCapitan')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl border border-[var(--border-color)] text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 transition-all duration-150">Cancelar</button>
+            <button type="button" onclick="cerrarModal('modalCapitan')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-white border border-slate-200 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-150">Cancelar</button>
         </div>
     </div>
 </div>
@@ -80,45 +80,45 @@
      3. MODAL NOTAS (Teclado Nativo del teléfono)
      ========================================== --}}
 <div id="modalNota" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-md max-h-[94vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-md max-h-[94vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
 
         <div class="flex items-center justify-between mb-4 sm:mb-5">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-blue-500/5 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-pen text-blue-500 text-xs"></i>
+                <span class="w-8 h-8 rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-pen text-white text-xs"></i>
                 </span>
                 <div>
-                    <h2 class="text-base sm:text-lg font-bold text-[var(--text-main)] tracking-tight">Instrucción Especial</h2>
-                    <p class="text-[11px] text-[var(--text-muted)] font-semibold">
-                        Para: <span id="notaModalProducto" class="text-blue-500 font-bold">-</span>
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Instrucción Especial</h2>
+                    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">
+                        Para: <span id="notaModalProducto" class="text-blue-600 font-black">-</span>
                     </p>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModal('modalNota')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalNota')" class="w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
 
         <textarea id="notaTextarea" rows="4"
             readonly
             inputmode="none"
             onclick="abrirTecladoNota()"
-            class="w-full rounded-2xl border border-[var(--border-color)] bg-[var(--input-bg)] shadow-inner p-4 text-sm font-medium text-[var(--text-main)] outline-none resize-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200 mb-4 cursor-pointer"
+            class="w-full rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-sm font-medium text-slate-800 outline-none resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 mb-4 cursor-pointer"
             placeholder="Toca aquí para escribir...">
         </textarea>
 
         <div class="flex items-center gap-2 mb-4 overflow-x-auto hide-scroll pb-1">
             @foreach(['Sin cebolla', 'Salsa aparte', 'Bien cocido', 'Término medio', 'Para llevar', 'Sin picante'] as $notaRapida)
                 <button type="button" onclick="agregarTextoRapidoNota('{{ $notaRapida }}')"
-                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 hover:bg-blue-500 hover:text-white active:scale-90 select-none text-[11px] font-bold shadow-sm transition-all duration-150">
+                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-500 hover:text-white active:scale-90 select-none text-[11px] font-bold shadow-sm transition-all duration-150">
                     {{ $notaRapida }}
                 </button>
             @endforeach
         </div>
 
         <div class="mt-2 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="limpiarNota()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-[var(--text-muted)]/10 border border-[var(--border-color)] text-[var(--text-muted)] hover:bg-[var(--text-muted)] hover:text-white active:scale-95 select-none text-[11px] sm:text-xs font-bold transition-all duration-150">Limpiar</button>
-            <button type="button" onclick="cerrarModal('modalNota')" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 text-xs font-bold transition-all duration-150">Cancelar</button>
-            <button type="button" onclick="guardarNota()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-gradient-to-b from-[var(--text-main)] to-[var(--text-main)] text-[var(--bg-base)] text-xs font-bold active:scale-95 shadow-md hover:shadow-lg transition-all duration-150 hover:opacity-90">Confirmar</button>
+            <button type="button" onclick="limpiarNota()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 select-none text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all duration-150">Limpiar</button>
+            <button type="button" onclick="cerrarModal('modalNota')" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 text-xs font-black uppercase tracking-widest transition-all duration-150">Cancelar</button>
+            <button type="button" onclick="guardarNota()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-150">Confirmar</button>
         </div>
     </div>
 </div>
@@ -127,34 +127,34 @@
      5. MODAL PERSONAS (Teclado Numérico Virtual)
      ========================================== --}}
 <div id="modalPersonas" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--text-main)]/10 to-[var(--text-main)]/5 border border-[var(--border-color)] flex items-center justify-center">
-                    <i class="fas fa-users text-[var(--text-main)] text-xs"></i>
+                <span class="w-8 h-8 rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-users text-white text-xs"></i>
                 </span>
-                <h2 class="text-base sm:text-lg font-bold text-[var(--text-main)] tracking-tight">Personas en Mesa</h2>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">Personas en Mesa</h2>
             </div>
-            <button type="button" onclick="cerrarModal('modalPersonas')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalPersonas')" class="w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
         
         <input id="personasInput" type="text" data-solo-numeros="true" data-teclado-virtual="true"
                maxlength="3" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3)"
-               class="w-full min-h-[64px] rounded-xl border border-[var(--border-color)] bg-[var(--input-bg)] shadow-inner p-4 text-2xl sm:text-xl font-black text-center text-[var(--text-main)] outline-none focus:border-[var(--text-main)] focus:ring-4 focus:ring-[var(--text-main)]/10 transition-all duration-200">
+               class="w-full min-h-[64px] rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-2xl sm:text-xl font-black text-center text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200">
 
         {{-- Teclado Numérico --}}
         <div class="grid grid-cols-3 gap-1.5 mt-4">
             @foreach(['1','2','3','4','5','6','7','8','9'] as $key)
-                <button type="button" onclick="escribirNumVirtual('personasInput', '{{ $key }}')" class="min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-[var(--text-main)]/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">{{ $key }}</button>
+                <button type="button" onclick="escribirNumVirtual('personasInput', '{{ $key }}')" class="min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">{{ $key }}</button>
             @endforeach
-            <button type="button" onclick="escribirNumVirtual('personasInput', '0')" class="col-span-2 min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-[var(--text-main)]/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">0</button>
-            <button type="button" onclick="borrarNumVirtual('personasInput')" class="min-h-[44px] rounded-lg bg-red-500/10 border border-red-500/15 text-red-500 hover:bg-red-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
+            <button type="button" onclick="escribirNumVirtual('personasInput', '0')" class="col-span-2 min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">0</button>
+            <button type="button" onclick="borrarNumVirtual('personasInput')" class="min-h-[44px] rounded-xl bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
         </div>
 
         <div class="mt-6">
-            <button type="button" onclick="guardarPersonas()" class="w-full min-h-[48px] rounded-xl bg-gradient-to-b from-[var(--text-main)] to-[var(--text-main)] text-[var(--bg-base)] text-sm font-bold active:scale-95 shadow-md hover:shadow-lg transition-all duration-150">Guardar</button>
+            <button type="button" onclick="guardarPersonas()" class="w-full min-h-[48px] rounded-xl bg-blue-600 text-white text-sm font-black uppercase tracking-widest active:scale-95 shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-150">Guardar</button>
         </div>
     </div>
 </div>
@@ -163,43 +163,43 @@
      6. MODAL GRAMAJE (Teclado Numérico Virtual propio)
      ========================================== --}}
 <div id="modalGramaje" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[94vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[94vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5 min-w-0">
-                <span class="w-8 h-8 shrink-0 rounded-lg bg-gradient-to-br from-orange-500/15 to-orange-500/5 border border-orange-500/20 flex items-center justify-center">
-                    <i class="fas fa-weight-scale text-orange-500 text-xs"></i>
+                <span class="w-8 h-8 shrink-0 rounded-xl bg-orange-500 shadow-md shadow-orange-500/20 flex items-center justify-center">
+                    <i class="fas fa-weight-scale text-white text-xs"></i>
                 </span>
-                <h2 id="modalGramajeTitulo" class="text-base sm:text-lg font-bold text-[var(--text-main)] truncate">Gramaje</h2>
+                <h2 id="modalGramajeTitulo" class="text-xl font-black text-slate-800 truncate">Gramaje</h2>
             </div>
-            <button type="button" onclick="cerrarModalGramaje()" class="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModalGramaje()" class="flex-shrink-0 w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
 
         <div class="flex items-center gap-3 mb-2">
             <input id="gramajeInput" type="text"
                    inputmode="decimal" autocomplete="off"
                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')"
-                   class="flex-1 min-w-0 rounded-xl border border-[var(--border-color)] bg-[var(--input-bg)] shadow-inner p-4 text-2xl font-black text-[var(--text-main)] text-center outline-none" placeholder="0">
-            <span class="shrink-0 text-[var(--text-muted)] font-bold text-lg">g</span>
+                   class="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-2xl font-black text-slate-800 text-center outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20" placeholder="0">
+            <span class="shrink-0 text-slate-500 font-black text-lg">g</span>
         </div>
 
         <p id="gramajePrecioPreview" class="text-center text-sm font-black text-orange-500 mb-4 h-5"></p>
 
         <div id="botonesRapidosGramaje" class="grid grid-cols-5 gap-1.5 mb-4">
             @foreach([['100','100g'],['250','250g'],['500','500g'],['700','700g'],['1000','1kg']] as [$valor, $etiqueta])
-                <button type="button" onclick="seleccionarGramajeRapido({{ $valor }})" class="min-h-[40px] py-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-500 hover:bg-orange-500 hover:text-white active:scale-90 select-none text-[11px] font-bold shadow-sm transition-all duration-150">{{ $etiqueta }}</button>
+                <button type="button" onclick="seleccionarGramajeRapido({{ $valor }})" class="min-h-[40px] py-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 hover:bg-orange-500 hover:text-white active:scale-90 select-none text-[11px] font-bold shadow-sm transition-all duration-150">{{ $etiqueta }}</button>
             @endforeach
         </div>
 
         <div id="tecladoGramaje" class="grid grid-cols-3 gap-2">
             @foreach(['1','2','3','4','5','6','7','8','9','.','0'] as $key)
-                <button type="button" onclick="anadirNumeroGramaje('{{ $key }}')" class="min-h-[48px] py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-orange-500/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">{{ $key }}</button>
+                <button type="button" onclick="anadirNumeroGramaje('{{ $key }}')" class="min-h-[48px] py-3 rounded-xl bg-white border border-slate-200 hover:border-orange-300 hover:bg-orange-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">{{ $key }}</button>
             @endforeach
-            <button type="button" onclick="borrarNumeroGramaje()" class="min-h-[48px] py-3 rounded-xl bg-red-500/10 border border-red-500/15 text-red-500 hover:bg-red-500 hover:text-white active:scale-90 select-none text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
+            <button type="button" onclick="borrarNumeroGramaje()" class="min-h-[48px] py-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-90 select-none text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
         </div>
         
         <div class="mt-6">
-            <button type="button" onclick="guardarGramajeDelItem()" class="w-full min-h-[48px] rounded-xl bg-gradient-to-b from-orange-500 to-orange-600 text-white text-sm font-bold active:scale-95 shadow-md hover:shadow-lg transition-all duration-150">Confirmar</button>
+            <button type="button" onclick="guardarGramajeDelItem()" class="w-full min-h-[48px] rounded-xl bg-orange-500 text-white text-sm font-black uppercase tracking-widest active:scale-95 shadow-md shadow-orange-500/20 hover:bg-orange-600 transition-all duration-150">Confirmar</button>
         </div>
     </div>
 </div>
@@ -208,37 +208,37 @@
      7. MODAL TIPO DE TRASPASO
      ========================================== --}}
 <div id="modalTipoTraspaso" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3 min-w-0">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br from-indigo-500/15 to-indigo-500/5 border border-indigo-500/20 flex items-center justify-center">
-                    <i class="fas fa-exchange-alt text-indigo-500 text-xs"></i>
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-indigo-600 shadow-md shadow-indigo-500/20 flex items-center justify-center">
+                    <i class="fas fa-exchange-alt text-white text-xs"></i>
                 </span>
                 <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">Traspaso</p>
-                    <h2 id="tituloTipoTraspaso" class="text-base sm:text-lg font-bold text-[var(--text-main)] leading-tight">¿Qué deseas traspasar?</h2>
+                    <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Traspaso</p>
+                    <h2 id="tituloTipoTraspaso" class="text-xl font-black text-slate-800 leading-tight">¿Qué deseas traspasar?</h2>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModal('modalTipoTraspaso')" class="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalTipoTraspaso')" class="flex-shrink-0 w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
         <div class="flex flex-col gap-3">
-            <button type="button" onclick="elegirTraspasoProducto()" class="w-full flex items-center gap-3 text-left rounded-2xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-4 hover:border-blue-500/40 hover:shadow-md active:scale-[0.98] transition-all duration-150">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-utensils text-blue-500 text-xs"></i>
+            <button type="button" onclick="elegirTraspasoProducto()" class="w-full flex items-center gap-3 text-left rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm hover:border-blue-300 hover:shadow-md active:scale-[0.98] transition-all duration-150">
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
+                    <i class="fas fa-utensils text-blue-600 text-xs"></i>
                 </span>
                 <span>
-                    <p class="text-sm font-bold text-[var(--text-main)]">Producto Individual</p>
-                    <p class="text-[12px] text-[var(--text-muted)] mt-0.5">Elige uno o varios platillos específicos</p>
+                    <p class="text-sm font-bold text-slate-800">Producto Individual</p>
+                    <p class="text-[12px] text-slate-500 mt-0.5">Elige uno o varios platillos específicos</p>
                 </span>
             </button>
-            <button type="button" onclick="elegirTraspasoCompleto()" class="w-full flex items-center gap-3 text-left rounded-2xl border border-[var(--border-color)] bg-[var(--bg-base)] px-4 py-4 hover:border-blue-500/40 hover:shadow-md active:scale-[0.98] transition-all duration-150">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-clipboard-list text-blue-500 text-xs"></i>
+            <button type="button" onclick="elegirTraspasoCompleto()" class="w-full flex items-center gap-3 text-left rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm hover:border-blue-300 hover:shadow-md active:scale-[0.98] transition-all duration-150">
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center">
+                    <i class="fas fa-clipboard-list text-blue-600 text-xs"></i>
                 </span>
                 <span>
-                    <p class="text-sm font-bold text-[var(--text-main)]">Pedido Completo</p>
-                    <p class="text-[12px] text-[var(--text-muted)] mt-0.5">Envía toda la orden a la mesa destino</p>
+                    <p class="text-sm font-bold text-slate-800">Pedido Completo</p>
+                    <p class="text-[12px] text-slate-500 mt-0.5">Envía toda la orden a la mesa destino</p>
                 </span>
             </button>
         </div>
@@ -249,24 +249,24 @@
      8. MODAL SELECCIÓN DE PRODUCTOS
      ========================================== --}}
 <div id="modalSeleccionProductos" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3 min-w-0">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br from-indigo-500/15 to-indigo-500/5 border border-indigo-500/20 flex items-center justify-center">
-                    <i class="fas fa-list-check text-indigo-500 text-xs"></i>
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-indigo-600 shadow-md shadow-indigo-500/20 flex items-center justify-center">
+                    <i class="fas fa-list-check text-white text-xs"></i>
                 </span>
                 <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-widest text-indigo-500 font-bold">Traspaso</p>
-                    <h2 class="text-lg font-bold text-[var(--text-main)] leading-tight">Selecciona productos</h2>
+                    <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Traspaso</p>
+                    <h2 class="text-lg font-black text-slate-800 leading-tight">Selecciona productos</h2>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModal('modalSeleccionProductos')" class="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalSeleccionProductos')" class="flex-shrink-0 w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
         <div id="listaProductosTraspaso" class="grid gap-2 max-h-[45vh] sm:max-h-[320px] overflow-y-auto hide-scroll pb-2"></div>
         <div class="mt-5 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="cerrarModal('modalSeleccionProductos')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl border border-[var(--border-color)] text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 transition-all duration-150">Cancelar</button>
-            <button type="button" onclick="confirmarTraspasoProductos()" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white text-xs font-bold active:scale-95 shadow-md transition-all duration-150">Traspasar</button>
+            <button type="button" onclick="cerrarModal('modalSeleccionProductos')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-white border border-slate-200 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-150">Cancelar</button>
+            <button type="button" onclick="confirmarTraspasoProductos()" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-150">Traspasar</button>
         </div>
     </div>
 </div>
@@ -275,25 +275,25 @@
      9. MODAL SELECCIÓN DE COMBO
      ========================================== --}}
 <div id="modalSeleccionCombo" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3 min-w-0">
-                <span class="w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br from-blue-500/15 to-blue-500/5 border border-blue-500/20 flex items-center justify-center">
-                    <i class="fas fa-tags text-blue-500 text-xs"></i>
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-blue-600 shadow-md shadow-blue-500/20 flex items-center justify-center">
+                    <i class="fas fa-tags text-white text-xs"></i>
                 </span>
                 <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-widest text-blue-500 font-bold">Combo</p>
-                    <h2 id="tituloSeleccionCombo" class="text-lg font-bold text-[var(--text-main)] leading-tight">Selecciona los productos</h2>
+                    <p class="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Combo</p>
+                    <h2 id="tituloSeleccionCombo" class="text-lg font-black text-slate-800 leading-tight">Selecciona los productos</h2>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModal('modalSeleccionCombo')" class="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModal('modalSeleccionCombo')" class="flex-shrink-0 w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
-        <p class="text-[12px] text-[var(--text-muted)] mb-3">Marca cuáles productos del ticket quieres que cuenten para este combo. Solo puedes marcar los que ya están agregados.</p>
+        <p class="text-[12px] text-slate-500 mb-3">Marca cuáles productos del ticket quieres que cuenten para este combo. Solo puedes marcar los que ya están agregados.</p>
         <div id="listaSeleccionCombo" class="grid gap-2 max-h-[40vh] sm:max-h-[320px] overflow-y-auto hide-scroll pb-2"></div>
         <div class="mt-5 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="cerrarModal('modalSeleccionCombo')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl border border-[var(--border-color)] text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 transition-all duration-150">Cancelar</button>
-            <button type="button" onclick="confirmarSeleccionCombo()" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 text-white text-xs font-bold active:scale-95 shadow-md transition-all duration-150">Aplicar combo</button>
+            <button type="button" onclick="cerrarModal('modalSeleccionCombo')" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-white border border-slate-200 text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100 active:scale-95 transition-all duration-150">Cancelar</button>
+            <button type="button" onclick="confirmarSeleccionCombo()" class="w-full sm:w-auto min-h-[44px] px-5 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-150">Aplicar combo</button>
         </div>
     </div>
 </div>
@@ -302,8 +302,8 @@
      10. MODAL PROMOCIONES
      ========================================== --}}
 <div id="modalPromociones" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-md max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-3xl bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <!-- Contenido de promociones -->
     </div>
 </div>
@@ -313,41 +313,41 @@
      (Independiente del modalNip de Capitán/Traspaso)
      ========================================== --}}
 <div id="modalNipCancelacion" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500/15 to-red-500/5 border border-red-500/20 flex items-center justify-center">
-                    <i class="fas fa-ban text-red-500 text-xs"></i>
+                <span class="w-8 h-8 rounded-xl bg-rose-500 shadow-md shadow-rose-500/20 flex items-center justify-center">
+                    <i class="fas fa-ban text-white text-xs"></i>
                 </span>
                 <div>
-                    <p class="text-[10px] uppercase tracking-widest text-red-500 font-bold">Autorización</p>
-                    <h2 class="text-base sm:text-lg font-bold text-[var(--text-main)] tracking-tight">NIP para Cancelar</h2>
+                    <p class="text-[9px] uppercase tracking-widest text-rose-500 font-bold">Autorización</p>
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">NIP para Cancelar</h2>
                 </div>
             </div>
-            <button type="button" onclick="cerrarModalCancelacion()" class="text-[var(--text-muted)] hover:text-[var(--text-main)] w-9 h-9 -m-1 rounded-full hover:bg-[var(--hover-bg)] flex items-center justify-center transition-all duration-200"><i class="fas fa-times text-lg"></i></button>
+            <button type="button" onclick="cerrarModalCancelacion()" class="w-9 h-9 -m-1 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times text-lg"></i></button>
         </div>
 
-        <p class="text-[12px] text-[var(--text-muted)] mb-3">Ingresa el NIP del Administrador para autorizar la cancelación de este producto.</p>
+        <p class="text-[12px] text-slate-500 mb-3">Ingresa el NIP del Administrador para autorizar la cancelación de este producto.</p>
 
         <input type="password" id="nipCancelacionInput" data-solo-numeros="true" data-teclado-virtual="true"
                maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)"
-               class="w-full min-h-[64px] rounded-xl border border-[var(--border-color)] bg-[var(--input-bg)] shadow-inner p-4 text-2xl sm:text-xl font-black text-center text-[var(--text-main)] outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 transition-all duration-200 tracking-[0.3em]"
+               class="w-full min-h-[64px] rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-2xl sm:text-xl font-black text-center text-slate-800 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 transition-all duration-200 tracking-[0.3em]"
                placeholder="••••">
 
         {{-- Teclado Numérico (reutiliza escribirNumVirtual/borrarNumVirtual, ya son genéricas por ID) --}}
         <div class="grid grid-cols-3 gap-1.5 mt-4">
             @foreach(['1','2','3','4','5','6','7','8','9'] as $key)
-                <button type="button" onclick="escribirNumVirtual('nipCancelacionInput', '{{ $key }}')" class="min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-red-500/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">{{ $key }}</button>
+                <button type="button" onclick="escribirNumVirtual('nipCancelacionInput', '{{ $key }}')" class="min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-rose-300 hover:bg-rose-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">{{ $key }}</button>
             @endforeach
-            <button type="button" onclick="escribirNumVirtual('nipCancelacionInput', '0')" class="col-span-2 min-h-[44px] rounded-lg bg-[var(--input-bg)] border border-[var(--border-color)] hover:border-red-500/30 hover:bg-[var(--hover-bg)] active:scale-90 text-[var(--text-main)] text-lg font-bold shadow-sm transition-all duration-100">0</button>
-            <button type="button" onclick="borrarNumVirtual('nipCancelacionInput')" class="min-h-[44px] rounded-lg bg-red-500/10 border border-red-500/15 text-red-500 hover:bg-red-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
+            <button type="button" onclick="escribirNumVirtual('nipCancelacionInput', '0')" class="col-span-2 min-h-[44px] rounded-xl bg-white border border-slate-200 hover:border-rose-300 hover:bg-rose-50 active:scale-90 text-slate-800 text-lg font-black shadow-sm transition-all duration-100">0</button>
+            <button type="button" onclick="borrarNumVirtual('nipCancelacionInput')" class="min-h-[44px] rounded-xl bg-rose-50 border border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white active:scale-90 text-sm font-bold transition-all duration-150"><i class="fas fa-backspace"></i></button>
         </div>
 
         <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="cerrarModalCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 text-xs font-bold transition-all duration-150">Cancelar</button>
-            <button type="button" id="btnConfirmarNipCancelacion" onclick="confirmarNipCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white text-xs font-bold active:scale-95 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-150">Autorizar Cancelación</button>
+            <button type="button" onclick="cerrarModalCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 text-xs font-black uppercase tracking-widest transition-all duration-150">Cancelar</button>
+            <button type="button" id="btnConfirmarNipCancelacion" onclick="confirmarNipCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-rose-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-rose-500/20 hover:bg-rose-700 transition-all duration-150">Autorizar Cancelación</button>
         </div>
     </div>
 </div>
@@ -356,22 +356,22 @@
      12. MODAL CONFIRMAR CANCELACIÓN DE PRODUCTO
      ========================================== --}}
 <div id="modalConfirmarCancelacion" class="modal-overlay hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-[var(--bg-panel)] border border-[var(--border-color)] p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl ring-1 ring-black/5">
-        <div class="sm:hidden w-10 h-1.5 rounded-full bg-[var(--border-color)] mx-auto mb-4"></div>
+    <div class="modal-sheet w-full sm:max-w-sm max-h-[92vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-slate-50 border border-slate-200 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mb-4"></div>
 
         <div class="flex flex-col items-center text-center gap-3 mb-2">
-            <span class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/15 to-red-500/5 border border-red-500/20 flex items-center justify-center">
-                <i class="fas fa-triangle-exclamation text-red-500 text-xl"></i>
+            <span class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center">
+                <i class="fas fa-triangle-exclamation text-rose-500 text-xl"></i>
             </span>
             <div>
-                <h2 class="text-base sm:text-lg font-bold text-[var(--text-main)] tracking-tight">¿Cancelar este producto?</h2>
-                <p class="text-[12px] text-[var(--text-muted)] mt-1.5 leading-relaxed">Esta acción no se puede deshacer y ya no se cobrará al cliente.</p>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">¿Cancelar este producto?</h2>
+                <p class="text-[12px] text-slate-500 mt-1.5 leading-relaxed">Esta acción no se puede deshacer y ya no se cobrará al cliente.</p>
             </div>
         </div>
 
         <div class="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
-            <button type="button" onclick="cerrarModalConfirmarCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--hover-bg)] active:scale-95 text-xs font-bold transition-all duration-150">No, mantener</button>
-            <button type="button" onclick="continuarCancelacionConNip()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-gradient-to-b from-red-500 to-red-600 text-white text-xs font-bold active:scale-95 shadow-md shadow-red-500/20 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-150">Sí, cancelar</button>
+            <button type="button" onclick="cerrarModalConfirmarCancelacion()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 text-xs font-black uppercase tracking-widest transition-all duration-150">No, mantener</button>
+            <button type="button" onclick="continuarCancelacionConNip()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-rose-600 text-white text-xs font-black uppercase tracking-widest active:scale-95 shadow-md shadow-rose-500/20 hover:bg-rose-700 transition-all duration-150">Sí, cancelar</button>
         </div>
     </div>
 </div>
@@ -383,16 +383,16 @@
      class="hidden fixed inset-0 z-[99999]"
      onclick="if(event.target===this) cerrarTecladoNota()">
 
-    <div class="absolute bottom-0 inset-x-0 bg-[var(--bg-base)] border-t border-[var(--border-color)] shadow-2xl rounded-t-3xl">
+    <div class="absolute bottom-0 inset-x-0 bg-slate-50 border-t border-slate-200 shadow-2xl rounded-t-3xl">
 
         {{-- Display + cerrar --}}
-        <div class="flex items-start gap-3 px-4 pt-4 pb-3 border-b border-[var(--border-color)]">
-            <div class="flex-1 bg-[var(--bg-panel)] border border-[var(--border-color)] rounded-xl px-3 py-2.5 min-h-[48px] max-h-24 overflow-y-auto">
-                <span id="tn-display" class="text-sm font-medium text-[var(--text-main)] break-words whitespace-pre-wrap"></span><span class="inline-block w-0.5 h-4 bg-blue-500 animate-pulse rounded-full align-middle ml-0.5"></span>
+        <div class="flex items-start gap-3 px-4 pt-4 pb-3 border-b border-slate-200">
+            <div class="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm px-3 py-2.5 min-h-[48px] max-h-24 overflow-y-auto">
+                <span id="tn-display" class="text-sm font-medium text-slate-800 break-words whitespace-pre-wrap"></span><span class="inline-block w-0.5 h-4 bg-blue-500 animate-pulse rounded-full align-middle ml-0.5"></span>
             </div>
             <button type="button" onclick="cerrarTecladoNota()"
-                class="w-10 h-10 rounded-xl bg-[var(--bg-panel)] border border-[var(--border-color)] text-[var(--text-muted)] flex items-center justify-center shrink-0 active:scale-95 mt-0.5">
-                <i class="fas fa-check text-sm text-blue-500"></i>
+                class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-blue-500 flex items-center justify-center shrink-0 active:scale-95 mt-0.5 shadow-sm">
+                <i class="fas fa-check text-sm"></i>
             </button>
         </div>
 
@@ -400,7 +400,7 @@
         <div class="flex gap-2 px-3 pt-2.5 overflow-x-auto hide-scroll pb-1">
             @foreach(['Sin cebolla','Salsa aparte','Bien cocido','Término medio','Para llevar','Sin picante'] as $nota)
                 <button type="button" onclick="tnRapida('{{ $nota }}')"
-                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[11px] font-bold active:scale-90 transition-all">
+                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-bold active:scale-90 transition-all">
                     {{ $nota }}
                 </button>
             @endforeach
@@ -419,7 +419,7 @@
                 <div class="flex justify-center gap-1">
                     @foreach($fila as $letra)
                         <button type="button" onclick="tnEscribir('{{ $letra }}')"
-                            class="flex-1 max-w-[38px] h-10 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 active:bg-blue-100 dark:active:bg-blue-500/20 transition-all duration-75">
+                            class="flex-1 max-w-[38px] h-10 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 active:bg-blue-100 transition-all duration-75">
                             {{ $letra }}
                         </button>
                     @endforeach
@@ -428,15 +428,15 @@
             {{-- Fila inferior --}}
             <div class="flex justify-center gap-1 mt-1">
                 <button type="button" onclick="tnEscribir(' ')"
-                    class="flex-1 h-10 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-500 font-bold text-xs shadow-sm active:scale-95 transition-all duration-75">
+                    class="flex-1 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 font-bold text-xs shadow-sm active:scale-95 transition-all duration-75">
                     ESPACIO
                 </button>
                 <button type="button" onclick="tnEscribir('.')"
-                    class="w-12 h-10 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-white font-black text-sm shadow-sm active:scale-95 transition-all duration-75">
+                    class="w-12 h-10 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-sm shadow-sm active:scale-95 transition-all duration-75">
                     .
                 </button>
                 <button type="button" onclick="tnBorrar()"
-                    class="w-14 h-10 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-500 shadow-sm active:scale-95 flex items-center justify-center transition-all duration-75">
+                    class="w-14 h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-500 shadow-sm active:scale-95 flex items-center justify-center transition-all duration-75">
                     <i class="fas fa-delete-left text-base"></i>
                 </button>
             </div>
@@ -453,42 +453,42 @@
     <div id="modalTipoPedido" class="modal-overlay fixed inset-0 z-[60] hidden flex items-center justify-center" aria-modal="true">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto flex min-h-full items-center justify-center p-4">
-            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-[var(--bg-panel)] text-left shadow-2xl transition-all w-full max-w-md border border-[var(--border-color)]">
-                <div class="px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-panel)] flex justify-between items-center">
-                    <h3 class="text-xl font-black text-[var(--text-main)]">Tipo de Pedido</h3>
-                    <button type="button" onclick="cerrarModal('modalTipoPedido')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
-                        <i class="fas fa-times text-xl"></i>
+            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-slate-50 text-left shadow-2xl transition-all w-full max-w-md border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                    <h3 class="text-xl font-black text-slate-800">Tipo de Pedido</h3>
+                    <button type="button" onclick="cerrarModal('modalTipoPedido')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300">
+                        <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
                 <div class="p-6 space-y-4">
                     <!-- Comedor -->
-                    <button type="button" onclick="seleccionarTipoPedido('comedor')" class="w-full flex items-center p-4 border-2 border-[var(--border-color)] rounded-xl hover:border-blue-500 hover:bg-blue-500/5 transition-all group">
-                        <div class="w-12 h-12 flex items-center justify-center bg-blue-500/10 text-blue-500 rounded-full group-hover:scale-110 transition-transform">
+                    <button type="button" onclick="seleccionarTipoPedido('comedor')" class="w-full flex items-center p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md transition-all group">
+                        <div class="w-12 h-12 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
                             <i class="fas fa-utensils text-xl"></i>
                         </div>
                         <div class="ml-4 text-left">
-                            <p class="font-bold text-[var(--text-main)] text-lg">Comedor / Mesa</p>
-                            <p class="text-sm text-[var(--text-muted)]">El cliente consume en el local.</p>
+                            <p class="font-black text-slate-800 text-lg">Comedor / Mesa</p>
+                            <p class="text-sm text-slate-500">El cliente consume en el local.</p>
                         </div>
                     </button>
                     <!-- Para Llevar -->
-                    <button type="button" onclick="seleccionarTipoPedido('llevar')" class="w-full flex items-center p-4 border-2 border-[var(--border-color)] rounded-xl hover:border-green-500 hover:bg-green-500/5 transition-all group">
-                        <div class="w-12 h-12 flex items-center justify-center bg-green-500/10 text-green-500 rounded-full group-hover:scale-110 transition-transform">
+                    <button type="button" onclick="seleccionarTipoPedido('llevar')" class="w-full flex items-center p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-emerald-300 hover:bg-emerald-50/50 hover:shadow-md transition-all group">
+                        <div class="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-110 transition-transform">
                             <i class="fas fa-shopping-bag text-xl"></i>
                         </div>
                         <div class="ml-4 text-left">
-                            <p class="font-bold text-[var(--text-main)] text-lg">Para Llevar (Pick Up)</p>
-                            <p class="text-sm text-[var(--text-muted)]">El cliente pasa a recoger su pedido.</p>
+                            <p class="font-black text-slate-800 text-lg">Para Llevar (Pick Up)</p>
+                            <p class="text-sm text-slate-500">El cliente pasa a recoger su pedido.</p>
                         </div>
                     </button>
                     <!-- A Domicilio -->
-                    <button type="button" onclick="abrirModalDelivery()" class="w-full flex items-center p-4 border-2 border-[var(--border-color)] rounded-xl hover:border-amber-500 hover:bg-amber-500/5 transition-all group">
-                        <div class="w-12 h-12 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-full group-hover:scale-110 transition-transform">
+                    <button type="button" onclick="abrirModalDelivery()" class="w-full flex items-center p-4 border border-slate-200 rounded-2xl bg-white shadow-sm hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-md transition-all group">
+                        <div class="w-12 h-12 flex items-center justify-center bg-blue-50 text-blue-700 rounded-xl group-hover:scale-110 transition-transform">
                             <i class="fas fa-motorcycle text-xl"></i>
                         </div>
                         <div class="ml-4 text-left">
-                            <p class="font-bold text-[var(--text-main)] text-lg">A Domicilio</p>
-                            <p class="text-sm text-[var(--text-muted)]">Requiere cliente y dirección de entrega.</p>
+                            <p class="font-black text-slate-800 text-lg">A Domicilio</p>
+                            <p class="text-sm text-slate-500">Requiere cliente y dirección de entrega.</p>
                         </div>
                     </button>
                 </div>
@@ -500,14 +500,14 @@
     <div id="modalDireccion" class="modal-overlay fixed inset-0 z-[70] hidden flex items-center justify-center" aria-modal="true">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto flex min-h-full items-center justify-center p-4">
-            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-[var(--bg-panel)] text-left shadow-2xl transition-all w-full max-w-2xl border border-[var(--border-color)]">
-                <div class="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-panel)]">
-                    <div class="flex items-center space-x-3 text-amber-500">
+            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-slate-50 text-left shadow-2xl transition-all w-full max-w-2xl border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <div class="flex items-center space-x-3 text-blue-600">
                         <i class="fas fa-box text-2xl"></i>
-                        <h3 class="text-xl font-black text-[var(--text-main)]">Dirección de Entrega</h3>
+                        <h3 class="text-xl font-black text-slate-800">Dirección de Entrega</h3>
                     </div>
-                    <button type="button" onclick="cerrarModal('modalDireccion')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors">
-                        <i class="fas fa-times text-xl"></i>
+                    <button type="button" onclick="cerrarModal('modalDireccion')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300">
+                        <i class="fas fa-times text-lg"></i>
                     </button>
                 </div>
                 
@@ -515,8 +515,8 @@
                     <!-- VISTA A: BUSCADOR -->
                     <div id="vista-buscador-clientes">
                         <div class="flex justify-between items-end mb-4">
-                            <label class="block text-sm font-bold text-[var(--text-main)]">Seleccionar Cliente *</label>
-                            <button type="button" onclick="abrirModalNuevoCliente()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-lg shadow text-sm transition-colors">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">Seleccionar Cliente *</label>
+                            <button type="button" onclick="abrirModalNuevoCliente()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-2 px-4 rounded-xl shadow-md shadow-blue-600/20 text-xs uppercase tracking-widest transition-colors">
                                 <i class="fas fa-user-plus mr-2"></i> Nuevo Cliente
                             </button>
                         </div>
@@ -524,41 +524,41 @@
                 <!-- Opción de Domicilio Express / Temporal -->
 @if(request('tipo_pedido') === 'domicilio')
     <!-- Opción de Domicilio Express / Temporal -->
-    <div class="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-        <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mb-2"><i class="fas fa-bolt mr-1"></i> ¿Pedido exprés sin registrar?</p>
+    <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+        <p class="text-xs font-black text-blue-700 mb-2"><i class="fas fa-bolt mr-1"></i> ¿Pedido exprés sin registrar?</p>
         <div class="flex gap-2">
-            <input type="text" id="inputDomicilioExpressNombre" placeholder="Nombre del cliente..." class="flex-1 px-3 py-2 text-xs border border-[var(--border-color)] rounded-lg bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-1 focus:ring-amber-500">
-            <input type="text" id="inputDomicilioExpressDireccion" placeholder="Dirección corta / Referencia..." class="flex-1 px-3 py-2 text-xs border border-[var(--border-color)] rounded-lg bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-1 focus:ring-amber-500">
-            <button type="button" onclick="confirmarDomicilioExpress()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-2 rounded-lg text-xs transition-colors shrink-0">Usar</button>
+            <input type="text" id="inputDomicilioExpressNombre" placeholder="Nombre del cliente..." class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white shadow-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+            <input type="text" id="inputDomicilioExpressDireccion" placeholder="Dirección corta / Referencia..." class="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white shadow-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+            <button type="button" onclick="confirmarDomicilioExpress()" class="bg-blue-600 hover:bg-blue-700 text-white font-black px-3 py-2 rounded-xl text-xs uppercase tracking-widest transition-colors shrink-0">Usar</button>
         </div>
     </div>
 @endif
                         <div class="relative mb-4">
-                            <i class="fas fa-search absolute left-3 top-3.5 text-[var(--text-muted)]"></i>
-                            <input type="text" id="inputBuscarCliente" placeholder="Escribe el nombre o teléfono del cliente..." class="w-full pl-10 pr-3 py-3 border border-[var(--border-color)] rounded-xl bg-[var(--input-bg)] text-[var(--text-main)] focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all outline-none">
+                            <i class="fas fa-search absolute left-3 top-3.5 text-slate-400"></i>
+                            <input type="text" id="inputBuscarCliente" placeholder="Escribe el nombre o teléfono del cliente..." class="w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-white shadow-sm text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none">
                         </div>
-                        <div id="resultadosClientes" class="border border-[var(--border-color)] rounded-xl max-h-48 overflow-y-auto bg-[var(--bg-base)]">
+                        <div id="resultadosClientes" class="border border-slate-200 rounded-xl max-h-48 overflow-y-auto bg-white shadow-sm">
                             <!-- Aquí se inyectarán los resultados con JS -->
-                            <div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">Empieza a escribir para buscar...</div>
+                            <div class="p-4 text-center text-slate-500 text-sm font-medium">Empieza a escribir para buscar...</div>
                         </div>
                     </div>
 
                     <!-- VISTA B: CLIENTE SELECCIONADO Y DIRECCIONES -->
                     <div id="vista-direcciones-cliente" class="hidden">
-                        <div class="bg-green-500/10 p-4 rounded-xl flex justify-between items-center mb-6 border border-green-500/20">
+                        <div class="bg-emerald-50 p-4 rounded-xl flex justify-between items-center mb-6 border border-emerald-200">
                             <div>
-                                <p class="text-[10px] font-black text-green-500 uppercase tracking-wider mb-1">Cliente Seleccionado</p>
-                                <h4 id="lbl-nombre-cliente" class="text-lg font-bold text-[var(--text-main)]">Nombre Cliente</h4>
-                                <p id="lbl-tel-cliente" class="text-sm text-[var(--text-muted)] font-medium">Tel: 00000000</p>
+                                <p class="text-[10px] font-black text-emerald-600 uppercase tracking-wider mb-1">Cliente Seleccionado</p>
+                                <h4 id="lbl-nombre-cliente" class="text-lg font-black text-slate-800">Nombre Cliente</h4>
+                                <p id="lbl-tel-cliente" class="text-sm text-slate-500 font-medium">Tel: 00000000</p>
                             </div>
-                            <button type="button" onclick="cambiarCliente()" class="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white font-bold py-1.5 px-3 rounded-lg text-sm transition-colors">
+                            <button type="button" onclick="cambiarCliente()" class="bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white font-black py-1.5 px-3 rounded-xl text-sm transition-colors">
                                 Cambiar Cliente
                             </button>
                         </div>
 
                         <div class="flex justify-between items-center mb-3">
-                            <label class="block text-sm font-bold text-[var(--text-main)]">Dirección de Entrega *</label>
-                            <button type="button" onclick="abrirModalNuevaDireccion()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 px-3 rounded-lg text-sm transition-colors">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">Dirección de Entrega *</label>
+                            <button type="button" onclick="abrirModalNuevaDireccion()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-1.5 px-3 rounded-xl text-sm transition-colors">
                                 + Nueva Dirección
                             </button>
                         </div>
@@ -570,9 +570,9 @@
                     </div>
                 </div>
 
-                <div class="bg-[var(--bg-panel)] px-6 py-4 flex space-x-3 border-t border-[var(--border-color)]">
-                    <button type="button" onclick="cerrarModal('modalDireccion')" class="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-main)] font-bold py-3 px-4 rounded-xl hover:bg-[var(--hover-bg)] transition-colors">Cancelar / Volver</button>
-                    <button type="button" id="btnConfirmarDelivery" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl transition-all shadow opacity-50 cursor-not-allowed" disabled>Confirmar Dirección</button>
+                <div class="bg-slate-100/50 border-t border-slate-200/60 px-6 py-4 flex space-x-3" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+                    <button type="button" onclick="cerrarModal('modalDireccion')" class="flex-1 bg-white border border-slate-200 text-slate-500 font-black py-3 px-4 rounded-xl hover:bg-slate-100 text-xs uppercase tracking-widest transition-colors">Cancelar / Volver</button>
+                    <button type="button" id="btnConfirmarDelivery" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md shadow-blue-600/20 opacity-50 cursor-not-allowed" disabled>Confirmar Dirección</button>
                 </div>
             </div>
         </div>
@@ -582,29 +582,29 @@
     <div id="modalNuevoCliente" class="modal-overlay fixed inset-0 z-[80] hidden flex items-center justify-center" aria-modal="true">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto flex min-h-full items-center justify-center p-4">
-            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-[var(--bg-panel)] text-left shadow-2xl w-full max-w-lg border border-[var(--border-color)]">
-                <div class="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-[var(--text-main)]">Registrar Nuevo Cliente</h3>
-                    <button type="button" onclick="cerrarModal('modalNuevoCliente')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><i class="fas fa-times"></i></button>
+            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-slate-50 text-left shadow-2xl w-full max-w-lg border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="text-lg font-black text-slate-800">Registrar Nuevo Cliente</h3>
+                    <button type="button" onclick="cerrarModal('modalNuevoCliente')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times"></i></button>
                 </div>
                 <form id="formNuevoCliente" onsubmit="guardarNuevoClienteAjax(event)" class="p-6 space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Nombre *</label>
-                            <input type="text" id="nc_nombre" required class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Nombre *</label>
+                            <input type="text" id="nc_nombre" required class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Apellidos *</label>
-                            <input type="text" id="nc_apellido" class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Apellidos *</label>
+                            <input type="text" id="nc_apellido" class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Teléfono *</label>
-                        <input type="text" id="nc_telefono" required class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Teléfono *</label>
+                        <input type="text" id="nc_telefono" required class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                     </div>
                     <div class="pt-4 flex space-x-3">
-                        <button type="button" onclick="cerrarModal('modalNuevoCliente')" class="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-main)] font-bold py-2 rounded-xl hover:bg-[var(--hover-bg)] transition-colors">Cancelar</button>
-                        <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition-colors">Guardar Cliente</button>
+                        <button type="button" onclick="cerrarModal('modalNuevoCliente')" class="flex-1 bg-white border border-slate-200 text-slate-500 font-black py-2 rounded-xl hover:bg-slate-100 text-xs uppercase tracking-widest transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-2 rounded-xl text-xs uppercase tracking-widest transition-colors">Guardar Cliente</button>
                     </div>
                 </form>
             </div>
@@ -615,61 +615,61 @@
     <div id="modalNuevaDireccion" class="modal-overlay fixed inset-0 z-[90] hidden flex items-center justify-center" aria-modal="true">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto flex min-h-full items-center justify-center p-4">
-            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-[var(--bg-panel)] text-left shadow-2xl w-full max-w-lg border border-[var(--border-color)]">
-                <div class="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-[var(--text-main)]">Registrar Nueva Dirección</h3>
-                    <button type="button" onclick="cerrarModal('modalNuevaDireccion')" class="text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"><i class="fas fa-times"></i></button>
+            <div class="modal-sheet relative transform overflow-hidden rounded-[24px] bg-slate-50 text-left shadow-2xl w-full max-w-lg border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="text-lg font-black text-slate-800">Registrar Nueva Dirección</h3>
+                    <button type="button" onclick="cerrarModal('modalNuevaDireccion')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300"><i class="fas fa-times"></i></button>
                 </div>
                 <form id="formNuevaDireccion" onsubmit="guardarNuevaDireccionAjax(event)" class="p-6 space-y-4">
                     <input type="hidden" id="nd_cliente_id"> 
                     <div>
-                        <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Calle *</label>
-                        <input type="text" id="nd_calle" required class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Calle *</label>
+                        <input type="text" id="nd_calle" required class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Manzana</label>
-                            <input type="text" id="nd_manzana" class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Manzana</label>
+                            <input type="text" id="nd_manzana" class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Lote</label>
-                            <input type="text" id="nd_lote" class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Lote</label>
+                            <input type="text" id="nd_lote" class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Colonia</label>
-                        <input type="text" id="nd_colonia" class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500">
+                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Colonia</label>
+                        <input type="text" id="nd_colonia" class="w-full h-12 rounded-xl border border-slate-200 bg-white shadow-sm px-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-[var(--text-muted)] mb-1">Referencia</label>
-                        <textarea id="nd_referencia" rows="2" class="w-full rounded-lg border-[var(--border-color)] bg-[var(--input-bg)] text-[var(--text-main)] outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                        <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Referencia</label>
+                        <textarea id="nd_referencia" rows="2" class="w-full rounded-xl border border-slate-200 bg-white shadow-sm p-3 text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
                     </div>
                     <div class="pt-4 flex space-x-3">
-                        <button type="button" onclick="cerrarModal('modalNuevaDireccion')" class="flex-1 bg-[var(--input-bg)] border border-[var(--border-color)] text-[var(--text-main)] font-bold py-2 rounded-xl hover:bg-[var(--hover-bg)] transition-colors">Cancelar</button>
-                        <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 rounded-xl transition-colors">Guardar Dirección</button>
+                        <button type="button" onclick="cerrarModal('modalNuevaDireccion')" class="flex-1 bg-white border border-slate-200 text-slate-500 font-black py-2 rounded-xl hover:bg-slate-100 text-xs uppercase tracking-widest transition-colors">Cancelar</button>
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-2 rounded-xl text-xs uppercase tracking-widest transition-colors">Guardar Dirección</button>
                     </div>
                 </form>
 
 
           <!-- Modal Cliente Para Llevar -->
 <div id="modalParaLlevar" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[60] p-4 backdrop-blur-sm transition-all duration-300">
-    <div class="bg-[var(--card-color)] rounded-xl shadow-2xl max-w-md w-full border border-[var(--border-color)] overflow-hidden flex flex-col">
-        <div class="px-6 py-4 border-b border-[var(--border-color)] flex justify-between items-center bg-[var(--bg-color)]/50">
-            <h2 class="text-xl font-bold text-[var(--text-color)]"><i class="fas fa-shopping-bag mr-2"></i>Cliente Para Llevar</h2>
-            <button type="button" onclick="cerrarModal('modalParaLlevar')" class="text-[var(--text-muted)] hover:text-red-500 transition-colors">
+    <div class="bg-slate-50 rounded-[24px] shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden flex flex-col">
+        <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <h2 class="text-xl font-black text-slate-800"><i class="fas fa-shopping-bag mr-2"></i>Cliente Para Llevar</h2>
+            <button type="button" onclick="cerrarModal('modalParaLlevar')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center hover:rotate-90 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500 transition-all duration-300">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
         <div class="p-6">
-            <label class="block text-sm font-semibold text-[var(--text-color)] mb-2">Nombre del cliente (Temporal o Buscar)</label>
-            <input type="text" id="inputClienteLlevar" autocomplete="off" class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-lg focus:ring-2 focus:ring-blue-500 text-[var(--text-color)] shadow-inner transition-colors" placeholder="Ej. Juan Pérez">
+            <label class="block text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1">Nombre del cliente (Temporal o Buscar)</label>
+            <input type="text" id="inputClienteLlevar" autocomplete="off" class="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 transition-colors" placeholder="Ej. Juan Pérez">
             
             <!-- Contenedor opcional si decides reutilizar la búsqueda aquí -->
             <div id="resultadosLlevar" class="mt-2 max-h-40 overflow-y-auto"></div>
         </div>
-        <div class="px-6 py-4 bg-[var(--bg-color)]/50 border-t border-[var(--border-color)] flex justify-end gap-3">
-            <button type="button" onclick="cerrarModal('modalParaLlevar')" class="px-4 py-2 rounded-lg font-semibold border border-[var(--border-color)] text-[var(--text-color)] hover:opacity-80 transition">Cancelar</button>
-            <button type="button" onclick="confirmarClienteLlevar()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow-sm transition">Confirmar Nombre</button>
+        <div class="px-6 py-4 bg-slate-100/50 border-t border-slate-200/60 flex justify-end gap-3" style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));">
+            <button type="button" onclick="cerrarModal('modalParaLlevar')" class="px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 transition">Cancelar</button>
+            <button type="button" onclick="confirmarClienteLlevar()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-md shadow-blue-500/20 transition">Confirmar Nombre</button>
         </div>
     </div>
 </div>
@@ -690,7 +690,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (lblTitulo) lblTitulo.textContent = 'A Domicilio';
         if (lblBoton) {
             lblBoton.textContent = 'Seleccionar Cliente';
-            lblBoton.className = 'text-[11px] font-black text-amber-500 mt-1 truncate max-w-full px-1';
+            lblBoton.className = 'text-[11px] font-black text-blue-600 mt-1 truncate max-w-full px-1';
         }
     }
 });
@@ -705,12 +705,12 @@ document.addEventListener('input', function(e) {
         if (!contenedor) return;
 
         if (query.length < 2) {
-            contenedor.innerHTML = '<div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">Empieza a escribir para buscar...</div>';
+            contenedor.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">Empieza a escribir para buscar...</div>';
             return;
         }
 
         timeoutBuscador = setTimeout(() => {
-            contenedor.innerHTML = '<div class="p-4 text-center text-amber-500 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando cliente...</div>';
+            contenedor.innerHTML = '<div class="p-4 text-center text-blue-600 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando cliente...</div>';
             
             fetch(`/pos/clientes/buscar?q=${encodeURIComponent(query)}`, {
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
@@ -718,7 +718,7 @@ document.addEventListener('input', function(e) {
             .then(res => res.json())
             .then(clientes => {
                 if (!clientes || clientes.length === 0) {
-                    contenedor.innerHTML = '<div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">No se encontraron clientes con esos datos.</div>';
+                    contenedor.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">No se encontraron clientes con esos datos.</div>';
                     return;
                 }
 
@@ -728,13 +728,13 @@ document.addEventListener('input', function(e) {
                     const nombreCompleto = `${c.nombre} ${c.apellido || ''}`.trim();
                     
                     html += `
-                    <div class="flex justify-between items-center p-3 border-b border-[var(--border-color)] hover:bg-[var(--hover-bg)] cursor-pointer transition-colors" 
+                    <div class="flex justify-between items-center p-3 border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors" 
                          onclick="window.seleccionarClienteDelivery(${c.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '${c.telefono}', '${jsonDirecciones}')">
                         <div>
-                            <p class="font-bold text-[var(--text-main)] text-sm">${nombreCompleto}</p>
-                            <p class="text-xs text-[var(--text-muted)]"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
+                            <p class="font-bold text-slate-800 text-sm">${nombreCompleto}</p>
+                            <p class="text-xs text-slate-500"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
                         </div>
-                        <button type="button" class="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm"><i class="fas fa-check text-blue-500"></i></button>
+                        <button type="button" class="bg-white border border-slate-200 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm"><i class="fas fa-check text-blue-500"></i></button>
                     </div>`;
                 });
                 contenedor.innerHTML = html;
@@ -787,7 +787,7 @@ function renderDireccionesRadios(direcciones) {
     if (!contenedor) return;
     
     if (!direcciones || direcciones.length === 0) {
-        contenedor.innerHTML = `<div class="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl text-orange-500 text-sm font-medium text-center">
+        contenedor.innerHTML = `<div class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm font-medium text-center">
             Este cliente no tiene direcciones registradas. Haz clic en "+ Nueva Dirección".
         </div>`;
         return;
@@ -800,14 +800,14 @@ function renderDireccionesRadios(direcciones) {
         if(d.lote) detalle += ` Lt: ${d.lote}`;
         
         html += `
-        <label class="flex items-start p-3 border border-[var(--border-color)] rounded-xl cursor-pointer hover:bg-[var(--hover-bg)] transition-colors">
+        <label class="flex items-start p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
             <div class="flex items-center h-5 mt-1">
-                <input type="radio" name="radio_direccion" value="${d.id}" onchange="window.activarBotonConfirmar()" class="w-4 h-4 text-amber-500 bg-[var(--input-bg)] border-[var(--border-color)] focus:ring-amber-500 focus:ring-2 cursor-pointer">
+                <input type="radio" name="radio_direccion" value="${d.id}" onchange="window.activarBotonConfirmar()" class="w-4 h-4 text-blue-600 bg-white border-slate-300 focus:ring-blue-600 focus:ring-2 cursor-pointer">
             </div>
             <div class="ml-3 text-sm flex-1">
-                <p class="font-bold text-[var(--text-main)]">${detalle}</p>
-                <p class="text-xs text-[var(--text-muted)]">${d.colonia || ''}</p>
-                ${d.referencia ? `<p class="text-xs text-[var(--text-muted)] mt-1 italic border-l-2 border-amber-500 pl-2">Ref: ${d.referencia}</p>` : ''}
+                <p class="font-bold text-slate-800">${detalle}</p>
+                <p class="text-xs text-slate-500">${d.colonia || ''}</p>
+                ${d.referencia ? `<p class="text-xs text-slate-500 mt-1 italic border-l-2 border-blue-600 pl-2">Ref: ${d.referencia}</p>` : ''}
             </div>
         </label>`;
     });
@@ -925,7 +925,7 @@ window.cambiarCliente = function() {
     // Vaciamos los resultados anteriores del buscador
     const resultados = document.getElementById('resultadosClientes');
     if (resultados) {
-        resultados.innerHTML = '<div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">Empieza a escribir para buscar...</div>';
+        resultados.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">Empieza a escribir para buscar...</div>';
     }
 
     // Ocultamos la vista del cliente seleccionado y mostramos de nuevo el buscador
@@ -1014,12 +1014,12 @@ document.addEventListener('input', function(e) {
         const esLlevar = (window.tipoPedidoActual === 'llevar') || (new URLSearchParams(window.location.search).get('tipo_pedido') === 'llevar');
 
         if (query.length < 2) {
-            contenedor.innerHTML = `<div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">Empieza a escribir para buscar ${esLlevar ? 'o usar un nombre temporal' : ''}...</div>`;
+            contenedor.innerHTML = `<div class="p-4 text-center text-slate-500 text-sm font-medium">Empieza a escribir para buscar ${esLlevar ? 'o usar un nombre temporal' : ''}...</div>`;
             return;
         }
 
         timeoutBuscador = setTimeout(() => {
-            contenedor.innerHTML = '<div class="p-4 text-center text-amber-500 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando...</div>';
+            contenedor.innerHTML = '<div class="p-4 text-center text-blue-600 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando...</div>';
             
             fetch(`/pos/clientes/buscar?q=${encodeURIComponent(query)}`, {
                 headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') }
@@ -1037,13 +1037,13 @@ document.addEventListener('input', function(e) {
                             <p class="font-bold text-blue-700 text-sm"><i class="fas fa-walking mr-1"></i> Usar nombre sin registrar</p>
                             <p class="text-xs text-blue-600 font-medium">Nombre: ${query}</p>
                         </div>
-                        <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors">Seleccionar</button>
+                        <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm transition-colors">Seleccionar</button>
                     </div>`;
                 }
 
                 if (!clientes || clientes.length === 0) {
                     if (!esLlevar) {
-                        contenedor.innerHTML = '<div class="p-4 text-center text-[var(--text-muted)] text-sm font-medium">No se encontraron clientes. Haz clic en "Nuevo Cliente".</div>';
+                        contenedor.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">No se encontraron clientes. Haz clic en "Nuevo Cliente".</div>';
                     } else {
                         contenedor.innerHTML = html; // Si es llevar, muestra solo el botón temporal
                     }
@@ -1056,13 +1056,13 @@ document.addEventListener('input', function(e) {
                     const nombreCompleto = `${c.nombre} ${c.apellido || ''}`.trim();
                     
                     html += `
-                    <div class="flex justify-between items-center p-3 border-b border-[var(--border-color)] hover:bg-[var(--hover-bg)] cursor-pointer transition-colors" 
+                    <div class="flex justify-between items-center p-3 border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors" 
                          onclick="window.seleccionarClienteDelivery(${c.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '${c.telefono}', '${jsonDirecciones}')">
                         <div>
-                            <p class="font-bold text-[var(--text-main)] text-sm">${nombreCompleto}</p>
-                            <p class="text-xs text-[var(--text-muted)]"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
+                            <p class="font-bold text-slate-800 text-sm">${nombreCompleto}</p>
+                            <p class="text-xs text-slate-500"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
                         </div>
-                        <button type="button" class="bg-[var(--bg-base)] border border-[var(--border-color)] text-[var(--text-main)] px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm"><i class="fas fa-check text-amber-500"></i></button>
+                        <button type="button" class="bg-white border border-slate-200 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm"><i class="fas fa-check text-blue-600"></i></button>
                     </div>`;
                 });
                 contenedor.innerHTML = html;
@@ -1283,7 +1283,7 @@ window.confirmarDomicilioExpress = function() {
     if (lblTitulo) lblTitulo.textContent = 'A Domicilio (Exprés)';
     if (lblBoton) {
         lblBoton.textContent = window.nombreClienteTemporal;
-        lblBoton.className = 'text-[11px] font-black text-amber-500 mt-1 truncate max-w-full px-1';
+        lblBoton.className = 'text-[11px] font-black text-blue-600 mt-1 truncate max-w-full px-1';
     }
 
     // Limpiamos los inputs
