@@ -13,48 +13,50 @@
 <div id="toastContainer" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:bottom-8 z-[9999] flex flex-col gap-3 items-center sm:items-end" aria-live="polite" aria-atomic="true"></div>
 
 {{-- Contenedor principal --}}
-<div class="px-3 py-4 sm:px-4 sm:py-6 lg:p-8 w-full max-w-[1600px] mx-auto space-y-5 sm:space-y-8 relative z-10 font-sans overflow-x-hidden min-h-screen bg-white dark:bg-[#15171c] transition-colors duration-300">
-    
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-slate-50 font-sans transition-colors duration-300">
+
     {{-- ALERTAS DE SESIÓN --}}
     @if(session('error'))
-        <div class="p-3 sm:p-4 mb-4 text-xs sm:text-sm text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-2xl">
+        <div class="px-5 py-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl shadow-sm text-xs font-bold flex items-center gap-3 animate-fade-in-up">
+            <i class="fas fa-exclamation-circle text-rose-500 text-base"></i>
             {{ session('error') }}
         </div>
     @endif
 
     @if(session('success'))
-        <div class="p-3 sm:p-4 mb-4 text-xs sm:text-sm text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800 rounded-2xl">
+        <div class="px-5 py-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl shadow-sm text-xs font-bold flex items-center gap-3 animate-fade-in-up">
+            <i class="fas fa-check-circle text-emerald-500 text-base"></i>
             {{ session('success') }}
         </div>
     @endif
-    
-    {{-- HEADER Y PANEL FINANCIERO --}}
-    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 sm:gap-6 w-full">
-        <div class="space-y-2.5 sm:space-y-3 w-full xl:w-auto flex flex-col sm:flex-row sm:items-center sm:justify-between xl:flex-col xl:items-start">
-            <div class="w-full">
-                <div class="inline-flex items-center gap-2 rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-sm transition-colors bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 max-w-full flex-wrap">
-                    <span class="h-2 w-2 rounded-full bg-blue-600 animate-pulse shrink-0"></span>
-                    <span class="truncate">Panel Financiero [Turno: {{ $cajaActiva->turno ?? 'N/A' }}]</span>
-                </div>
-                <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tighter break-words text-gray-900 dark:text-slate-100 mt-1">Panel de Caja</h1>
+
+    {{-- ENCABEZADO PREMIUM --}}
+    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6 animate-fade-in-up" style="animation-delay: 0ms;">
+        <div class="space-y-2 sm:space-y-3 max-w-2xl w-full">
+            <div class="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-100 px-3 sm:px-4 py-1.5 sm:py-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.35em] text-blue-600 shadow-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse shrink-0"></span>
+                Panel Financiero · Turno {{ $cajaActiva->turno ?? 'N/A' }}
             </div>
+            <h1 class="text-xl sm:text-3xl md:text-4xl font-black text-slate-800 tracking-tight drop-shadow-sm">Panel de Caja</h1>
+            <p class="text-xs sm:text-sm font-medium text-slate-500 tracking-wide">Consulta el estado de las mesas y el corte de tu turno en tiempo real.</p>
         </div>
-        
-        {{-- TARJETAS ESTADÍSTICAS --}}
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 w-full xl:w-auto">
-            <div class="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-slate-700/50 bg-gray-50/50 dark:bg-[#1e2026]/40 shadow-sm flex flex-col justify-center w-full transition-colors duration-300">
-                <p class="text-gray-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Mesas activas</p>
-                <p class="mt-1 sm:mt-2 text-xl sm:text-4xl font-black tracking-tighter text-gray-900 dark:text-slate-100" id="mesas-activas-display">{{ $mesasActivas ?? 0 }}</p>
+
+        {{-- BARRA DE ESTADÍSTICAS --}}
+        <div class="bg-white rounded-[2rem] p-5 sm:p-6 border border-slate-200 shadow-sm w-full xl:w-auto flex items-center justify-between sm:justify-end gap-4 sm:gap-8 sm:px-8">
+            <div class="text-center sm:text-right flex-1 sm:flex-none">
+                <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400">Mesas Activas</p>
+                <p class="text-2xl sm:text-3xl font-black text-slate-800 leading-none mt-1" id="mesas-activas-display">{{ $mesasActivas ?? 0 }}</p>
             </div>
-            <div class="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-slate-700/50 bg-gray-50/50 dark:bg-[#1e2026]/40 shadow-sm flex flex-col justify-center w-full transition-colors duration-300">
-                <p class="text-gray-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Mesas libres</p>
-                <p class="mt-1 sm:mt-2 text-xl sm:text-4xl font-black tracking-tighter text-gray-500 dark:text-slate-400" id="mesas-libres-display">{{ $mesasLibres }}</p>
+            <div class="w-px h-8 sm:h-12 bg-slate-200"></div>
+            <div class="text-center sm:text-left flex-1 sm:flex-none">
+                <p class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400">Mesas Libres</p>
+                <p class="text-2xl sm:text-3xl font-black text-emerald-500 leading-none mt-1" id="mesas-libres-display">{{ $mesasLibres }}</p>
             </div>
         </div>
     </div>
 
     {{-- GRID DE MESAS --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6 pt-1 sm:pt-4 w-full" id="mesas-container">
+    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 animate-fade-in-up" style="animation-delay: 150ms;" id="mesas-container">
         @include('admin.caja.partials.mesas')
     </div>
 </div>
@@ -63,15 +65,15 @@
     window.mostrarToast = function(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         if (!container) return;
-        
-        const toast = document.createElement('div');
-        const typeClasses = type === 'success' ? 'border-l-4 border-emerald-500' : 'border-l-4 border-red-500';
 
-        toast.className = `w-full sm:min-w-[300px] sm:w-auto p-4 rounded-2xl bg-white dark:bg-[#1e2026] border border-gray-200 dark:border-slate-700 shadow-xl flex items-center gap-3 opacity-0 translate-y-3 sm:translate-y-0 sm:translate-x-5 transition-all duration-300 ${typeClasses}`;
-        toast.innerHTML = `<div><strong class="block text-sm font-bold text-gray-900 dark:text-white">${type === 'success' ? 'Éxito' : 'Error'}</strong><span class="text-xs text-gray-500 dark:text-slate-400">${message}</span></div>`;
-        
+        const toast = document.createElement('div');
+        const typeClasses = type === 'success' ? 'border-l-4 border-emerald-500' : 'border-l-4 border-rose-500';
+
+        toast.className = `w-full sm:min-w-[300px] sm:w-auto p-4 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center gap-3 opacity-0 translate-y-3 sm:translate-y-0 sm:translate-x-5 transition-all duration-300 ${typeClasses}`;
+        toast.innerHTML = `<div><strong class="block text-sm font-black text-slate-800">${type === 'success' ? 'Éxito' : 'Error'}</strong><span class="text-xs font-medium text-slate-500">${message}</span></div>`;
+
         container.appendChild(toast);
-        
+
         setTimeout(() => { toast.classList.remove('opacity-0', 'translate-y-3', 'sm:translate-x-5'); }, 50);
         setTimeout(() => {
             toast.classList.add('opacity-0', 'translate-y-3', 'sm:translate-x-5');

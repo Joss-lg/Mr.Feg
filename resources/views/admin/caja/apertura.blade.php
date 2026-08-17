@@ -1,4 +1,4 @@
-@extends('layouts.admin') {{-- Reemplaza con tu layout base si es necesario --}}
+@extends('layouts.admin')
 
 @section('content')
 <style>
@@ -18,70 +18,87 @@
     }
 </style>
 
-<div id="aperturaCajaWrapper" class="flex items-center justify-center min-h-[80vh] bg-gray-100 dark:bg-gray-900 px-4 py-8">
-    <div id="aperturaCajaCard" class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-200 dark:border-gray-700 transition-all duration-300">
-        
-        <div class="text-center mb-6">
-            <div class="inline-flex p-3 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 rounded-full mb-3">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<div id="aperturaCajaWrapper" class="flex items-center justify-center min-h-[80vh] bg-slate-50 px-4 py-8">
+    <div id="aperturaCajaCard" class="max-w-md w-full bg-white rounded-[2rem] shadow-sm p-6 sm:p-10 border border-slate-200 transition-all duration-300">
+
+        <div class="text-center mb-6 sm:mb-8">
+            <div class="inline-flex w-14 h-14 sm:w-16 sm:h-16 items-center justify-center bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl mb-4 shadow-sm">
+                <svg class="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                 </svg>
             </div>
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Apertura de Caja</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <h2 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Apertura de Caja</h2>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium mt-2 leading-relaxed">
                 Para comenzar a gestionar mesas y registrar cobros, es necesario iniciar un turno operativo.
             </p>
         </div>
 
         @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm dark:bg-red-900 dark:text-red-200 dark:border-red-800">
+            <div class="px-4 py-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl mb-4 text-xs font-bold flex items-center gap-2.5">
+                <i class="fas fa-exclamation-circle text-rose-500"></i>
                 {{ session('error') }}
             </div>
         @endif
 
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm dark:bg-green-900 dark:text-green-200 dark:border-green-800">
+            <div class="px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl mb-4 text-xs font-bold flex items-center gap-2.5">
+                <i class="fas fa-check-circle text-emerald-500"></i>
                 {{ session('success') }}
             </div>
         @endif
 
-        <form action="{{ route('admin.caja.abrir') }}" method="POST" class="space-y-5">
+        <form id="formAperturaCaja" action="{{ route('admin.caja.abrir') }}" method="POST" class="space-y-5">
             @csrf
 
-            <div>
-                <label for="turno" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seleccionar Turno</label>
-                <select name="turno" id="turno" required 
-                    class="w-full h-12 text-base rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('turno') border-red-500 @enderror">
-                    <option value="" disabled selected>-- Elige el turno actual --</option>
-                    <option value="Matutino" {{ old('turno') == 'Matutino' ? 'selected' : '' }}>☀️ Matutino</option>
-                    <option value="Vespertino" {{ old('turno') == 'Vespertino' ? 'selected' : '' }}>🌙 Vespertino</option>
-                </select>
+            {{-- Dropdown Personalizado: Turno --}}
+            <div class="space-y-2 relative" id="cajaTurno" data-required-dropdown>
+                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Seleccionar Turno</label>
+
+                <input type="hidden" name="turno" id="val_Turno" value="{{ old('turno') }}">
+
+                <button type="button" onclick="window.toggleCustomMenu('menu_Turno')" id="btn_Turno"
+                    class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-sm font-semibold text-slate-800 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 shadow-sm transition-all @error('turno') border-rose-400 @enderror">
+                    <span id="text_Turno" class="truncate {{ old('turno') ? 'text-slate-800 font-bold' : 'text-slate-400' }}">
+                        {{ old('turno') ?? 'Elige el turno actual' }}
+                    </span>
+                    <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
+                </button>
+
+                <div id="menu_Turno" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-1">
+                    <button type="button" onclick="window.selectCustomOption('val_Turno', 'text_Turno', 'menu_Turno', 'Matutino', 'Matutino')" class="w-full px-5 py-3 flex items-center gap-2.5 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
+                        <i class="fas fa-sun text-amber-500 w-4"></i> Matutino
+                    </button>
+                    <button type="button" onclick="window.selectCustomOption('val_Turno', 'text_Turno', 'menu_Turno', 'Vespertino', 'Vespertino')" class="w-full px-5 py-3 flex items-center gap-2.5 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
+                        <i class="fas fa-moon text-indigo-500 w-4"></i> Vespertino
+                    </button>
+                </div>
+
                 @error('turno')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-rose-500 text-xs font-semibold mt-1 ml-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label for="monto_inicial" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Monto Inicial (Fondo de Caja)</label>
-                <div class="relative rounded-lg shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                <label for="monto_inicial" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Monto Inicial (Fondo de Caja)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <span class="text-slate-400 text-sm font-bold">$</span>
                     </div>
                     {{-- TECLADO VIRTUAL NUMÉRICO: type=text (no number) para que el teclado personalizado pueda escribir el valor --}}
                     <input type="text" name="monto_inicial" id="monto_inicial" pattern="[0-9]*\.?[0-9]*" required data-teclado="numerico" data-teclado-titulo="Monto Inicial" inputmode="none"
                         value="{{ old('monto_inicial', '0.00') }}"
-                        class="w-full h-12 pl-7 text-base rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 @error('monto_inicial') border-red-500 @enderror"
+                        class="w-full h-12 pl-8 pr-4 rounded-xl border border-slate-200 bg-white text-slate-800 font-semibold focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all shadow-sm @error('monto_inicial') border-rose-400 @enderror"
                         placeholder="0.00"
                         onfocus="this.select()">
                 </div>
                 @error('monto_inicial')
-                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    <p class="text-rose-500 text-xs font-semibold mt-1 ml-1">{{ $message }}</p>
                 @enderror
             </div>
 
-            <button type="submit" 
-                class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 font-semibold">
-                Iniciar Turno e Ir a Mesas
+            <button type="submit"
+                class="w-full h-12 sm:h-14 flex items-center justify-center gap-2 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-[0.98] transition-all outline-none">
+                <i class="fas fa-door-open"></i> Iniciar Turno e Ir a Mesas
             </button>
         </form>
 
@@ -90,13 +107,13 @@
              cerrada no había forma de consultar los cortes anteriores sin
              abrir un turno nuevo. --}}
         @if(($turnosCerrados ?? collect())->isNotEmpty())
-            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-slate-700">
+            <div class="mt-8 pt-6 border-t border-slate-100">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400">
                         Últimos turnos cerrados
                     </h3>
                     <a href="{{ route('historial.index') }}"
-                       class="text-xs font-bold text-blue-600 hover:text-blue-500">
+                       class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700">
                         Ver todo
                     </a>
                 </div>
@@ -105,26 +122,26 @@
                     @foreach($turnosCerrados as $turno)
                         <li>
                             <a href="{{ route('historial.show', $turno->id) }}"
-                               class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 transition">
+                               class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-blue-200 hover:bg-blue-50/50 transition-all">
                                 <div class="min-w-0">
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                    <p class="text-sm font-bold text-slate-800 truncate">
                                         {{ $turno->updated_at?->format('d/m/Y') }}
-                                        <span class="font-normal text-gray-500 dark:text-slate-400">
+                                        <span class="font-medium text-slate-400">
                                             · {{ $turno->user->nombre ?? 'Sin usuario' }}
                                         </span>
                                     </p>
-                                    <p class="text-[11px] text-gray-500 dark:text-slate-400">
+                                    <p class="text-[11px] text-slate-400 font-medium mt-0.5">
                                         Contado: ${{ number_format($turno->monto_final_real ?? 0, 2) }}
                                     </p>
                                 </div>
 
                                 @php $dif = (float) ($turno->diferencia ?? 0); @endphp
-                                <span class="shrink-0 text-xs font-black px-2 py-1 rounded-md
+                                <span class="shrink-0 text-[10px] font-black uppercase tracking-wide px-2.5 py-1.5 rounded-lg border
                                     {{ abs($dif) < 0.01
-                                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                        ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
                                         : ($dif < 0
-                                            ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
-                                            : 'bg-amber-500/15 text-amber-600 dark:text-amber-400') }}">
+                                            ? 'bg-rose-50 border-rose-100 text-rose-600'
+                                            : 'bg-amber-50 border-amber-100 text-amber-600') }}">
                                     @if(abs($dif) < 0.01)
                                         Cuadrada
                                     @elseif($dif < 0)
@@ -143,8 +160,74 @@
     </div>
 </div>
 
-
 <script>
+    // =====================================================================
+    // DROPDOWN PERSONALIZADO: Turno (reemplazo de <select> nativo)
+    // Definidas aquí mismo, protegidas con "typeof === 'undefined'" por si
+    // ya existen (otra vista/modal en la misma página las definió antes).
+    // =====================================================================
+    if (typeof window.toggleCustomMenu === 'undefined') {
+        window.toggleCustomMenu = function (menuId) {
+            document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                if (menu.id !== menuId) menu.classList.add('hidden');
+            });
+            const menu = document.getElementById(menuId);
+            if (menu) menu.classList.toggle('hidden');
+        };
+    }
+
+    if (typeof window.selectCustomOption === 'undefined') {
+        window.selectCustomOption = function (hiddenInputId, textSpanId, menuId, value, label) {
+            const hiddenInput = document.getElementById(hiddenInputId);
+            const textSpan = document.getElementById(textSpanId);
+            const menu = document.getElementById(menuId);
+
+            if (hiddenInput) hiddenInput.value = value;
+            if (textSpan) {
+                textSpan.textContent = label;
+                textSpan.classList.remove('text-slate-400');
+                textSpan.classList.add('text-slate-800', 'font-bold');
+            }
+            if (menu) menu.classList.add('hidden');
+        };
+    }
+
+    if (!window.__customDropdownOutsideClickBound) {
+        window.__customDropdownOutsideClickBound = true;
+        document.addEventListener('click', function (e) {
+            document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                const btnId = 'btn_' + menu.id.replace('menu_', '');
+                const btn = document.getElementById(btnId);
+                if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
+    }
+
+    // Validación del dropdown obligatorio (Turno) antes de enviar el form
+    const formAperturaCaja = document.getElementById('formAperturaCaja');
+    if (formAperturaCaja) {
+        formAperturaCaja.addEventListener('submit', function (e) {
+            const cajasRequeridas = formAperturaCaja.querySelectorAll('[data-required-dropdown]');
+            let valido = true;
+
+            cajasRequeridas.forEach(caja => {
+                const hidden = caja.querySelector('input[type="hidden"]');
+                const boton = caja.querySelector('button[id^="btn_"]');
+                if (hidden && !hidden.value) {
+                    valido = false;
+                    if (boton) boton.classList.add('ring-4', 'ring-rose-500/20', 'border-rose-400');
+                }
+            });
+
+            if (!valido) {
+                e.preventDefault();
+                alert('Por favor selecciona el turno antes de continuar.');
+            }
+        });
+    }
+
     // Nos aseguramos de que el teclado virtual detecte el campo numérico de esta vista.
     // Si tu layout ya llama a esto globalmente, esta llamada es redundante pero inofensiva.
     document.addEventListener('DOMContentLoaded', function() {
