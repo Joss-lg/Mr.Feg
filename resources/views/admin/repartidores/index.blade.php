@@ -3,6 +3,11 @@
 @section('title', 'Módulo de Repartidores | Ollintem Pro')
 
 @section('content')
+<style>
+    .unique-scrollbar::-webkit-scrollbar { width: 6px; }
+    .unique-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+</style>
+
 <div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
 
     {{-- ENCABEZADO PREMIUM --}}
@@ -95,15 +100,30 @@
                     {{-- Formulario para asignar repartidor --}}
                     <form action="{{ route('admin.repartidores.asignar', $orden->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-slate-100 form-async">
                         @csrf
-                        <div class="relative flex-1">
-                            <select name="repartidor_id" required class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-4 pr-10 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none cursor-pointer shadow-sm">
-                                <option value="">Seleccionar Repartidor...</option>
+                        
+                        {{-- Dropdown Personalizado de Repartidor --}}
+                        <div class="relative flex-1" id="cajaRepartidor_{{ $orden->id }}">
+                            <input type="hidden" name="repartidor_id" id="val_repartidor_{{ $orden->id }}" value="">
+
+                            <button type="button" onclick="window.toggleCustomMenu('menu_repartidor_{{ $orden->id }}')" id="btn_repartidor_{{ $orden->id }}"
+                                class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl px-4 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all text-left">
+                                <span id="text_repartidor_{{ $orden->id }}" class="truncate text-slate-400">Seleccionar Repartidor...</span>
+                                <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
+                            </button>
+                            
+                            {{-- Menú que abre hacia abajo (top-full mt-1) --}}
+                            <div id="menu_repartidor_{{ $orden->id }}" class="absolute top-full mt-1 left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden max-h-40 overflow-y-auto unique-scrollbar">
+                                <button type="button" onclick="window.selectCustomOption('val_repartidor_{{ $orden->id }}', 'text_repartidor_{{ $orden->id }}', 'menu_repartidor_{{ $orden->id }}', '', 'Seleccionar Repartidor...')" class="w-full px-4 py-2.5 text-left text-xs hover:bg-blue-50 font-bold text-slate-500 transition-colors">
+                                    Seleccionar Repartidor...
+                                </button>
                                 @foreach($repartidores as $rep)
-                                    <option value="{{ $rep->id }}">{{ $rep->nombre ?? $rep->name }}</option>
+                                    <button type="button" onclick="window.selectCustomOption('val_repartidor_{{ $orden->id }}', 'text_repartidor_{{ $orden->id }}', 'menu_repartidor_{{ $orden->id }}', '{{ $rep->id }}', '{{ addslashes($rep->nombre ?? $rep->name) }}')" class="w-full px-4 py-2.5 text-left text-xs hover:bg-blue-50 font-bold text-slate-700 transition-colors">
+                                        {{ $rep->nombre ?? $rep->name }}
+                                    </button>
                                 @endforeach
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+                            </div>
                         </div>
+
                         <button type="submit" class="h-12 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-widest shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none shrink-0">
                             <i class="fas fa-paper-plane"></i> Enviar
                         </button>
@@ -191,15 +211,79 @@
     </div>
 </div>
 
-{{-- Script dinámico para manejo asíncrono y fluidez sin recargas completas --}}
+<!-- Script de SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- LÓGICA DE DROPDOWNS ---
+    window.toggleCustomMenu = function(menuId) {
+        // Cierra todos los demás menús antes de abrir este
+        document.querySelectorAll('div[id^="menu_repartidor_"]').forEach(menu => {
+            if(menu.id !== menuId) menu.classList.add('hidden');
+        });
+        const menu = document.getElementById(menuId);
+        if(menu) menu.classList.toggle('hidden');
+    };
+
+    window.selectCustomOption = function(inputId, spanId, menuId, value, text) {
+        const input = document.getElementById(inputId);
+        const span = document.getElementById(spanId);
+        const menu = document.getElementById(menuId);
+        
+        if (input) input.value = value;
+        if (span) {
+            span.innerText = text;
+            span.classList.remove('text-slate-400');
+            span.classList.add('text-slate-800');
+        }
+        if (menu) menu.classList.add('hidden');
+    };
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('div[id^="menu_repartidor_"]').forEach(menu => {
+            if (!menu.classList.contains('hidden')) {
+                const btnId = menu.id.replace('menu_', 'btn_');
+                const btn = document.getElementById(btnId);
+                if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+    // --- LÓGICA DE ENVÍO ASÍNCRONO CON SWEETALERT2 ---
     document.querySelectorAll('.form-async').forEach(form => {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Validación manual para el input oculto
+            const inputRepartidor = this.querySelector('input[name="repartidor_id"]');
+            if (inputRepartidor && inputRepartidor.value.trim() === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Falta información',
+                    text: 'Por favor, selecciona un repartidor antes de enviar.',
+                    confirmButtonColor: '#2563eb', // blue-600
+                    confirmButtonText: 'Entendido',
+                    customClass: {
+                        popup: 'rounded-[2rem] border border-slate-200 shadow-sm',
+                        title: 'text-slate-800 font-black',
+                        confirmButton: 'rounded-xl font-black uppercase tracking-widest text-[10px] px-6 py-3 outline-none'
+                    }
+                });
+                return;
+            }
+
             const url = this.action;
             const data = new FormData(this);
             const method = this.method;
+            const btnSubmit = this.querySelector('button[type="submit"]');
+            
+            // Evitar múltiples clics
+            if(btnSubmit) btnSubmit.disabled = true;
 
             try {
                 const response = await fetch(url, {
@@ -215,11 +299,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.success) {
                     location.reload(); 
                 } else {
-                    alert(result.message || 'Ocurrió un error');
+                    // Alerta de error elegante
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: result.message || 'Ocurrió un error al procesar la solicitud.',
+                        confirmButtonColor: '#e11d48', // rose-600
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            popup: 'rounded-[2rem] border border-slate-200 shadow-sm',
+                            title: 'text-slate-800 font-black',
+                            confirmButton: 'rounded-xl font-black uppercase tracking-widest text-[10px] px-6 py-3 outline-none'
+                        }
+                    });
+                    if(btnSubmit) btnSubmit.disabled = false;
                 }
             } catch (err) {
                 console.error(err);
-                this.submit();
+                this.submit(); // Fallback tradicional
             }
         });
     });

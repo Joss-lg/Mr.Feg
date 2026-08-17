@@ -89,10 +89,18 @@
      BARRA FIJA INFERIOR — Solo móvil (< md)
      Siempre visible, con acciones rápidas del platillo y botón
      para abrir el panel completo del ticket.
+
+     FIX: este contenedor no tenía "flex", así que los botones
+     (que usan shrink-0/whitespace-nowrap pensando en un layout de
+     fila) se apilaban verticalmente como bloques normales,
+     generando la tarjeta flotante rara que aparecía sobre el
+     catálogo en móvil. Con flex + overflow-x-auto quedan en una
+     sola fila horizontal con scroll, como se pensó originalmente.
      ════════════════════════════════════════════════════════════ --}}
+<div id="barra-acciones-mobile-wrapper" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-50 border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]" style="padding-bottom: env(safe-area-inset-bottom)">
+
 <div id="barra-acciones-mobile"
-     class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-50 border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]"
-     style="padding-bottom: env(safe-area-inset-bottom)">
+     class="flex items-center gap-2 overflow-x-auto hide-scroll px-3 py-2.5">
 
   {{-- Botón Móvil: Tipo de Pedido - Solo para Llevar o Domicilio --}}
 @php
@@ -127,9 +135,32 @@
             class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] font-bold text-red-500 shadow-sm active:scale-95 whitespace-nowrap">
             <i class="fas fa-trash-alt text-[10px]"></i> Limpiar
         </button>
-    </div>
-
 </div>
+
+    {{-- Degradado indicador de scroll: avisa visualmente que hay más
+         botones a la derecha. Se oculta solo con JS cuando ya no queda
+         nada por deslizar (ver script más abajo). --}}
+    <div id="fade-scroll-acciones" class="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-slate-50 to-transparent transition-opacity duration-200"></div>
+</div>
+
+<script>
+(function () {
+    const barra = document.getElementById('barra-acciones-mobile');
+    const fade = document.getElementById('fade-scroll-acciones');
+    if (!barra || !fade) return;
+
+    function actualizarFade() {
+        // Si ya se llegó al final del scroll (con 4px de margen), se oculta el degradado.
+        const alFinal = barra.scrollLeft + barra.clientWidth >= barra.scrollWidth - 4;
+        fade.style.opacity = alFinal ? '0' : '1';
+    }
+
+    barra.addEventListener('scroll', actualizarFade, { passive: true });
+    window.addEventListener('resize', actualizarFade);
+    // Estado inicial (por si en pantallas grandes ya caben todos los botones)
+    actualizarFade();
+})();
+</script>
 
 <script>
 (function () {
