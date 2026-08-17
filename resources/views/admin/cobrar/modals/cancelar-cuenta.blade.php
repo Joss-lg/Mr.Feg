@@ -11,55 +11,59 @@
     lo vuelve a validar en el servidor.
 --}}
 <div id="modal-cancelar-cuenta" class="hidden fixed inset-0 z-[9998] items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-cerrar-cancelar></div>
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" data-cerrar-cancelar></div>
 
-    <div class="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/10 shadow-2xl overflow-hidden">
+    <div class="relative w-full max-w-md bg-white rounded-[2rem] border border-slate-200 shadow-2xl overflow-hidden">
 
-        <div class="px-6 pt-6 pb-4 border-b border-zinc-200 dark:border-white/10">
+        <div class="px-6 pt-6 pb-4 border-b border-slate-100">
             <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-500/15 flex items-center justify-center shrink-0">
-                    <i class="fas fa-triangle-exclamation text-rose-500"></i>
+                <div class="w-11 h-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                    <i class="fas fa-triangle-exclamation text-rose-600"></i>
                 </div>
-                <div>
-                    <h3 class="text-lg font-black text-zinc-900 dark:text-white leading-tight">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-black text-slate-800 leading-tight">
                         Cancelar cuenta sin cobrar
                     </h3>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1 leading-snug">
+                    <p class="text-xs text-slate-500 font-medium mt-1 leading-snug">
                         La mesa quedará libre y esta cuenta se registrará como pérdida.
                         Esta acción no se puede deshacer.
                     </p>
                 </div>
+                <button type="button" data-cerrar-cancelar
+                    class="group w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0">
+                    <i class="fas fa-times text-sm transition-transform duration-300 group-hover:rotate-90"></i>
+                </button>
             </div>
         </div>
 
         <div class="px-6 py-5 space-y-4">
-            <div class="rounded-2xl bg-rose-500/10 border border-rose-500/20 px-4 py-3 flex items-center justify-between">
-                <span class="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            <div class="rounded-2xl bg-rose-50 border border-rose-100 px-4 py-3 flex items-center justify-between">
+                <span class="text-[11px] font-black uppercase tracking-wider text-rose-600">
                     Se dejará de cobrar
                 </span>
-                <span class="text-xl font-black text-rose-600 dark:text-rose-400">
+                <span class="text-xl font-black text-rose-600">
                     ${{ number_format($totalPagar ?? 0, 2) }}
                 </span>
             </div>
 
             <div>
-                <label for="motivo-cancelacion" class="block text-[10px] font-black uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+                <label for="motivo-cancelacion" class="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">
                     Motivo <span class="text-rose-500">*</span>
                 </label>
                 <textarea id="motivo-cancelacion" rows="3" maxlength="255"
                     placeholder="Ej: El cliente se retiró sin pagar."
-                    class="w-full px-3 py-2.5 rounded-xl border border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 text-sm text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition resize-none"></textarea>
-                <p id="error-motivo-cancelacion" class="hidden mt-1.5 text-[11px] font-bold text-rose-500"></p>
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-800 outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all resize-none placeholder:text-slate-400"></textarea>
+                <p id="error-motivo-cancelacion" class="hidden mt-1.5 text-[11px] font-bold text-rose-600"></p>
             </div>
         </div>
 
         <div class="px-6 pb-6 flex gap-3">
             <button type="button" data-cerrar-cancelar
-                class="flex-1 py-3 rounded-xl border border-zinc-300 dark:border-white/10 text-zinc-700 dark:text-zinc-300 text-xs font-black uppercase tracking-wider hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
+                class="flex-1 h-12 rounded-xl border border-slate-200 text-slate-500 text-xs font-black uppercase tracking-wider hover:bg-slate-50 hover:text-slate-800 transition-all">
                 Volver
             </button>
             <button type="button" id="btn-confirmar-cancelar-cuenta"
-                class="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                class="flex-1 h-12 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase tracking-wider shadow-md shadow-rose-500/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100">
                 Sí, cancelar
             </button>
         </div>

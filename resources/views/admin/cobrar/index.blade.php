@@ -12,16 +12,16 @@
     $anchoIzquierda = $esPorProducto ? 'lg:w-3/5' : 'lg:w-2/5';
     $anchoDerecha   = $esPorProducto ? 'lg:w-2/5' : 'lg:w-3/5';
 @endphp
-<div class="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+<div class="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-slate-50 text-slate-800">
     
     {{-- IZQUIERDA: Detalle --}}
-    <div class="w-full {{ $anchoIzquierda }} border-r border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 flex flex-col border-b lg:border-b-0 lg:overflow-hidden lg:min-h-0 shadow-sm">
-        <div class="p-4 sm:p-5 border-b border-zinc-200 dark:border-white/10">
-            <a href="{{ route('admin.caja.index') }}" class="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white text-[10px] font-black flex items-center gap-2 mb-1 transition-all hover:translate-x-1 uppercase tracking-widest">
+    <div class="w-full {{ $anchoIzquierda }} border-r border-slate-200 bg-white flex flex-col border-b lg:border-b-0 lg:overflow-hidden lg:min-h-0 shadow-sm">
+        <div class="p-4 sm:p-5 border-b border-slate-100">
+            <a href="{{ route('admin.caja.index') }}" class="text-slate-400 hover:text-slate-800 text-[10px] font-black flex items-center gap-2 mb-1 transition-all hover:translate-x-1 uppercase tracking-widest">
                 <i class="fas fa-arrow-left"></i> VOLVER A CAJA
             </a>
             
-            <h1 class="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white italic tracking-tighter uppercase break-words">
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-800 italic tracking-tighter uppercase break-words">
                 @if($mesa->esDelivery())
                     <i class="fas fa-motorcycle text-orange-500 mr-1"></i> {{ $mesa->plataformaDelivery->nombre ?? 'Delivery' }} · {{ $mesa->numero }}
                 @else
@@ -29,7 +29,7 @@
                 @endif
             </h1>
             
-            <p class="text-[11px] sm:text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mt-0.5">
+            <p class="text-[11px] sm:text-xs font-bold text-slate-400 uppercase tracking-wide mt-0.5">
                 {{ $orden->numero_orden ?? 'ORDEN SIN NÚMERO' }} • {{ $orden->mesero->nombre ?? 'MESERO NO ASIGNADO' }}
             </p>
 
@@ -38,17 +38,17 @@
                  quien cobra. Requiere permiso de EDITAR en Caja; la ruta lo
                  vuelve a validar en el servidor. --}}
             @if(auth()->user()->tienePermiso('Caja', 'editar'))
-                <div class="mt-3 flex items-center gap-2">
+                <div class="mt-3 flex items-center gap-2 flex-wrap">
                     <div class="relative">
                         <input type="text" inputmode="decimal" data-teclado="numerico"
                                id="input-descuento-caja"
                                value="{{ ($descuentoPorcentaje ?? 0) > 0 ? rtrim(rtrim(number_format($descuentoPorcentaje, 2, '.', ''), '0'), '.') : '' }}"
                                placeholder="0"
-                               class="w-20 pl-3 pr-6 py-1.5 rounded-lg border border-zinc-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-sm font-bold text-zinc-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
-                        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">%</span>
+                               class="w-20 pl-3 pr-6 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-800 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm">
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
                     </div>
                     <button type="button" id="btn-aplicar-descuento-caja"
-                        class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-wider transition-colors">
+                        class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-wider transition-all shadow-sm active:scale-95">
                         Aplicar descuento
                     </button>
                     <span id="msg-descuento-caja" class="hidden text-[11px] font-bold"></span>
@@ -61,7 +61,7 @@
                  'permiso:Caja,eliminar' de la ruta. --}}
             @if(auth()->user()->tienePermiso('Caja', 'eliminar'))
                 <button type="button" id="btn-abrir-cancelar-cuenta"
-                    class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-rose-300 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 text-[10px] font-black uppercase tracking-wider hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors">
+                    class="mt-3 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-wider hover:bg-rose-100 hover:border-rose-200 transition-all">
                     <i class="fas fa-ban"></i> Cancelar cuenta sin cobrar
                 </button>
             @endif
