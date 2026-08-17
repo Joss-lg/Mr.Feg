@@ -27,8 +27,8 @@
                 </div>
             </div>
             
-            <button type="button" onclick="closeModalMovimiento()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all outline-none shrink-0 border border-slate-200">
-                <i class="fas fa-times text-xs sm:text-sm"></i>
+            <button type="button" onclick="closeModalMovimiento()" class="group w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0 border border-slate-200">
+                <i class="fas fa-times text-xs sm:text-sm transition-transform duration-300 group-hover:rotate-90"></i>
             </button>
         </div>
         
@@ -38,17 +38,35 @@
 
             <div class="p-6 sm:p-8 pt-4 sm:pt-6 space-y-5 overflow-y-auto flex-1 overscroll-contain">
 
-                <div class="space-y-2">
+                {{-- Dropdown Personalizado: Tipo de Movimiento --}}
+                <div class="space-y-2 relative" id="cajaTipoMovimiento">
                     <label class="flex items-center gap-2 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
                         <i class="fas fa-arrows-alt-v opacity-40"></i> Tipo de Movimiento
                     </label>
-                    <div class="relative">
-                        <select name="tipo" required class="w-full h-12 bg-white border border-slate-200 rounded-xl px-5 text-sm font-bold text-slate-800 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer shadow-sm">
-                            <option value="entrada" class="text-emerald-600 font-black">🟢 ENTRADA (Suma al stock)</option>
-                            <option value="salida" class="text-rose-600 font-black">🔴 SALIDA (Resta al stock)</option>
-                            <option value="ajuste" class="text-orange-600 font-black">🟠 MERMA / DESPERDICIO</option>
-                        </select>
-                        <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+
+                    <input type="hidden" name="tipo" id="val_TipoMovimiento" value="entrada">
+
+                    <button type="button" onclick="window.toggleCustomMenu('menu_TipoMovimiento')" id="btn_TipoMovimiento"
+                        class="flex items-center justify-between w-full h-12 bg-white border border-slate-200 rounded-xl px-5 text-sm font-bold text-slate-800 outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 shadow-sm transition-all">
+                        <span id="text_TipoMovimiento" class="flex items-center gap-2 truncate">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> Entrada (Suma al stock)
+                        </span>
+                        <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
+                    </button>
+
+                    <div id="menu_TipoMovimiento" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
+                        <button type="button" onclick="window.selectCustomOptionTipoMovimiento('entrada', 'bg-emerald-500', 'Entrada (Suma al stock)')"
+                            class="w-full px-5 py-3 flex items-center gap-2 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span> Entrada (Suma al stock)
+                        </button>
+                        <button type="button" onclick="window.selectCustomOptionTipoMovimiento('salida', 'bg-rose-500', 'Salida (Resta al stock)')"
+                            class="w-full px-5 py-3 flex items-center gap-2 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
+                            <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span> Salida (Resta al stock)
+                        </button>
+                        <button type="button" onclick="window.selectCustomOptionTipoMovimiento('ajuste', 'bg-orange-500', 'Merma / Desperdicio')"
+                            class="w-full px-5 py-3 flex items-center gap-2 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
+                            <span class="w-2 h-2 rounded-full bg-orange-500 shrink-0"></span> Merma / Desperdicio
+                        </button>
                     </div>
                 </div>
 
@@ -86,12 +104,76 @@
 </div>
 
 <script>
+    // =====================================================================
+    // DROPDOWNS PERSONALIZADOS (reemplazo de <select> nativo)
+    // Definidas aquí mismo, protegidas con "typeof === 'undefined'" para
+    // que no truenen si este archivo y modal-crear.blade.php cargan en la
+    // misma página (ambos definen las mismas funciones globales).
+    // =====================================================================
+    if (typeof window.toggleCustomMenu === 'undefined') {
+        window.toggleCustomMenu = function (menuId) {
+            document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                if (menu.id !== menuId) menu.classList.add('hidden');
+            });
+            const menu = document.getElementById(menuId);
+            if (menu) menu.classList.toggle('hidden');
+        };
+    }
+
+    if (typeof window.selectCustomOption === 'undefined') {
+        window.selectCustomOption = function (hiddenInputId, textSpanId, menuId, value, label) {
+            const hiddenInput = document.getElementById(hiddenInputId);
+            const textSpan = document.getElementById(textSpanId);
+            const menu = document.getElementById(menuId);
+
+            if (hiddenInput) hiddenInput.value = value;
+            if (textSpan) {
+                textSpan.textContent = label;
+                textSpan.classList.remove('text-slate-400');
+                textSpan.classList.add('text-slate-800');
+            }
+            if (menu) menu.classList.add('hidden');
+        };
+    }
+
+    if (!window.__customDropdownOutsideClickBound) {
+        window.__customDropdownOutsideClickBound = true;
+        document.addEventListener('click', function (e) {
+            document.querySelectorAll('[id^="menu_"]').forEach(menu => {
+                const btnId = 'btn_' + menu.id.replace('menu_', '');
+                const btn = document.getElementById(btnId);
+                if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
+    }
+
+    // Selector propio del dropdown "Tipo de Movimiento": reconstruye el
+    // span con el puntito de color + texto, y guarda el valor real en el
+    // input oculto. Es distinto de selectCustomOption porque necesita
+    // reconstruir el ícono de color, no solo el texto.
+    window.selectCustomOptionTipoMovimiento = function (value, dotClass, label) {
+        const hidden = document.getElementById('val_TipoMovimiento');
+        const textSpan = document.getElementById('text_TipoMovimiento');
+        const menu = document.getElementById('menu_TipoMovimiento');
+
+        if (hidden) hidden.value = value;
+        if (textSpan) {
+            textSpan.innerHTML = `<span class="w-2 h-2 rounded-full ${dotClass} shrink-0"></span> ${label}`;
+        }
+        if (menu) menu.classList.add('hidden');
+    };
+
     function openModalMovimiento(id, nombre) {
         const modal = document.getElementById('modalMovimiento');
         const container = document.getElementById('movimientoContainer');
         
         document.getElementById('movimientoInsumoId').value = id;
         document.getElementById('movimientoNombreInsumo').innerText = nombre;
+
+        // Reinicia el dropdown de tipo a su valor por defecto (Entrada) cada vez que se abre
+        window.selectCustomOptionTipoMovimiento('entrada', 'bg-emerald-500', 'Entrada (Suma al stock)');
 
         modal.classList.remove('hidden');
         setTimeout(() => {

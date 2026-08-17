@@ -19,24 +19,16 @@
     </script>
     <style>
         :root {
-            /* Acentos Naranja de Mr. Feg */
-            --coral-400: #fb923c; 
-            --coral-500: #f97316; 
-            --coral-700: #c2410c; 
-            
-            --text-color: #F8FAFC;
-            
-            /* Fondo Modo Oscuro (Degradado Azul) */
-            --bg-color: #0a4670;
-            --bg-image: linear-gradient(to bottom, #38b6ff 0%, #1573b0 50%, #0a4670 100%);
-            --titulo-color: #ffffff;
+            --text-color: #1e293b;
+            --bg-color: #f1f5f9; /* Gris sutil de fondo general */
+            --titulo-color: #1e293b;
         }
 
-        /* Variables Modo Claro (#A5B4FC) */
+        /* Variables Modo Alternativo / Oscuro */
         body.modo-claro {
-            --bg-color: #A5B4FC; 
-            --bg-image: none;    
-            --titulo-color: #020617;
+            --bg-color: #0f172a; 
+            --text-color: #f8fafc;
+            --titulo-color: #ffffff;
         }
 
         html, body {
@@ -45,7 +37,6 @@
 
         body { 
             background-color: var(--bg-color);
-            background-image: var(--bg-image);
             color: var(--text-color); 
             font-family: 'Inter', sans-serif; 
             margin: 0; 
@@ -59,45 +50,46 @@
 
         .logo-box {
             background-color: #ffffff;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
             transition: all 0.3s ease;
         }
 
-        /* VISOR EN NEGRO PROFUNDO */
+        /* VISOR CON EL GRIS DE MODALES (#f8fafc / slate-50) */
         .visor-screen {
-            background-color: #0a0a0a; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.8); 
+            background-color: #f8fafc; 
+            border: 1px solid #e2e8f0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03); 
         }
 
-        /* BOTONES EN NEGRO NEUTRO */
+        /* BOTONES CON EL GRIS SUAVE DE MODALES */
         .key-btn {
-            background-color: #111111;
-            color: var(--text-color);
-            border: 1px solid #262626;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+            background-color: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
             transition: all 0.15s ease-in-out;
         }
 
         .key-btn:hover { 
             transform: translateY(-2px); 
-            background-color: #1a1a1a;
-            border-color: #333333; 
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            background-color: #ffffff;
+            border-color: #cbd5e1; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
         }
         
         .key-btn:active { 
             transform: scale(0.96); 
-            background-color: #000000; 
-            border-color: #000000;
-            box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.1); 
+            background-color: #e2e8f0; 
+            border-color: #cbd5e1;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05); 
         }
 
         .btn-ok {
-            background: linear-gradient(180deg, var(--coral-400) 0%, var(--coral-500) 100%);
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
             border: none;
-            border-bottom: 4px solid var(--coral-700); 
-            box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
+            border-bottom: 4px solid #1d4ed8; 
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
             color: white !important;
             transition: all 0.1s ease-in-out;
         }
@@ -121,7 +113,7 @@
         }
 
         /* =========================================
-           INTERRUPTOR DE CÁPSULA (COLORES MR. FEG)
+            INTERRUPTOR DE CÁPSULA 
            ========================================= */
         .capsule-wrapper {
             position: fixed;
@@ -139,19 +131,18 @@
             display: block;
             width: 82px;
             height: 38px;
-            /* NIGHTMODE: Fondo Negro igual al teclado */
-            background: #111111;
-            border: 1px solid #262626;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 40px;
             cursor: pointer;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: background 0.5s ease, border-color 0.5s ease;
         }
 
         .capsule-thumb {
             position: absolute;
             top: 2px;
-            left: 46px; /* Lado derecho por defecto (Noche) */
+            left: 46px; 
             width: 32px;
             height: 32px;
             background-color: #ffffff;
@@ -159,7 +150,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
@@ -173,25 +164,25 @@
         .icon-sun-svg {
             opacity: 0;
             transform: rotate(-90deg);
-            color: var(--coral-500); /* Sol Naranja */
+            color: #2563eb; 
         }
 
         .icon-moon-svg {
             opacity: 1;
             transform: rotate(0deg);
-            color: #111111; /* Luna Negra */
+            color: #64748b; 
         }
 
-        /* --- ESTADO MODO CLARO (CHECKED - DAYMODE) --- */
+        /* --- ESTADO MODO CLARO / ALTERNATIVO --- */
         .theme-toggle-input:checked + .capsule-track {
-            /* DAYMODE: Degradado Naranja igual al botón OK */
-            background: linear-gradient(to right, var(--coral-400), var(--coral-500));
-            border-color: transparent;
-            box-shadow: inset 0 2px 6px rgba(200, 50, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.1);
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .theme-toggle-input:checked + .capsule-track .capsule-thumb {
-            transform: translateX(-44px); /* Desplaza la esfera a la izquierda */
+            transform: translateX(-44px); 
+            background-color: #0f172a;
         }
 
         .theme-toggle-input:checked + .capsule-track .icon-sun-svg {
@@ -220,12 +211,12 @@
         <input type="checkbox" id="themeSwitch" class="theme-toggle-input" onchange="toggleTheme(this.checked)">
         <label for="themeSwitch" class="capsule-track" title="Cambiar tema Día / Noche">
             <div class="capsule-thumb">
-                <!-- Ícono Sol (DAYMODE) -->
+                <!-- Ícono Sol -->
                 <svg class="capsule-icon icon-sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="4"></circle>
                     <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
                 </svg>
-                <!-- Ícono Luna y Estrellas (NIGHTMODE) -->
+                <!-- Ícono Luna -->
                 <svg class="capsule-icon icon-moon-svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.39 2.47-4.22-.44-.06-.9-.1-1.36-.1z"/>
                     <path d="M19 3l.6 1.4.8.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6.6-1.4zM21 9l.3.7.7.3-.7.3-.3.7-.3-.7-.7-.3.7-.3.3-.7z"/>
@@ -238,19 +229,19 @@
         
         {{-- Cabecera --}}
         <div class="compact-header flex flex-col items-center mb-8 sm:mb-10">
-            <div class="logo-box p-2 rounded-xl mb-4">
+            <div class="logo-box p-3 rounded-[2rem] mb-4 shadow-sm">
                 <img src="{{ asset('images/mrlogo.png') }}" alt="Logo Mr. Feg" class="mx-auto w-20 h-20 sm:w-24 sm:h-24 object-contain">
             </div>
             
-            <h1 class="text-xl sm:text-2xl font-black tracking-widest leading-none uppercase drop-shadow-md text-[var(--titulo-color)] transition-colors duration-400">
+            <h1 class="text-xl sm:text-2xl font-black tracking-widest leading-none uppercase drop-shadow-sm text-[var(--titulo-color)] transition-colors duration-400">
                 Mr. Feg
             </h1>
-            <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] font-bold mt-2 text-orange-400 drop-shadow-sm">Restaurante</p>
+            <p class="text-[9px] sm:text-[10px] uppercase tracking-[0.4em] font-black mt-2 text-blue-600">Restaurante</p>
         </div>
 
         @if($errors->any())
-            <div class="w-full bg-orange-500/20 border border-orange-500/30 py-2 sm:py-3 rounded-xl mb-4 flex items-center justify-center">
-                <p class="text-orange-500 text-[10px] font-black uppercase tracking-widest">NIP Incorrecto</p>
+            <div class="w-full bg-rose-50 border border-rose-200 py-2.5 sm:py-3 rounded-2xl mb-4 flex items-center justify-center shadow-sm">
+                <p class="text-rose-600 text-[10px] font-black uppercase tracking-widest">NIP Incorrecto</p>
             </div>
         @endif
 
@@ -260,9 +251,9 @@
         </form>
 
         {{-- Visor del PIN --}}
-        <div class="compact-visor w-full h-14 sm:h-16 visor-screen rounded-2xl mb-5 sm:mb-6 flex items-center justify-center gap-2 relative overflow-hidden">
-            <span id="pinDisplay" class="text-3xl sm:text-4xl font-black tracking-[0.4em] text-white mt-1"></span>
-            <span class="cursor-blink w-[2px] h-8 rounded-full" style="background-color: var(--coral-400);"></span>
+        <div class="compact-visor w-full h-14 sm:h-16 visor-screen rounded-2xl mb-5 sm:mb-6 flex items-center justify-center gap-2 relative overflow-hidden shadow-sm">
+            <span id="pinDisplay" class="text-3xl sm:text-4xl font-black tracking-[0.4em] text-slate-800 mt-1"></span>
+            <span class="cursor-blink w-[2px] h-8 rounded-full bg-blue-600"></span>
         </div>
 
         {{-- Teclado Numérico --}}
@@ -271,7 +262,7 @@
             <button type="button" onclick="appendNumber('2')" class="key-btn aspect-square rounded-2xl text-2xl sm:text-3xl font-bold flex items-center justify-center">2</button>
             <button type="button" onclick="appendNumber('3')" class="key-btn aspect-square rounded-2xl text-2xl sm:text-3xl font-bold flex items-center justify-center">3</button>
             
-            {{-- Botón OK Naranja --}}
+            {{-- Botón OK Azul Principal --}}
             <button type="button" onclick="submitForm()" class="btn-ok col-span-1 row-span-2 rounded-2xl flex flex-col items-center justify-center w-full h-full">
                 <span class="font-black text-2xl sm:text-3xl leading-tight drop-shadow-md">OK</span>
                 <span class="text-[8px] sm:text-[9px] font-bold uppercase mt-1 opacity-90 tracking-wider">Entrar</span>
@@ -286,7 +277,7 @@
             <button type="button" onclick="appendNumber('9')" class="key-btn aspect-square rounded-2xl text-2xl sm:text-3xl font-bold flex items-center justify-center">9</button>
             
             <button type="button" onclick="deleteNumber()" class="key-btn aspect-square rounded-2xl flex flex-col items-center justify-center">
-                <i class="fas fa-backspace text-orange-400 text-lg sm:text-xl"></i>
+                <i class="fas fa-backspace text-blue-600 text-lg sm:text-xl"></i>
             </button>
 
             <div class="col-span-1 aspect-square"></div>
