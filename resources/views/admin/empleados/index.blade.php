@@ -67,6 +67,11 @@
         @endif
     </div>
 
+    {{-- Las alertas de session('success') / session('error') ya las muestra
+         layouts.admin de forma global (el toast que aparece arriba a la
+         derecha), así que no se repiten aquí para evitar el mensaje duplicado. --}}
+
+
     {{-- LÓGICA DE ESTADÍSTICAS --}}
     @php
         $totalAdmin = 0; $totalCapitan = 0; $totalMesero = 0; $totalCocinero = 0; $totalCajero = 0;

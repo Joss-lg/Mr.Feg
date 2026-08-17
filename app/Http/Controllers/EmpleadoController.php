@@ -193,8 +193,23 @@ class EmpleadoController extends Controller
         }
 
         if ($empleado->esta_activo == false) {
-            $empleado->permisos()->delete();
-            $empleado->forceDelete();
+            try {
+                $empleado->permisos()->delete();
+                $empleado->forceDelete();
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Código 23000 = violación de llave foránea (MySQL). El
+                // empleado tiene historial (órdenes, ventas, etc.) que
+                // quedaría huérfano si lo borráramos de verdad, así que
+                // avisamos en vez de dejar que la excepción reviente la vista.
+                if ($e->getCode() === '23000') {
+                    return redirect()->back()->with(
+                        'error',
+                        "No puedes eliminar a {$empleado->nombre} de forma permanente: tiene órdenes u otros registros asociados en el sistema. Su baja lógica ya se aplicó, así que dejará de aparecer en el listado activo, pero se conserva por trazabilidad."
+                    );
+                }
+
+                throw $e;
+            }
 
             return redirect()->back()->with('success', 'El empleado ha sido eliminado permanentemente de la base de datos.');
         }
