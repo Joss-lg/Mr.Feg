@@ -7,9 +7,9 @@
 
 @push('styles')
 <style>
-    /* 1. Forzamos modo claro y fondo blanco SOLO en esta vista */
-    html.dark { background: #f8fafc !important; }
-    body { background: #f8fafc !important; background-image: none !important; }
+    /* 1. Forzamos fondo #F2F2F2 en esta vista */
+    html.dark { background: #F2F2F2 !important; }
+    body { background: #F2F2F2 !important; background-image: none !important; }
 
     /* 2. Colores oscuros para textos, con scope al contenedor .historial-caja-view */
     .historial-caja-view .text-zinc-100,
@@ -44,7 +44,7 @@
 @endpush
 
 @section('content')
-<div class="historial-caja-view p-3 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-5 md:space-y-8 flex-1 flex flex-col bg-transparent">
+<div class="historial-caja-view p-3 sm:p-6 md:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-5 md:space-y-8 flex-1 flex flex-col bg-[#F2F2F2]">
 
     {{-- CABECERA --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 relative z-10 animate-fade-in-up" style="animation-delay: 0ms;">
@@ -52,7 +52,7 @@
             <h1 class="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Historial de Turnos</h1>
             <p class="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Auditoría, cierres y conciliaciones</p>
         </div>
-        <div class="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-full border border-slate-100 shadow-sm text-[10px] font-black text-slate-500 uppercase tracking-widest">
+        <div class="inline-flex items-center gap-2 bg-white px-4 py-2.5 rounded-full border border-slate-200/80 shadow-sm text-[10px] font-black text-slate-500 uppercase tracking-widest">
             <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
             Mostrando {{ $turnos->count() }} turnos
         </div>
@@ -83,12 +83,12 @@
                 </div>
             </div>
         @empty
-            <div class="text-center py-10 text-slate-400 font-bold">Sin registros</div>
+            <div class="text-center py-10 text-slate-400 font-bold bg-white rounded-2xl border border-slate-200">Sin registros</div>
         @endforelse
     </div>
 
     {{-- CONTENEDOR PRINCIPAL (Escritorio) --}}
-    <div class="hidden md:flex bg-white border border-slate-100 shadow-sm rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 w-full flex-1 flex-col relative z-20 animate-fade-in-up" style="animation-delay: 300ms;">
+    <div class="hidden md:flex bg-white border border-slate-200/80 shadow-sm rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 w-full flex-1 flex-col relative z-20 animate-fade-in-up" style="animation-delay: 300ms;">
 
         {{-- Tabla Escritorio --}}
         <div class="w-full overflow-x-auto relative">

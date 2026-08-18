@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="w-full min-h-screen p-4 sm:p-6 lg:p-8 bg-slate-50">
+<div class="w-full min-h-screen p-4 sm:p-6 lg:p-8 bg-[#F2F2F2]">
 
     {{-- 1. Encabezado / Botones de Área --}}
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

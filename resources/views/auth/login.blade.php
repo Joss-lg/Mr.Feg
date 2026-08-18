@@ -20,7 +20,7 @@
     <style>
         :root {
             --text-color: #1e293b;
-            --bg-color: #f1f5f9; /* Gris sutil de fondo general */
+            --bg-color: #F2F2F2; /* Color de fondo actualizado a #F2F2F2 */
             --titulo-color: #1e293b;
         }
 
@@ -111,89 +111,6 @@
             .compact-visor span:first-child { font-size: 1.5rem !important; }
             .keypad-grid { gap: 0.5rem !important; }
         }
-
-        /* =========================================
-            INTERRUPTOR DE CÁPSULA 
-           ========================================= */
-        .capsule-wrapper {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.25rem;
-            z-index: 150;
-        }
-
-        .theme-toggle-input {
-            display: none;
-        }
-
-        .capsule-track {
-            position: relative;
-            display: block;
-            width: 82px;
-            height: 38px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 40px;
-            cursor: pointer;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: background 0.5s ease, border-color 0.5s ease;
-        }
-
-        .capsule-thumb {
-            position: absolute;
-            top: 2px;
-            left: 46px; 
-            width: 32px;
-            height: 32px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .capsule-icon {
-            position: absolute;
-            width: 18px;
-            height: 18px;
-            transition: opacity 0.4s ease, transform 0.5s ease;
-        }
-
-        .icon-sun-svg {
-            opacity: 0;
-            transform: rotate(-90deg);
-            color: #2563eb; 
-        }
-
-        .icon-moon-svg {
-            opacity: 1;
-            transform: rotate(0deg);
-            color: #64748b; 
-        }
-
-        /* --- ESTADO MODO CLARO / ALTERNATIVO --- */
-        .theme-toggle-input:checked + .capsule-track {
-            background: #1e293b;
-            border-color: #334155;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .theme-toggle-input:checked + .capsule-track .capsule-thumb {
-            transform: translateX(-44px); 
-            background-color: #0f172a;
-        }
-
-        .theme-toggle-input:checked + .capsule-track .icon-sun-svg {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-
-        .theme-toggle-input:checked + .capsule-track .icon-moon-svg {
-            opacity: 0;
-            transform: rotate(90deg);
-        }
     </style>
 </head>
 <body class="w-full flex flex-col items-center justify-center relative p-4" style="padding-top: max(1rem, env(safe-area-inset-top)); padding-bottom: max(1rem, env(safe-area-inset-bottom));">
@@ -205,25 +122,6 @@
             document.body.classList.add('modo-claro');
         }
     </script>
-
-    <!-- Interruptor Estilo Cápsula Día/Noche -->
-    <div class="capsule-wrapper">
-        <input type="checkbox" id="themeSwitch" class="theme-toggle-input" onchange="toggleTheme(this.checked)">
-        <label for="themeSwitch" class="capsule-track" title="Cambiar tema Día / Noche">
-            <div class="capsule-thumb">
-                <!-- Ícono Sol -->
-                <svg class="capsule-icon icon-sun-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-                </svg>
-                <!-- Ícono Luna -->
-                <svg class="capsule-icon icon-moon-svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-5.4-5.4c0-1.81 1-3.39 2.47-4.22-.44-.06-.9-.1-1.36-.1z"/>
-                    <path d="M19 3l.6 1.4.8.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6.6-1.4zM21 9l.3.7.7.3-.7.3-.3.7-.3-.7-.7-.3.7-.3.3-.7z"/>
-                </svg>
-            </div>
-        </label>
-    </div>
 
     <div class="w-full max-w-[320px] sm:max-w-[350px] flex flex-col items-center my-auto py-2">
         
@@ -317,28 +215,6 @@
             if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
             if (e.key === 'Backspace') deleteNumber();
             if (e.key === 'Enter') submitForm();
-        });
-
-        // --- LÓGICA DEL INTERRUPTOR CÁPSULA Y TEMA ---
-        const themeSwitch = document.getElementById('themeSwitch');
-
-        function toggleTheme(esClaro) {
-            const body = document.body;
-            if (esClaro) {
-                body.classList.add('modo-claro');
-                localStorage.setItem('tema-mrfeg', 'claro');
-            } else {
-                body.classList.remove('modo-claro');
-                localStorage.setItem('tema-mrfeg', 'oscuro');
-            }
-        }
-
-        // Sincronizar el checkbox al cargar la página
-        document.addEventListener('DOMContentLoaded', () => {
-            const esClaro = document.body.classList.contains('modo-claro');
-            if (themeSwitch) {
-                themeSwitch.checked = esClaro;
-            }
         });
     </script>
 </body>

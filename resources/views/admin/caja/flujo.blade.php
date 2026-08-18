@@ -1,7 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-slate-50 font-sans transition-colors duration-300">
+{{-- Se reemplazó bg-slate-50 por bg-[#F2F2F2] en el contenedor principal --}}
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-[#F2F2F2] font-sans transition-colors duration-300">
 
     {{-- Encabezado y Alertas --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 animate-fade-in-up" style="animation-delay: 0ms;">
@@ -266,10 +267,7 @@
             </div>
         </div>
 
-        {{-- BLOQUE 3: Cuentas canceladas
-             Va aparte de "Gastos y Salidas" a propósito: no son compras ni
-             salidas del cajón, es consumo que nunca se cobró. Tampoco entra
-             al arqueo de efectivo por la misma razón. --}}
+        {{-- BLOQUE 3: Cuentas canceladas --}}
         @if(($historicoCancelaciones ?? collect())->isNotEmpty())
             <div class="bg-white border border-rose-200 rounded-[2rem] shadow-sm overflow-hidden w-full animate-fade-in-up" style="animation-delay: 600ms;">
                 <div class="bg-rose-50 p-4 sm:p-5 border-b border-slate-100 flex flex-wrap gap-2 justify-between items-center w-full">
@@ -460,54 +458,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (backdrop) backdrop.addEventListener('click', ocultarModal);
 
     // --- Diferencia en vivo mientras se teclea el conteo ---
-    // Le avisa al cajero si hay faltante ANTES de confirmar, en vez de
-    // enterarse hasta que ya se cerró el turno.
     const cajaEsperado = document.getElementById('efectivoEsperado');
     const cajaDiferencia = document.getElementById('diferenciaCorte');
 
     if (inputMonto && cajaEsperado && cajaDiferencia) {
         const esperado = parseFloat(cajaEsperado.dataset.esperado) || 0;
 
-        const pintarDiferencia = () => {
-            // El campo es de texto para que el teclado táctil pueda escribir
-            // el punto decimal; se acepta también la coma.
-            const crudo = (inputMonto.value || '').trim().replace(',', '.');
+        inputMonto.addEventListener('input', () => {
+            const val = parseFloat(inputMonto.value) || 0;
+            const diff = val - esperado;
 
-            if (crudo === '') {
+            if (inputMonto.value.trim() === '') {
                 cajaDiferencia.classList.add('hidden');
                 return;
             }
 
-            const contado = parseFloat(crudo);
-            if (isNaN(contado)) {
-                cajaDiferencia.classList.add('hidden');
-                return;
-            }
-
-            const diferencia = Math.round((contado - esperado) * 100) / 100;
             cajaDiferencia.classList.remove('hidden');
-            cajaDiferencia.className = 'mt-2 px-3 py-2 rounded-xl text-sm font-black flex items-center justify-between';
 
-            if (Math.abs(diferencia) < 0.01) {
-                cajaDiferencia.classList.add('bg-emerald-50', 'text-emerald-600', 'border', 'border-emerald-100');
-                cajaDiferencia.innerHTML = '<span>Caja cuadrada</span><span>$0.00</span>';
-            } else if (diferencia < 0) {
-                cajaDiferencia.classList.add('bg-rose-50', 'text-rose-600', 'border', 'border-rose-100');
-                cajaDiferencia.innerHTML = '<span>FALTANTE</span><span>-$' + Math.abs(diferencia).toFixed(2) + '</span>';
+            if (diff < 0) {
+                cajaDiferencia.className = 'mt-2 px-3 py-2 rounded-xl text-sm font-black flex items-center justify-between bg-rose-50 text-rose-600 border border-rose-100';
+                cajaDiferencia.innerHTML = '<span>Faltante:</span><span>-$' + Math.abs(diff).toFixed(2) + '</span>';
+            } else if (diff > 0) {
+                cajaDiferencia.className = 'mt-2 px-3 py-2 rounded-xl text-sm font-black flex items-center justify-between bg-emerald-50 text-emerald-600 border border-emerald-100';
+                cajaDiferencia.innerHTML = '<span>Sobrante:</span><span>+$' + diff.toFixed(2) + '</span>';
             } else {
-                cajaDiferencia.classList.add('bg-amber-50', 'text-amber-600', 'border', 'border-amber-100');
-                cajaDiferencia.innerHTML = '<span>SOBRANTE</span><span>+$' + diferencia.toFixed(2) + '</span>';
+                cajaDiferencia.className = 'mt-2 px-3 py-2 rounded-xl text-sm font-black flex items-center justify-between bg-blue-50 text-blue-600 border border-blue-100';
+                cajaDiferencia.innerHTML = '<span>Cuadre exacto</span><span>$0.00</span>';
             }
-        };
-
-        inputMonto.addEventListener('input', pintarDiferencia);
-        inputMonto.addEventListener('change', pintarDiferencia);
-
-        // El teclado virtual escribe con .value y no dispara 'input', así que
-        // también se revisa periódicamente mientras el modal está abierto.
-        setInterval(() => {
-            if (modal && !modal.classList.contains('hidden')) pintarDiferencia();
-        }, 300);
+        });
     }
 });
 </script>

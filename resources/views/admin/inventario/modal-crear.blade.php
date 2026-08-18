@@ -17,8 +17,9 @@
 
 <div id="modalCrear" class="fixed inset-0 z-[9999] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-3 sm:p-4 transition-all duration-300">
     
-    <div id="createContainer" class="bg-white border border-slate-200 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-500 scale-95 opacity-0 flex flex-col max-h-[95dvh] sm:max-h-[92dvh]">
+    <div id="createContainer" class="bg-white border border-slate-200/80 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-500 scale-95 opacity-0 flex flex-col max-h-[95dvh] sm:max-h-[92dvh]">
         
+        {{-- ENCABEZADO DEL MODAL --}}
         <div class="p-6 sm:p-8 pb-4 shrink-0 flex justify-between items-center border-b border-slate-100">
             <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shrink-0">
@@ -30,11 +31,12 @@
                 </div>
             </div>
             
-            <button type="button" onclick="closeCreateModal()" class="group w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0 border border-slate-200">
+            <button type="button" onclick="closeCreateModal()" class="group w-10 h-10 rounded-xl flex items-center justify-center bg-[#F2F2F2] text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0 border border-slate-200/80">
                 <i class="fas fa-times text-sm transition-transform duration-300 group-hover:rotate-90"></i>
             </button>
         </div>
         
+        {{-- FORMULARIO --}}
         <form id="formCrearInsumo" action="{{ route('admin.inventario.store') }}" method="POST" class="flex flex-col flex-1 min-h-0">
             @csrf
 
@@ -46,7 +48,7 @@
                         <i class="fas fa-tag opacity-40"></i> Nombre del Artículo
                     </label>
                     <input type="text" name="nombre" required data-teclado="texto" autocomplete="off"
-                        class="w-full h-12 bg-slate-50 border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                        class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                         placeholder="Ej: Harina">
                 </div>
                 
@@ -59,12 +61,12 @@
                     <input type="hidden" name="categoria_id" id="val_Categoria" value="">
 
                     <button type="button" onclick="window.toggleCustomMenu('menu_Categoria')" id="btn_Categoria"
-                        class="flex items-center justify-between w-full h-12 bg-slate-50 border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 outline-none hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all">
+                        class="flex items-center justify-between w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 outline-none hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all">
                         <span id="text_Categoria" class="text-slate-400 truncate">Selecciona una categoría</span>
                         <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
                     </button>
 
-                    <div id="menu_Categoria" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
+                    <div id="menu_Categoria" class="absolute left-0 right-0 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
                         @foreach($categorias as $categoria)
                             <button type="button" onclick="window.selectCustomOption('val_Categoria', 'text_Categoria', 'menu_Categoria', '{{ $categoria->id }}', '{{ addslashes($categoria->nombre) }}')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
                                 {{ $categoria->nombre }}
@@ -82,12 +84,12 @@
                     <input type="hidden" name="unidad_medida" id="val_Unidad" value="g">
 
                     <button type="button" onclick="window.toggleCustomMenu('menu_Unidad')" id="btn_Unidad"
-                        class="flex items-center justify-between w-full h-12 bg-slate-50 border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 outline-none hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all">
+                        class="flex items-center justify-between w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 outline-none hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 shadow-sm transition-all">
                         <span id="text_Unidad" class="text-slate-800 truncate">Gramos (g)</span>
                         <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
                     </button>
 
-                    <div id="menu_Unidad" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
+                    <div id="menu_Unidad" class="absolute left-0 right-0 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
                         <button type="button" onclick="window.selectCustomOption('val_Unidad', 'text_Unidad', 'menu_Unidad', 'g', 'Gramos (g)')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">Gramos (g)</button>
                         <button type="button" onclick="window.selectCustomOption('val_Unidad', 'text_Unidad', 'menu_Unidad', 'ml', 'Mililitros (ml)')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">Mililitros (ml)</button>
                         <button type="button" onclick="window.selectCustomOption('val_Unidad', 'text_Unidad', 'menu_Unidad', 'pz', 'Piezas (pz)')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">Piezas (pz)</button>
@@ -101,24 +103,26 @@
                             <i class="fas fa-dollar-sign opacity-40"></i> Precio Compra
                         </label>
                         <input type="text" name="precio_compra" data-teclado="numerico" data-teclado-decimales="true" autocomplete="off"
-                            class="w-full h-12 bg-slate-50 border border-slate-200 rounded-2xl px-5 text-sm font-black text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                            class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-black text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                             placeholder="0.00">
                     </div>
+
                     {{-- Campo Stock Mínimo --}}
                     <div class="space-y-2">
                         <label class="flex items-center gap-2 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] ml-1">
                             <i class="fas fa-bell opacity-40"></i> Stock Mínimo
                         </label>
                         <input type="text" name="stock_minimo" required data-teclado="numerico" autocomplete="off"
-                            class="w-full h-12 bg-slate-50 border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+                            class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-400 shadow-sm"
                             placeholder="0">
                     </div>
                 </div>
             </div>
 
+            {{-- BOTONES DE ACCIÓN --}}
             <div class="flex items-center gap-4 px-6 sm:px-8 py-6 border-t border-slate-100 shrink-0">
                 <button type="button" onclick="closeCreateModal()"
-                    class="flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all outline-none">
+                    class="flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-800 hover:bg-[#F2F2F2] transition-all outline-none">
                     Cancelar
                 </button>
                 <button type="submit"
@@ -133,13 +137,11 @@
 <script>
     // =====================================================================
     // DROPDOWNS PERSONALIZADOS (reemplazo de <select> nativo)
-    // Definidas aquí mismo, protegidas con "typeof === 'undefined'" para
-    // que no truenen si este archivo y modal-movimiento.blade.php cargan
-    // en la misma página (ambos definen las mismas funciones globales).
+    // Protegidos con "typeof === 'undefined'" para evitar redeclaraciones
+    // si existen múltiples modales en la misma vista.
     // =====================================================================
     if (typeof window.toggleCustomMenu === 'undefined') {
         window.toggleCustomMenu = function (menuId) {
-            // Cierra cualquier otro menú abierto antes de abrir este
             document.querySelectorAll('[id^="menu_"]').forEach(menu => {
                 if (menu.id !== menuId) menu.classList.add('hidden');
             });
@@ -177,7 +179,7 @@
         });
     }
 
-    // Validación del dropdown obligatorio (Categoría) antes de enviar el form
+    // Validación del dropdown obligatorio (Categoría) antes de enviar el formulario
     const formCrearInsumo = document.getElementById('formCrearInsumo');
     if (formCrearInsumo) {
         formCrearInsumo.addEventListener('submit', function (e) {

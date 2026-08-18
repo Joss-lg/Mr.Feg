@@ -12,8 +12,8 @@
 
 <div id="toastContainer" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:bottom-8 z-[9999] flex flex-col gap-3 items-center sm:items-end" aria-live="polite" aria-atomic="true"></div>
 
-{{-- Contenedor principal --}}
-<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-slate-50 font-sans transition-colors duration-300">
+{{-- Contenedor principal con el fondo actualizado --}}
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-[#F2F2F2] font-sans transition-colors duration-300">
 
     {{-- ALERTAS DE SESIÓN --}}
     @if(session('error'))

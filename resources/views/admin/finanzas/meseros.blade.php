@@ -6,9 +6,9 @@
 
 @push('styles')
 <style>
-    /* Fondo general del sistema en gris extra claro */
+    /* Fondo general del sistema actualizado a #F2F2F2 */
     body, html, #app, main, .wrapper, .main-content {
-        background-color: #f8fafc !important; /* slate-50 */
+        background-color: #F2F2F2 !important; 
     }
     
     /* Textos del header superior en oscuro */

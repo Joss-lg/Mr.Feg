@@ -16,9 +16,9 @@
 <div id="modalCrearRol" class="fixed inset-0 z-[99999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
     
     {{-- Tarjeta Estilo Soft Light --}}
-    <div class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="modalCrearContent">
+    <div class="bg-[#F2F2F2] border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="modalCrearContent">
         
-        <form action="{{ route('admin.roles.store') }}" method="POST" class="flex flex-col h-full relative z-10 bg-slate-50">
+        <form action="{{ route('admin.roles.store') }}" method="POST" class="flex flex-col h-full relative z-10 bg-[#F2F2F2]">
             @csrf
             
             {{-- Encabezado con X animada --}}

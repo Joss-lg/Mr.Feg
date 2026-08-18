@@ -12,7 +12,7 @@
     $anchoIzquierda = $esPorProducto ? 'lg:w-3/5' : 'lg:w-2/5';
     $anchoDerecha   = $esPorProducto ? 'lg:w-2/5' : 'lg:w-3/5';
 @endphp
-<div class="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-slate-50 text-slate-800">
+<div class="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden bg-[#F2F2F2] text-slate-800">
     
     {{-- IZQUIERDA: Detalle --}}
     <div class="w-full {{ $anchoIzquierda }} border-r border-slate-200 bg-white flex flex-col border-b lg:border-b-0 lg:overflow-hidden lg:min-h-0 shadow-sm">

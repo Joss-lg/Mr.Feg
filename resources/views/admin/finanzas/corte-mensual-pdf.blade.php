@@ -10,6 +10,7 @@
             font-size: 10px;
             color: #27272a;
             padding: 15px 25px;
+            background-color: #F2F2F2; /* Color de fondo actualizado */
         }
 
         .header { border-bottom: 3px solid #2563eb; padding-bottom: 10px; margin-bottom: 15px; }
@@ -27,6 +28,7 @@
         .kpis td {
             width: 20%; border: 1px solid #e4e4e7; border-radius: 6px;
             padding: 8px; text-align: center; vertical-align: top;
+            background-color: #ffffff; /* Fondo blanco para las tarjetas para que resalten sobre el gris */
         }
         .kpis .label { font-size: 7px; text-transform: uppercase; letter-spacing: 1px; color: #71717a; font-weight: bold; }
         .kpis .valor { font-size: 13px; font-weight: bold; margin-top: 3px; }
@@ -42,7 +44,7 @@
             border-left: 4px solid #2563eb; padding-left: 6px;
         }
 
-        table.datos { width: 100%; border-collapse: collapse; }
+        table.datos { width: 100%; border-collapse: collapse; background-color: #ffffff; }
         table.datos th {
             background: #f4f4f5; color: #52525b; font-size: 8px;
             text-transform: uppercase; letter-spacing: 0.5px;
@@ -65,10 +67,13 @@
         table.cats td:last-child { text-align: right; font-weight: bold; }
 
         .dos-columnas { width: 100%; border-collapse: separate; border-spacing: 8px 0; }
-        .dos-columnas > tbody > tr > td { width: 50%; vertical-align: top; border: 1px solid #e4e4e7; border-radius: 6px; padding: 8px; }
+        .dos-columnas > tbody > tr > td { 
+            width: 50%; vertical-align: top; border: 1px solid #e4e4e7; 
+            border-radius: 6px; padding: 8px; background-color: #ffffff; 
+        }
         .dos-columnas h3 { font-size: 9px; text-transform: uppercase; color: #52525b; margin-bottom: 5px; }
 
-        .detalle-dia { margin-bottom: 8px; page-break-inside: avoid; }
+        .detalle-dia { margin-bottom: 8px; page-break-inside: avoid; background-color: #ffffff; border: 1px solid #e4e4e7; border-radius: 6px; padding: 8px; }
         .detalle-dia .titulo-dia {
             background: #eff6ff; color: #1d4ed8; font-weight: bold; font-size: 9px;
             padding: 4px 8px; border-radius: 4px; text-transform: capitalize;

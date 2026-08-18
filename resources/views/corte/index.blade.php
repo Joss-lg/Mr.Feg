@@ -3,7 +3,7 @@
 @section('title', 'Productos Vendidos | Ollintem Pro')
 
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-6 sm:space-y-8 flex-1 flex flex-col font-sans bg-slate-50 text-slate-800 min-h-screen transition-colors duration-300">
+<div class="px-4 py-6 sm:p-8 lg:p-10 xl:p-12 max-w-[1800px] mx-auto w-full space-y-6 sm:space-y-8 flex-1 flex flex-col font-sans bg-[#F2F2F2] text-slate-800 min-h-screen transition-colors duration-300">
 
     {{-- Encabezado --}}
     <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
@@ -80,8 +80,8 @@
 
         @forelse($ventasPorArea as $area => $productos)
             @php
-                $areaSlug  = strtolower($area);
-                $icono     = match($areaSlug) { 'barra' => 'fa-glass-martini-alt', 'cocina' => 'fa-utensils', default => 'fa-tag' };
+                $areaSlug      = strtolower($area);
+                $icono         = match($areaSlug) { 'barra' => 'fa-glass-martini-alt', 'cocina' => 'fa-utensils', default => 'fa-tag' };
                 $totalUnidades = $productos->sum('total_vendido');
             @endphp
 
@@ -102,7 +102,7 @@
                         {{ $totalUnidades }} Unidades
                     </span>
                 </div>
-    
+
                 {{-- Tabla --}}
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -152,7 +152,7 @@
             </div>
         @empty
             <div class="py-16 text-center flex flex-col items-center gap-3">
-                <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-200 text-slate-400 shadow-sm">
+                <div class="w-16 h-16 bg-[#F2F2F2] rounded-2xl flex items-center justify-center border border-slate-200 text-slate-400 shadow-sm">
                     <i class="fas fa-inbox text-2xl"></i>
                 </div>
                 <p class="text-sm text-slate-500 font-bold">No hay productos vendidos en las fechas seleccionadas.</p>

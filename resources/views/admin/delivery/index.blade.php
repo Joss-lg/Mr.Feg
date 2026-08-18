@@ -3,7 +3,7 @@
 @section('title', 'Delivery | Ollintem Pro')
 
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-4xl mx-auto space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-4xl mx-auto space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-[#F2F2F2] text-slate-800 transition-colors duration-300">
 
     {{-- ENCABEZADO PREMIUM --}}
     <div class="flex items-center gap-4 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">

@@ -4,10 +4,8 @@
 @section('header-title', 'Promociones')
 @section('header-subtitle', 'Marketing, ofertas y descuentos')
 
-@push('styles')
-
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-slate-50 font-sans transition-colors duration-300">
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-[1800px] mx-auto space-y-6 sm:space-y-8 relative z-10 min-h-screen bg-[#F2F2F2] font-sans transition-colors duration-300">
     
     {{-- ENCABEZADO PREMIUM --}}
     <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6 animate-fade-in-up" style="animation-delay: 0ms;">
@@ -36,7 +34,7 @@
                 <i class="fas fa-search text-sm"></i>
             </div>
             <input type="text" id="buscadorPromociones" data-teclado="texto" placeholder="Buscar promoción..." 
-                class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm">
+                class="w-full bg-[#F2F2F2] border border-slate-300/80 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm">
         </div>
 
         <div class="flex items-center justify-between sm:justify-end w-full lg:w-auto gap-4 sm:gap-8 sm:px-4">
@@ -78,7 +76,7 @@
 
                     {{-- HEADER DE LA TARJETA --}}
                     <div class="flex justify-between items-start mb-5 sm:mb-6 pt-2">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $promo->esta_activa ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-50 text-slate-400 border border-slate-200' }} transition-all duration-300 shadow-sm">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $promo->esta_activa ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-[#F2F2F2] text-slate-400 border border-slate-200' }} transition-all duration-300 shadow-sm">
                             <i class="fas fa-ticket-alt text-xl"></i>
                         </div>
                         
@@ -131,7 +129,7 @@
                                 $dias = is_array($dias) ? $dias : [];
                             @endphp
                             @foreach(['L','M','X','J','V','S','D'] as $i => $d)
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-colors shrink-0 {{ in_array($i+1, $dias) ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-slate-50 text-slate-400 border border-slate-200' }}">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-colors shrink-0 {{ in_array($i+1, $dias) ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-[#F2F2F2] text-slate-400 border border-slate-200' }}">
                                     {{ $d }}
                                 </div>
                             @endforeach
@@ -140,20 +138,20 @@
 
                     {{-- FOOTER DE TARJETA --}}
                     <div class="flex justify-between items-center pt-4 border-t border-slate-100 gap-2">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shrink-0 {{ $promo->esta_activa ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-50 text-slate-500 border border-slate-200' }}">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shrink-0 {{ $promo->esta_activa ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-[#F2F2F2] text-slate-500 border border-slate-200' }}">
                             <span class="w-1.5 h-1.5 rounded-full {{ $promo->esta_activa ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400' }}"></span>
                             {{ $promo->esta_activa ? 'Activa' : 'Inactiva' }}
                         </span>
                         
                         <div class="flex items-center gap-2 shrink-0">
                             @if(auth()->user()->tienePermiso('promociones.editar'))
-                                <button type="button" onclick="window.editPromo({{ $promo->id }})" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 transition-all hover:bg-blue-50 hover:border-blue-100 hover:text-blue-600 outline-none active:scale-95 shadow-sm">
+                                <button type="button" onclick="window.editPromo({{ $promo->id }})" class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F2F2F2] border border-slate-200 text-slate-400 transition-all hover:bg-blue-50 hover:border-blue-100 hover:text-blue-600 outline-none active:scale-95 shadow-sm">
                                     <i class="fas fa-pen text-xs"></i>
                                 </button>
                             @endif
 
                             @if(auth()->user()->tienePermiso('promociones.eliminar'))
-                                <button type="button" onclick="window.openDeleteModal({{ $promo->id }}, '{{ addslashes($promo->nombre) }}')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 transition-all hover:bg-rose-50 hover:border-rose-100 hover:text-rose-600 outline-none active:scale-95 shadow-sm">
+                                <button type="button" onclick="window.openDeleteModal({{ $promo->id }}, '{{ addslashes($promo->nombre) }}')" class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F2F2F2] border border-slate-200 text-slate-400 transition-all hover:bg-rose-50 hover:border-rose-100 hover:text-rose-600 outline-none active:scale-95 shadow-sm">
                                     <i class="fas fa-trash-alt text-xs"></i>
                                 </button>
                             @endif
@@ -196,10 +194,6 @@
         }
 
         // --- PROTECCIÓN DEL SIDEBAR (Mover modales al body) ---
-        // OJO: usamos ids EXACTOS (#modalEditar), no el selector de prefijo [id^="modalEditar"],
-        // porque ese prefijo también atrapaba a "modalEditarPromocionContent" (el contenedor
-        // interno) y lo movía por separado al <body>, dejando el modal vacío y la tarjeta
-        // suelta fuera del overlay.
         const modales = document.querySelectorAll('#modalEditar, #modalCrear, #modalEliminar');
         modales.forEach(m => {
             if(m && m.parentElement !== document.body) {
@@ -207,11 +201,6 @@
             }
         });
     });
-
-    {{-- NOTA: window.openModal y window.closeModal YA NO se redefinen aquí.
-         Se usan las versiones genéricas de layouts.admin, que reciben
-         (modalId, containerId). Por eso todas las llamadas abajo pasan
-         ambos parámetros. --}}
 
     // Funciones específicas para el modal de eliminar
     window.openDeleteModal = function(id, nombre) {
@@ -221,8 +210,6 @@
         if(form) form.action = `/promociones/${id}`;
         if(display) display.innerText = nombre;
         
-        // TODO: confirma el id real del contenedor interno en modal-eliminar.blade.php
-        // (el div con las clases scale-95/opacity-0) y reemplázalo aquí.
         window.openModal('modalEliminar', 'deleteContainer');
     };
 
@@ -279,7 +266,7 @@
         formData.append('toggle_status', '1');
         formData.append('esta_activa', checkbox.checked ? '1' : '0');
 
-       fetch(`/promociones/${id}`, {
+        fetch(`/promociones/${id}`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -358,7 +345,7 @@
     }
 </script>
 
-{{-- AQUÍ INCLUIMOS EL COMPONENTE DEL TECLADO VIRTUAL --}}
+{{-- INCLUSIÓN DEL TECLADO VIRTUAL --}}
 @include('partials.teclado-virtual')
 <script src="{{ asset('js/teclado-virtual.js') }}"></script>
 @endsection

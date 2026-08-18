@@ -2,6 +2,11 @@
 
 @section('content')
 <style>
+    /* Fondo general del sistema actualizado a #F2F2F2 */
+    body, html, #app, main, .wrapper, .main-content {
+        background-color: #F2F2F2 !important; 
+    }
+
     /* Solo aplicamos el truco de subir la tarjeta en pantallas grandes (computadoras/punto de venta) */
     @media (min-width: 768px) {
         /* 1. Mandamos la tarjeta a la parte de arriba de la pantalla */
@@ -18,7 +23,7 @@
     }
 </style>
 
-<div id="aperturaCajaWrapper" class="flex items-center justify-center min-h-[80vh] bg-slate-50 px-4 py-8">
+<div id="aperturaCajaWrapper" class="flex items-center justify-center min-h-[80vh] bg-[#F2F2F2] px-4 py-8">
     <div id="aperturaCajaCard" class="max-w-md w-full bg-white rounded-[2rem] shadow-sm p-6 sm:p-10 border border-slate-200 transition-all duration-300">
 
         <div class="text-center mb-6 sm:mb-8">
@@ -122,7 +127,7 @@
                     @foreach($turnosCerrados as $turno)
                         <li>
                             <a href="{{ route('historial.show', $turno->id) }}"
-                               class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-blue-200 hover:bg-blue-50/50 transition-all">
+                               class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/50 transition-all">
                                 <div class="min-w-0">
                                     <p class="text-sm font-bold text-slate-800 truncate">
                                         {{ $turno->updated_at?->format('d/m/Y') }}

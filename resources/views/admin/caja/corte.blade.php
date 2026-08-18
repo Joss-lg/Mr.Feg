@@ -2,17 +2,18 @@
 <div id="modalCierreCaja" class="fixed inset-0 z-[9999] hidden overflow-y-auto">
     <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" id="backdropCierreCaja"></div>
     <div class="flex items-center justify-center min-h-screen px-4 py-6">
-        <div class="relative inline-block bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all max-w-lg w-full border border-slate-200 p-6 sm:p-8 z-10">
+        {{-- Se cambió bg-white por bg-[#F2F2F2] aquí abajo --}}
+        <div class="relative inline-block bg-[#F2F2F2] rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all max-w-lg w-full border border-slate-200 p-6 sm:p-8 z-10">
 
             {{-- Encabezado --}}
-            <div class="flex items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-5">
+            <div class="flex items-center justify-between gap-4 mb-6 border-b border-slate-200/80 pb-5">
                 <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600 border border-rose-100 shrink-0">
                         <i class="fas fa-lock"></i>
                     </div>
                     <h3 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight truncate">Realizar Corte de Caja</h3>
                 </div>
-                <button type="button" id="btnCerrarModalX" class="group w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0 cursor-pointer">
+                <button type="button" id="btnCerrarModalX" class="group w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 transition-all outline-none shrink-0 cursor-pointer">
                     <i class="fas fa-times text-sm transition-transform duration-300 group-hover:rotate-90"></i>
                 </button>
             </div>
@@ -47,13 +48,9 @@
             <form action="{{ route('admin.caja.cerrar') }}" method="POST" class="space-y-5">
                 @csrf
 
-                {{-- EFECTIVO QUE DEBE HABER
-                     Se muestra ANTES de contar para que el cajero sepa contra
-                     qué está comparando. Es el mismo cálculo que usa el cierre
-                     (CajaService::calcularEfectivoEsperado), ya con las
-                     propinas pendientes descontadas. --}}
+                {{-- EFECTIVO QUE DEBE HABER --}}
                 <div class="rounded-2xl border border-slate-200 overflow-hidden">
-                    <div class="px-4 py-3 space-y-1.5 text-xs bg-slate-50">
+                    <div class="px-4 py-3 space-y-1.5 text-xs bg-slate-100/70">
                         <div class="flex justify-between text-slate-500">
                             <span>Fondo inicial</span>
                             <span class="font-bold text-slate-800">${{ number_format($efectivo['monto_inicial'] ?? 0, 2) }}</span>
@@ -114,9 +111,9 @@
                         placeholder="Observaciones sobre faltantes, sobrantes o incidentes en el turno..."></textarea>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200/80">
                     <button type="button" id="btnCancelarModal"
-                        class="h-12 px-6 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-all outline-none cursor-pointer">
+                        class="h-12 px-6 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 hover:bg-slate-200/50 transition-all outline-none cursor-pointer">
                         Cancelar
                     </button>
                     <button type="submit"

@@ -17,13 +17,13 @@
 <div id="modalCrearEmpleado" class="fixed inset-0 z-[99999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
     
     {{-- Tarjeta Estilo Soft Light --}}
-    <div class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="modalCrearContent">
+    <div class="bg-[#F2F2F2] border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="modalCrearContent">
         
-        <form id="formCrearEmpleado" method="POST" action="{{ route('admin.empleados.store') }}" class="flex flex-col h-full relative z-10 overflow-hidden bg-slate-50">
+        <form id="formCrearEmpleado" method="POST" action="{{ route('admin.empleados.store') }}" class="flex flex-col h-full relative z-10 overflow-hidden bg-[#F2F2F2]">
             @csrf
             
             {{-- Cuerpo del modal --}}
-            <div class="p-5 sm:p-8 overflow-y-auto flex-1 space-y-4 bg-slate-50 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
+            <div class="p-5 sm:p-8 overflow-y-auto flex-1 space-y-4 bg-[#F2F2F2] overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
                 
                 {{-- Encabezado con la "X" animada --}}
                 <div class="flex justify-between items-start pb-2 gap-3">

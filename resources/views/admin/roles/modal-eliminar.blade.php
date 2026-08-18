@@ -15,7 +15,7 @@
 <div id="modalEliminarRol" class="fixed inset-0 z-[99999] hidden bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
     
     {{-- Tarjeta Estilo Soft Light --}}
-    <div class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="deleteModalContent">
+    <div class="bg-[#F2F2F2] border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88dvh] sm:max-h-[90dvh]" id="deleteModalContent">
         
         {{-- Header con aviso de peligro --}}
         <div class="p-6 pb-4 border-b border-rose-100 bg-rose-50/50 flex items-start gap-4 shrink-0">

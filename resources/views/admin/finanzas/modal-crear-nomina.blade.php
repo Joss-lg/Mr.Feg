@@ -14,7 +14,7 @@
 
 <div id="modalCrearNomina" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-opacity duration-300">
     
-    <div id="createNominaContainer" class="bg-slate-50 border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
+    <div id="createNominaContainer" class="bg-[#F2F2F2] border border-slate-200 w-full max-w-md rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0 flex flex-col max-h-[92dvh]">
 
         {{-- CABECERA MODAL --}}
         <div class="px-6 pt-6 pb-4 flex justify-between items-start flex-shrink-0">
@@ -29,7 +29,7 @@
             </button>
         </div>
         
-        <form action="{{ route('admin.pagos-nomina.store') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
+        <form action="{{ route('admin.pagos-nomina.store') }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-[#F2F2F2]">
             @csrf
             <div class="px-6 pb-4 space-y-4 overflow-y-auto flex-1 overscroll-contain scrollbar-thin" style="-webkit-overflow-scrolling: touch;">
 

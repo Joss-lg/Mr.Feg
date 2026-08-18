@@ -1,4 +1,4 @@
-<aside id="sidebar" class="w-[260px] bg-white backdrop-blur-2xl border-r border-slate-100 flex flex-col justify-between z-50 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-x-hidden relative">
+<aside id="sidebar" class="w-[260px] bg-[#F2F2F2] backdrop-blur-2xl border-r border-slate-200/60 flex flex-col justify-between z-50 shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)] overflow-x-hidden relative">
     
     {{-- LÓGICA CSS PURA (Adiós bugs visuales al contraer) --}}
     <style>
@@ -98,7 +98,7 @@
         </div>
         
         {{-- Botón colapsar --}}
-        <button id="toggleSidebar" class="absolute right-4 top-7 w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer z-50 shrink-0 border border-slate-100 hover:border-blue-100">
+        <button id="toggleSidebar" class="absolute right-4 top-7 w-8 h-8 flex items-center justify-center rounded-lg bg-white hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer z-50 shrink-0 border border-slate-200/60 hover:border-blue-100 shadow-sm">
             <i class="fas fa-bars text-sm"></i>
         </button>
     </div>
@@ -110,8 +110,8 @@
         <style>
             #nav-container::-webkit-scrollbar { width: 4px; }
             #nav-container::-webkit-scrollbar-track { background: transparent; }
-            #nav-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-            #nav-container:hover::-webkit-scrollbar-thumb { background: #cbd5e1; }
+            #nav-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+            #nav-container:hover::-webkit-scrollbar-thumb { background: #94a3b8; }
         </style>
 
         @php
@@ -172,10 +172,10 @@
                             @endphp
 
                             <a href="{{ $url }}" 
-                               class="menu-link animate-slide-in relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-blue-50/80 border border-blue-100/50 shadow-sm shadow-blue-900/5' : 'border border-transparent hover:bg-slate-50 hover:translate-x-1' }}"
+                               class="menu-link animate-slide-in relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-300 group overflow-hidden {{ $isActive ? 'bg-blue-50/80 border border-blue-100/50 shadow-sm shadow-blue-900/5' : 'border border-transparent hover:bg-white hover:shadow-sm hover:translate-x-1' }}"
                                style="animation-delay: {{ $animationDelayCounter }}ms;">
                                 
-                                <div class="menu-icon flex h-9 w-9 items-center justify-center rounded-[10px] transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white border border-slate-200 text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200 group-hover:bg-blue-50/50' }}">
+                                <div class="menu-icon flex h-9 w-9 items-center justify-center rounded-[10px] transition-all duration-300 shrink-0 relative z-10 {{ $isActive ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/20' : 'bg-white border border-slate-200/80 text-slate-400 group-hover:text-blue-500 group-hover:border-blue-200 group-hover:bg-blue-50/50' }}">
                                     <i class="{{ $item['icon'] }} text-[14px]"></i>
                                 </div>
                                 
@@ -195,7 +195,7 @@
     </nav>
 
     {{-- Footer de Usuario --}}
-    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-white border border-slate-100 flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-sm hover:shadow-md">
+    <div class="user-footer p-4 mx-3 mb-5 mt-2 rounded-2xl bg-white border border-slate-200/60 flex flex-col gap-3 shrink-0 relative transition-all duration-300 shadow-sm hover:shadow-md">
         <div class="flex items-center w-full">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md mx-auto">
                 {{ substr(auth()->user()->nombre ?? 'U', 0, 2) }}
@@ -208,7 +208,7 @@
 
         <form method="POST" action="{{ route('logout') }}" class="mt-1 w-full flex justify-center">
             @csrf
-            {{-- Botón de logout ahora usa un gradiente rojo moderno (Rose a Red) --}}
+            {{-- Botón de logout con gradiente rojo --}}
             <button type="submit" class="btn-logout w-full h-[40px] px-3 flex items-center bg-gradient-to-r from-rose-500 to-red-600 hover:from-red-500 hover:to-rose-600 text-white rounded-xl transition-all duration-300 shadow-md shadow-red-500/20 hover:shadow-red-500/40 active:scale-95 group overflow-hidden border border-red-400/50">
                 <div class="flex items-center justify-center shrink-0 w-6">
                     <i class="fas fa-sign-out-alt text-[14px] transition-transform group-hover:translate-x-1"></i>

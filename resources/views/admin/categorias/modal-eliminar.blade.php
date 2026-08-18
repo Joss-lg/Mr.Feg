@@ -23,7 +23,7 @@
         </div>
 
         {{-- Formulario con Botones Balanceados --}}
-        <form id="formEliminar" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
+        <form id="formEliminar" method="POST" class="flex flex-col flex-1 min-h-0 bg-[#F2F2F2]">
             @csrf
             @method('DELETE')
             

@@ -13,10 +13,10 @@
 <div id="modalEditar" class="hidden fixed inset-0 z-[9999] items-center justify-center bg-slate-900/40 backdrop-blur-sm p-3 sm:p-4 transition-all duration-300">
     <div class="fixed inset-0 bg-transparent" onclick="window.closeModal('modalEditar', 'modalEditarPromocionContent')"></div>
     
-    <div id="modalEditarPromocionContent" class="relative bg-white border border-slate-200 w-full max-w-2xl mx-auto rounded-[2rem] shadow-2xl scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden max-h-[95vh] sm:max-h-[92vh]">
+    <div id="modalEditarPromocionContent" class="relative bg-[#F2F2F2] border border-slate-200 w-full max-w-2xl mx-auto rounded-[2rem] shadow-2xl scale-95 opacity-0 transition-all duration-300 flex flex-col overflow-hidden max-h-[95vh] sm:max-h-[92vh]">
 
         {{-- Encabezado del Modal --}}
-        <div class="flex items-center justify-between p-6 sm:p-8 pb-4 sm:pb-5 border-b border-slate-100 shrink-0">
+        <div class="flex items-center justify-between p-6 sm:p-8 pb-4 sm:pb-5 border-b border-slate-200 shrink-0 bg-[#F2F2F2]">
             <div class="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
                     <i class="fas fa-pen text-blue-600 text-lg"></i>
@@ -26,7 +26,7 @@
                     <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Actualizar parámetros de oferta</p>
                 </div>
             </div>
-            <button type="button" onclick="window.closeModal('modalEditar', 'modalEditarPromocionContent')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 hover:rotate-90 active:scale-95 transition-all duration-300 outline-none shrink-0">
+            <button type="button" onclick="window.closeModal('modalEditar', 'modalEditarPromocionContent')" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 hover:rotate-90 active:scale-95 transition-all duration-300 outline-none shrink-0">
                 <i class="fas fa-times text-sm"></i>
             </button>
         </div>
@@ -35,7 +35,7 @@
         <input type="checkbox" name="esta_activa" value="1" id="edit_esta_activa" class="hidden" form="formEditarPromocion">
 
         {{-- Formulario --}}
-        <form id="formEditarPromocion" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
+        <form id="formEditarPromocion" method="POST" class="flex flex-col flex-1 min-h-0 bg-[#F2F2F2]">
             @csrf
             @method('PUT')
 
@@ -172,9 +172,9 @@
             </div>
 
             {{-- Botones Footer --}}
-            <div class="flex items-center gap-4 px-6 sm:px-8 py-6 border-t border-slate-200 shrink-0 bg-slate-50">
+            <div class="flex items-center gap-4 px-6 sm:px-8 py-6 border-t border-slate-200 shrink-0 bg-[#F2F2F2]">
                 <button type="button" onclick="window.closeModal('modalEditar', 'modalEditarPromocionContent')"
-                    class="flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all outline-none">
+                    class="flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:bg-slate-200/60 transition-all outline-none">
                     Cancelar
                 </button>
                 <button type="submit"

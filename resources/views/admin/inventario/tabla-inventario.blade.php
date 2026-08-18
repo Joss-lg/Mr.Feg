@@ -53,7 +53,7 @@
                 <i class="fas fa-search text-sm"></i>
             </div>
             <input type="text" id="buscadorInventario" data-teclado="texto" placeholder="Buscar ingrediente..."
-                class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm">
+                class="w-full bg-[#F2F2F2] border border-slate-200/80 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all shadow-sm">
         </div>
 
         <div class="flex items-center justify-between sm:justify-end w-full lg:w-auto gap-4 sm:gap-8 sm:px-4">
@@ -297,7 +297,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // --- APÉNDICE DE MODALES AL BODY (Arreglo del Sidebar en Móviles) ---
-        // Toma dinámicamente todos los modales existentes y los pasa a la raíz del body
         const modales = document.querySelectorAll('#modalCrear, #modalEliminar, #modalMovimiento, [id^="modalEditar-"], [id^="modalMovimiento-"]');
         modales.forEach(modal => {
             if(modal) {
@@ -317,7 +316,6 @@
         }
 
         if (buscador) {
-            // Escucha tanto el input normal (teclado físico) como los eventos custom (teclado virtual)
             buscador.addEventListener('input', function(e) {
                 filtrarInventario(e.target.value.toLowerCase().trim());
             });
@@ -342,7 +340,6 @@
         }, 10);
     }
 
-    // El nombre de esta función coincide con tu disparador onclick
     function closeCreateModal() {
         const modal = document.getElementById('modalCrear');
         const container = document.getElementById('createContainer');
@@ -430,6 +427,6 @@
 @include('admin.inventario.modal-eliminar')
 @include('admin.inventario.modal-movimiento')
 
-{{-- AQUÍ INCLUIMOS EL COMPONENTE DEL TECLADO VIRTUAL --}}
+{{-- COMPONENTE DEL TECLADO VIRTUAL --}}
 @include('partials.teclado-virtual')
 @endsection

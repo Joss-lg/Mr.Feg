@@ -17,7 +17,7 @@
 @endpush
 
 @section('content')
-<div class="p-3 sm:p-6 lg:p-8 xl:p-10 max-w-[1400px] mx-auto w-full space-y-5 sm:space-y-8 bg-[var(--bg-color)] text-[var(--text-color)]">
+<div class="p-3 sm:p-6 lg:p-8 xl:p-10 max-w-[1400px] mx-auto w-full space-y-5 sm:space-y-8 bg-[#F2F2F2] text-[var(--text-color)]">
 
     {{-- Encabezado --}}
     <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-end gap-3 sm:gap-4 animate-fade-in-up" style="animation-delay: 0ms;">

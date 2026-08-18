@@ -3,7 +3,7 @@
 @section('title', 'Historial de Comandas | ' . $area)
 
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-5xl mx-auto space-y-6 bg-slate-50 min-h-screen">
+<div class="px-4 py-6 sm:p-8 lg:p-10 w-full max-w-5xl mx-auto space-y-6 bg-[#F2F2F2] min-h-screen">
 
     {{-- CABECERA --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm animate-fade-in-up" style="animation-delay: 0ms;">

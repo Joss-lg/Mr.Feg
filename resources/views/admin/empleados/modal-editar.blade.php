@@ -16,7 +16,7 @@
 <div id="editEmpleadoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 hidden opacity-0 transition-all duration-300">
     
     {{-- Contenedor principal con estilo Soft Light --}}
-    <div class="relative bg-slate-50 border border-slate-200 rounded-[2rem] w-full max-w-[480px] transform scale-95 opacity-0 transition-all duration-300 shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh] overflow-hidden" id="editModalContent">
+    <div class="relative bg-[#F2F2F2] border border-slate-200 rounded-[2rem] w-full max-w-[480px] transform scale-95 opacity-0 transition-all duration-300 shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh] overflow-hidden" id="editModalContent">
         
         <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -31,12 +31,12 @@
             <p class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Actualización de credenciales</p>
         </div>
 
-        <form id="formEditar" action="#" method="POST" class="flex flex-col flex-1 min-h-0">
+        <form id="formEditar" action="#" method="POST" class="flex flex-col flex-1 min-h-0 bg-[#F2F2F2]">
             @csrf
             @method('PUT')
             
             {{-- Cuerpo con Scroll Interno --}}
-            <div class="px-6 sm:px-8 space-y-4 overflow-y-auto flex-1 pb-4 overscroll-contain" style="-webkit-overflow-scrolling: touch;">
+            <div class="px-6 sm:px-8 space-y-4 overflow-y-auto flex-1 pb-4 overscroll-contain bg-[#F2F2F2]" style="-webkit-overflow-scrolling: touch;">
                 
                 {{-- AVISO DE PROTECCIÓN --}}
                 <div id="alertaProteccion" class="hidden p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3 shadow-sm">

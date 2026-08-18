@@ -12,7 +12,7 @@
     {{-- Capa para cerrar al hacer clic fuera --}}
     <div class="fixed inset-0 bg-transparent" onclick="cerrarModalEspecifico('modalEditar-{{ $item->id }}')"></div>
 
-    <div id="modalContainer-{{ $item->id }}" class="modal-editar-insumo-container relative bg-white border border-slate-200 rounded-[2rem] w-full max-w-md shadow-2xl scale-95 opacity-0 transition-all duration-300 overflow-hidden flex flex-col max-h-[92dvh]">
+    <div id="modalContainer-{{ $item->id }}" class="modal-editar-insumo-container relative bg-white border border-slate-200/80 rounded-[2rem] w-full max-w-md shadow-2xl scale-95 opacity-0 transition-all duration-300 overflow-hidden flex flex-col max-h-[92dvh]">
 
         {{-- Encabezado --}}
         <div class="flex items-center gap-3 sm:gap-4 p-6 sm:p-8 pb-4 sm:pb-5 shrink-0 border-b border-slate-100">
@@ -24,12 +24,12 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">{{ strtoupper($item->nombre) }}</p>
             </div>
             <button type="button" onclick="cerrarModalEspecifico('modalEditar-{{ $item->id }}')"
-                class="group ml-auto w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 border border-slate-200 transition-all outline-none shrink-0">
+                class="group ml-auto w-10 h-10 flex items-center justify-center rounded-xl bg-[#F2F2F2] text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-100 border border-slate-200/80 transition-all outline-none shrink-0">
                 <i class="fas fa-times text-sm transition-transform duration-300 group-hover:rotate-90"></i>
             </button>
         </div>
 
-        <form action="{{ route('admin.inventario.update', $item->id) }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
+        <form action="{{ route('admin.inventario.update', $item->id) }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-white">
             @csrf
             @method('PUT')
 
@@ -41,7 +41,7 @@
                         <i class="fas fa-tag opacity-40"></i> Nombre del Artículo
                     </label>
                     <input type="text" name="nombre" value="{{ $item->nombre }}" required data-teclado="texto" autocomplete="off"
-                        class="w-full h-12 bg-white border border-slate-200 rounded-2xl px-5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm">
+                        class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-semibold text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm">
                 </div>
 
                 {{-- Categoría (Dropdown Personalizado) --}}
@@ -52,12 +52,12 @@
                     <input type="hidden" name="categoria_id" id="val_Categoria{{ $item->id }}" value="{{ $item->categoria_id }}">
 
                     <button type="button" onclick="window.toggleCustomMenu('menu_Categoria{{ $item->id }}')" id="btn_Categoria{{ $item->id }}"
-                        class="w-full h-12 bg-white border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:border-blue-500 outline-none transition-all flex items-center justify-between shadow-sm">
+                        class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all flex items-center justify-between shadow-sm">
                         <span id="text_Categoria{{ $item->id }}" class="truncate">{{ $item->categoria ? $item->categoria->nombre : 'Sin categoría' }}</span>
                         <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
                     </button>
 
-                    <div id="menu_Categoria{{ $item->id }}" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
+                    <div id="menu_Categoria{{ $item->id }}" class="absolute left-0 right-0 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
                         <button type="button" onclick="window.selectCustomOption('val_Categoria{{ $item->id }}', 'text_Categoria{{ $item->id }}', 'menu_Categoria{{ $item->id }}', '', 'Sin categoría')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">Sin categoría</button>
                         @foreach($categorias ?? [] as $cat)
                             <button type="button" onclick="window.selectCustomOption('val_Categoria{{ $item->id }}', 'text_Categoria{{ $item->id }}', 'menu_Categoria{{ $item->id }}', '{{ $cat->id }}', '{{ addslashes($cat->nombre) }}')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
@@ -79,12 +79,12 @@
                     @endphp
 
                     <button type="button" onclick="window.toggleCustomMenu('menu_Unidad{{ $item->id }}')" id="btn_Unidad{{ $item->id }}"
-                        class="w-full h-12 bg-white border border-slate-200 rounded-2xl px-5 text-sm font-bold text-slate-800 focus:border-blue-500 outline-none transition-all flex items-center justify-between shadow-sm">
+                        class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-5 text-sm font-bold text-slate-800 hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all flex items-center justify-between shadow-sm">
                         <span id="text_Unidad{{ $item->id }}" class="truncate">{{ $unidades[$item->unidad_medida] ?? 'Seleccionar' }}</span>
                         <i class="fas fa-chevron-down text-slate-400 text-[10px] shrink-0 ml-2"></i>
                     </button>
 
-                    <div id="menu_Unidad{{ $item->id }}" class="absolute left-0 right-0 bg-white border border-slate-200 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
+                    <div id="menu_Unidad{{ $item->id }}" class="absolute left-0 right-0 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
                         @foreach($unidades as $key => $label)
                             <button type="button" onclick="window.selectCustomOption('val_Unidad{{ $item->id }}', 'text_Unidad{{ $item->id }}', 'menu_Unidad{{ $item->id }}', '{{ $key }}', '{{ $label }}')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 transition-colors">
                                 {{ $label }}
@@ -99,7 +99,7 @@
                         <label class="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
                             <i class="fas fa-box opacity-40"></i> Stock Actual
                         </label>
-                        <div class="h-12 bg-slate-100 border border-slate-200 rounded-2xl px-4 flex items-center text-sm font-black text-blue-600">
+                        <div class="h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-4 flex items-center text-sm font-black text-blue-600 opacity-90">
                             {{ number_format($item->stock_actual, 2) }}
                         </div>
                     </div>
@@ -108,15 +108,15 @@
                             <i class="fas fa-bell opacity-40"></i> Stock Mínimo
                         </label>
                         <input type="text" name="stock_minimo" value="{{ $item->stock_minimo }}" required data-teclado="numerico" autocomplete="off"
-                            class="w-full h-12 bg-white border border-slate-200 rounded-2xl px-4 text-sm font-black text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm">
+                            class="w-full h-12 bg-[#F2F2F2] border border-slate-200/80 rounded-2xl px-4 text-sm font-black text-slate-800 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all shadow-sm">
                     </div>
                 </div>
             </div>
 
             {{-- Botones Footer --}}
-            <div class="flex items-center justify-between px-6 sm:px-8 py-6 border-t border-slate-100 gap-4 shrink-0 bg-slate-50">
+            <div class="flex items-center justify-between px-6 sm:px-8 py-6 border-t border-slate-100 gap-4 shrink-0 bg-white">
                 <button type="button" onclick="cerrarModalEspecifico('modalEditar-{{ $item->id }}')"
-                    class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors outline-none px-2 py-3">
+                    class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-800 hover:bg-[#F2F2F2] transition-colors outline-none px-4 py-3 rounded-2xl">
                     Cancelar
                 </button>
                 <button type="submit"

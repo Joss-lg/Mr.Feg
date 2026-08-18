@@ -8,7 +8,7 @@
 <style>
     /* Fondo general del sistema en gris extra claro */
     body, html, #app, main, .wrapper, .main-content {
-        background-color: #f8fafc !important; 
+        background-color: #F2F2F2 !important; 
     }
     
     /* Textos del header superior en oscuro */

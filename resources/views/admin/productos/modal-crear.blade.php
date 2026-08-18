@@ -17,10 +17,10 @@
 <div id="modal-crear-alimento" class="fixed inset-y-0 right-0 left-[74px] sm:left-0 sm:inset-0 z-[9999] hidden opacity-0 transition-all duration-300 flex items-center justify-center p-3 sm:p-4">
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm -ml-[74px] sm:ml-0" onclick="closeModalCrear()"></div>
 
-    {{-- Contenedor principal en tono Slate-50 (Gris extra suave) --}}
-    <div class="relative bg-slate-50 border border-slate-200 w-full max-w-xl sm:max-w-2xl max-h-[92vh] flex flex-col rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300 overflow-hidden" id="modal-crear-panel">
+    {{-- Contenedor principal en fondo #F2F2F2 --}}
+    <div class="relative bg-[#F2F2F2] border border-slate-300/70 w-full max-w-xl sm:max-w-2xl max-h-[92vh] flex flex-col rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300 overflow-hidden" id="modal-crear-panel">
 
-        <div class="p-5 sm:p-8 pb-4 sm:pb-6 border-b border-slate-200/60 flex justify-between items-start flex-shrink-0">
+        <div class="p-5 sm:p-8 pb-4 sm:pb-6 border-b border-slate-300/60 flex justify-between items-start flex-shrink-0">
             <div>
                 <h2 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight" id="modal-title">Nuevo Platillo</h2>
                 <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1" id="modal-subtitle">Configuración estética del menú</p>
@@ -30,18 +30,18 @@
             </button>
         </div>
 
-        <form id="formulario-crear-producto" onsubmit="guardarProducto(event)" class="overflow-y-auto overscroll-contain flex-1 p-5 sm:p-8 pt-4 sm:pt-6 bg-slate-50 flex flex-col">
+        <form id="formulario-crear-producto" onsubmit="guardarProducto(event)" class="overflow-y-auto overscroll-contain flex-1 p-5 sm:p-8 pt-4 sm:pt-6 bg-[#F2F2F2] flex flex-col">
             <div class="grid grid-cols-2 gap-4 sm:gap-6 flex-1">
 
                 {{-- Nombre --}}
                 <div class="col-span-2">
                     <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Nombre del Platillo</label>
-                    <input type="text" id="nombre" name="nombre" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-semibold shadow-sm" placeholder="Ej: Lasagna de la Casa" required>
+                    <input type="text" id="nombre" name="nombre" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-300 rounded-xl p-3.5 sm:p-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-semibold shadow-sm" placeholder="Ej: Lasagna de la Casa" required>
                 </div>
 
                 {{-- Toggle: Se vende por peso --}}
                 <div class="col-span-2">
-                    <label class="flex items-center justify-between gap-3 bg-orange-50/50 border border-orange-200/60 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none shadow-sm">
+                    <label class="flex items-center justify-between gap-3 bg-orange-100/50 border border-orange-200/80 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none shadow-sm">
                         <span class="flex items-center gap-2.5">
                             <i class="fas fa-weight-hanging text-orange-500 text-sm"></i>
                             <span class="text-xs sm:text-sm font-bold text-slate-800">Se vende por peso</span>
@@ -57,7 +57,7 @@
                 {{-- Precio fijo --}}
                 <div class="col-span-2 sm:col-span-1" id="grupo-precio-fijo-crear">
                     <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Precio</label>
-                    <input type="text" id="precio" name="precio" pattern="[0-9]*\.?[0-9]*" data-teclado="numerico" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-black shadow-sm" placeholder="0.00" required>
+                    <input type="text" id="precio" name="precio" pattern="[0-9]*\.?[0-9]*" data-teclado="numerico" inputmode="none" class="w-full bg-white border border-slate-300 rounded-xl p-3.5 sm:p-4 text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-black shadow-sm" placeholder="0.00" required>
                 </div>
 
                 {{-- Precio por 100g --}}
@@ -73,7 +73,7 @@
                 {{-- Categoría HÍBRIDA --}}
                 <div class="col-span-2 sm:col-span-1 relative">
                     <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Categoría</label>
-                    <input type="text" id="categoria_nombre" name="categoria_nombre" list="lista-categorias" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-semibold shadow-sm" placeholder="Escribe o selecciona..." autocomplete="off" required>
+                    <input type="text" id="categoria_nombre" name="categoria_nombre" list="lista-categorias" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-300 rounded-xl p-3.5 sm:p-4 text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition text-sm font-semibold shadow-sm" placeholder="Escribe o selecciona..." autocomplete="off" required>
                     <input type="hidden" id="categoria_id" name="categoria_id">
                     <datalist id="lista-categorias">
                         @foreach($categorias as $categoria)
@@ -85,7 +85,7 @@
                 {{-- Descripción del Platillo --}}
                 <div class="col-span-2">
                     <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" rows="2" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition resize-none text-sm font-semibold shadow-sm" placeholder="Describe qué lleva este platillo..."></textarea>
+                    <textarea id="descripcion" name="descripcion" rows="2" data-teclado="texto" inputmode="none" class="w-full bg-white border border-slate-300 rounded-xl p-3.5 sm:p-4 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition resize-none text-sm font-semibold shadow-sm" placeholder="Describe qué lleva este platillo..."></textarea>
                 </div>
 
                 {{-- Ingredientes del Platillo --}}
@@ -108,7 +108,7 @@
             </div>
 
             {{-- Botones de Acción inferiores --}}
-            <div class="mt-8 pt-4 border-t border-slate-200/60 bg-slate-100/50 -mx-5 sm:-mx-8 -mb-5 sm:-mb-8 p-5 sm:p-6 flex flex-col-reverse sm:flex-row gap-3 flex-shrink-0">
+            <div class="mt-8 pt-4 border-t border-slate-300/60 bg-slate-200/50 -mx-5 sm:-mx-8 -mb-5 sm:-mb-8 p-5 sm:p-6 flex flex-col-reverse sm:flex-row gap-3 flex-shrink-0">
                 <button type="button" onclick="closeModalCrear()" class="w-full sm:flex-1 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors py-3 sm:py-3.5 outline-none active:scale-95">CANCELAR</button>
                 <button type="submit" class="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black py-3.5 rounded-xl transition shadow-md shadow-blue-500/20 text-xs uppercase tracking-widest outline-none" id="btn-guardar">GUARDAR CAMBIOS</button>
             </div>

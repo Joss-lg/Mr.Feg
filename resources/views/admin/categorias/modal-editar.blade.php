@@ -40,7 +40,7 @@
         </div>
 
         {{-- Formulario --}}
-        <form action="{{ route('admin.categorias.update', $categoria->id) }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-slate-50">
+        <form action="{{ route('admin.categorias.update', $categoria->id) }}" method="POST" class="flex flex-col flex-1 min-h-0 bg-[#F2F2F2]">
             @csrf
             @method('PUT')
 
@@ -94,7 +94,7 @@
             </div>
 
             {{-- Botones Footer --}}
-            <div class="flex items-center gap-4 px-6 sm:px-8 py-6 border-t border-slate-200 shrink-0 bg-slate-50">
+            <div class="flex items-center gap-4 px-6 sm:px-8 py-6 border-t border-slate-200 shrink-0 bg-[#F2F2F2]">
                 <button type="button" onclick="cerrarModalEspecifico('modalEditar-{{ $categoria->id }}')"
                     class="flex-1 h-12 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-800 transition-colors outline-none">
                     Cancelar

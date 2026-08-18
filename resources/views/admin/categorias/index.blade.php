@@ -19,7 +19,7 @@
 @endpush
 
 @section('content')
-<div class="px-4 py-6 sm:p-8 lg:p-10 max-w-[1800px] mx-auto w-full space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
+<div class="px-4 py-6 sm:p-8 lg:p-10 max-w-[1800px] mx-auto w-full space-y-6 sm:space-y-8 relative z-10 font-sans min-h-screen bg-[#F2F2F2] text-slate-800 transition-colors duration-300">
 
     {{-- ======================================================== --}}
     {{-- HEADER & MÉTRICAS (ESTILO DASHBOARD PREMIUM) --}}

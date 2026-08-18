@@ -26,7 +26,7 @@
 
         body.modo-crema {
             /* MODO CREMA: Fresco, nítido y con alto contraste */
-            --bg-base: #f3f4f6;
+            --bg-base: #F2F2F2;
             --bg-panel: #ffffff;
             --border-color: rgba(0, 0, 0, 0.08);
             --border-highlight: rgba(0, 0, 0, 0.15);
