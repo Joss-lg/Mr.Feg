@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\FidelidadCliente;
 use Carbon\Carbon;
 
 class MesaOperacionController extends Controller
@@ -128,6 +129,22 @@ class MesaOperacionController extends Controller
                 // actualizarPropina), así que sumamos por seguridad.
                 $ordenesActivas = $mesa->ordenesActivas()->get();
                 $orden = $ordenesActivas->first();
+
+                // --- NUEVO: PROGRAMA DE LEALTAD AUTOMÁTICO ---
+                if ($orden && $orden->cliente_id) {
+                    $montoOrdenTotal = $cuentaDivision 
+                        ? (float) $cuentaDivision->total 
+                        : $this->cajaService->obtenerDesgloseMesa($mesa)['total'];
+
+                    if ($montoOrdenTotal >= 150.00) {
+                        $fidelidad = \App\Models\FidelidadCliente::firstOrCreate(
+                            ['cliente_id' => $orden->cliente_id],
+                            ['compras_acumuladas' => 0, 'total_canjes_realizados' => 0]
+                        );
+
+                        $fidelidad->increment('compras_acumuladas');
+                    }
+                }
 
                 // La propina "base" a prorratear es la de la parte que se está
                 // cobrando (si hay división) o la de toda la mesa (pago único).

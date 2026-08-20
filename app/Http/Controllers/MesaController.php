@@ -90,7 +90,7 @@ class MesaController extends Controller
         ));
     }
 
-    public function enviar(Request $request)
+   public function enviar(Request $request)
     {
         try {
             $request->validate([
@@ -99,12 +99,37 @@ class MesaController extends Controller
                 'total' => 'nullable|numeric|min:0',
                 'personas' => 'nullable|integer|min:1',
                 'descuento_porcentaje' => 'nullable|numeric|min:0|max:100',
+                // NUEVO: estos campos ya venían en el payload del frontend
+                // (enviarACocina() los manda), pero nunca se validaban ni se
+                // leían aquí, así que se perdían silenciosamente antes de
+                // llegar a ComandaService.
+                'cliente_id'      => 'nullable|integer|exists:clientes,id',
+                'direccion_id'    => 'nullable|integer|exists:direcciones,id',
+                'tipo_pedido'     => 'nullable|string|in:comedor,llevar,domicilio',
+                'nombre_temporal' => 'nullable|string|max:255',
             ]);
-
+ 
             $mesa = Mesa::findOrFail($request->mesa_id);
-
+ 
             $permitirSinStock = $request->boolean('permitir_sin_stock', true);
-
+ 
+            // NUEVO: esto es lo que faltaba. ComandaService::procesarEnvio()
+            // espera un 8vo argumento $datosExtra (con cliente_id, tipo_pedido,
+            // direccion_id, nombre_temporal). Como nunca se armaba ni se pasaba
+            // aquí, el servicio siempre recibía $datosExtra = [] (su valor por
+            // defecto), y por lo tanto NUNCA guardaba el cliente en la orden,
+            // sin importar qué seleccionaras en el modal del frontend. Esto
+            // rompía en cadena: sin cliente_id en la orden, el programa de
+            // fidelidad (en MesaOperacionController::procesarPago) nunca podía
+            // sumar el sello, porque su condición `if ($orden->cliente_id)`
+            // nunca se cumplía.
+            $datosExtra = [
+                'cliente_id'      => $request->cliente_id,
+                'direccion_id'    => $request->direccion_id,
+                'tipo_pedido'     => $request->tipo_pedido,
+                'nombre_temporal' => $request->nombre_temporal,
+            ];
+ 
             $orden = app(ComandaService::class)->procesarEnvio(
                 $mesa,
                 $request->platillos,
@@ -112,15 +137,16 @@ class MesaController extends Controller
                 $request->total ?? 0,
                 $request->personas ?? $mesa->capacidad ?? 4,
                 $request->descuento_porcentaje ?? 0,
-                $permitirSinStock // <-- Se lo pasamos como último argumento
+                $permitirSinStock, // <-- Se lo pasamos como último argumento
+                $datosExtra        // <-- NUEVO: el 8vo argumento que faltaba
             );
-
+ 
             return response()->json([
                 'success' => true,
                 'message' => 'Orden enviada correctamente',
                 'orden_id' => $orden->id
             ]);
-
+ 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -128,7 +154,6 @@ class MesaController extends Controller
             ], 500);
         }
     }
-
     /**
      * Cancela un producto individual que ya fue enviado a cocina.
      * Requiere autorización por NIP de un Capitán o Administrador.

@@ -22,5 +22,8 @@ class DatabaseSeeder extends Seeder
 
         // 2. Creamos el rol Administrador y al SuperAdmin (ID 1) con acceso total por código.
         $this->call(UsuarioAdminSeeder::class);
+
+        // 3. Niveles del programa de lealtad / fidelización
+        $this->call(NivelFidelidadSeeder::class);
     }
 }

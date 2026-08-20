@@ -29,11 +29,12 @@ class ComandaService
             // --- ACTUALIZACIÓN LIMPIA DE LA MESA VIRTUAL ---
             // Si es un pedido para llevar y trae nombre temporal, actualizamos 
             // el número de la mesa virtual existente sin tocar la estructura de la BD.
-            if (!empty($datosExtra['nombre_temporal'])) {
+                if (!empty($datosExtra['nombre_temporal'])) {
                 $mesa->update([
-                    'numero' => 'LLEVAR - ' . strtoupper($datosExtra['nombre_temporal'])
+                    'numero' => 'LLEVAR-' . strtoupper($datosExtra['nombre_temporal']) . '-' . $mesa->id
                 ]);
             }
+ 
             // ----------------------------------------------
 
             // 1. Buscar orden activa pendiente o crearla
@@ -55,10 +56,17 @@ class ComandaService
             if (Schema::hasColumn('ordenes', 'personas')) $ordenDataUpdate['personas'] = $personas;
             if (Schema::hasColumn('ordenes', 'descuento_porcentaje')) $ordenDataUpdate['descuento_porcentaje'] = $descuentoPorcentaje;
             
-            // Actualizamos los campos de delivery si la orden ya existía y el cajero los cambió
+            // Actualizamos los campos de delivery si la orden ya existía y el cajero los cambió.
+            // IMPORTANTE: usamos !empty() en vez de array_key_exists() a propósito.
+            // $datosExtra['cliente_id'] SIEMPRE existe como clave (ComandaController
+            // la manda como 'cliente_id' => $request->cliente_id, aunque sea null).
+            // Con array_key_exists(), cualquier envío posterior de platillos a esta
+            // misma orden -sin haber vuelto a seleccionar cliente en el modal, por
+            // ejemplo tras recargar la página- mandaba cliente_id: null y BORRABA el
+            // cliente que ya se había guardado correctamente en el primer envío.
             if (!empty($datosExtra['tipo_pedido'])) $ordenDataUpdate['tipo_pedido'] = $datosExtra['tipo_pedido'];
-            if (array_key_exists('cliente_id', $datosExtra)) $ordenDataUpdate['cliente_id'] = $datosExtra['cliente_id'];
-            if (array_key_exists('direccion_id', $datosExtra)) $ordenDataUpdate['direccion_id'] = $datosExtra['direccion_id'];
+            if (!empty($datosExtra['cliente_id'])) $ordenDataUpdate['cliente_id'] = $datosExtra['cliente_id'];
+            if (!empty($datosExtra['direccion_id'])) $ordenDataUpdate['direccion_id'] = $datosExtra['direccion_id'];
 
             if (!empty($ordenDataUpdate)) {
                 $orden->update($ordenDataUpdate);

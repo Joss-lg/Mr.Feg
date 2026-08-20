@@ -695,93 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 2. Buscador en tiempo real optimizado
-document.addEventListener('input', function(e) {
-    if (e.target && e.target.id === 'inputBuscarCliente') {
-        clearTimeout(timeoutBuscador);
-        const query = e.target.value.trim();
-        const contenedor = document.getElementById('resultadosClientes');
-
-        if (!contenedor) return;
-
-        if (query.length < 2) {
-            contenedor.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">Empieza a escribir para buscar...</div>';
-            return;
-        }
-
-        timeoutBuscador = setTimeout(() => {
-            contenedor.innerHTML = '<div class="p-4 text-center text-blue-600 text-sm font-bold"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando cliente...</div>';
-            
-            fetch(`/pos/clientes/buscar?q=${encodeURIComponent(query)}`, {
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
-            })
-            .then(res => res.json())
-            .then(clientes => {
-                if (!clientes || clientes.length === 0) {
-                    contenedor.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm font-medium">No se encontraron clientes con esos datos.</div>';
-                    return;
-                }
-
-                let html = '';
-                clientes.forEach(c => {
-                    const jsonDirecciones = encodeURIComponent(JSON.stringify(c.direcciones || []));
-                    const nombreCompleto = `${c.nombre} ${c.apellido || ''}`.trim();
-                    
-                    html += `
-                    <div class="flex justify-between items-center p-3 border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors" 
-                         onclick="window.seleccionarClienteDelivery(${c.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '${c.telefono}', '${jsonDirecciones}')">
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">${nombreCompleto}</p>
-                            <p class="text-xs text-slate-500"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
-                        </div>
-                        <button type="button" class="bg-white border border-slate-200 text-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm"><i class="fas fa-check text-blue-500"></i></button>
-                    </div>`;
-                });
-                contenedor.innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Error buscando cliente:', error);
-                contenedor.innerHTML = '<div class="p-4 text-center text-red-500 text-sm font-bold">Error de conexión al buscar.</div>';
-            });
-        }, 300);
-    }
-});
-
-// 3. Función global de selección de cliente para avanzar a direcciones
-window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEncoded) {
-    window.clienteSeleccionadoId = id;
-    
-    const inputClienteId = document.getElementById('nd_cliente_id');
-    if (inputClienteId) inputClienteId.value = id; 
-
-    const lblNombre = document.getElementById('lbl-nombre-cliente');
-    const lblTel = document.getElementById('lbl-tel-cliente');
-    if (lblNombre) lblNombre.textContent = nombre;
-    if (lblTel) lblTel.textContent = 'Tel: ' + telefono;
-
-    try {
-        const direcciones = JSON.parse(decodeURIComponent(direccionesEncoded));
-        renderDireccionesRadios(direcciones);
-    } catch(err) {
-        console.error("Error al decodificar direcciones:", err);
-        renderDireccionesRadios([]);
-    }
-
-    // Cambiamos de vista dentro del modal (ocultar buscador, mostrar direcciones)
-    const vistaBuscador = document.getElementById('vista-buscador-clientes');
-    const vistaDirecciones = document.getElementById('vista-direcciones-cliente');
-    
-    if (vistaBuscador) vistaBuscador.classList.add('hidden');
-    if (vistaDirecciones) vistaDirecciones.classList.remove('hidden');
-
-    const btnConfirmar = document.getElementById('btnConfirmarDelivery');
-    if (btnConfirmar) {
-        btnConfirmar.disabled = true;
-        btnConfirmar.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-};
-
-// 4. Renderizar las opciones de direcciones
+// 2. Renderizar las opciones de direcciones
 function renderDireccionesRadios(direcciones) {
     const contenedor = document.getElementById('lista-direcciones-radios');
     if (!contenedor) return;
@@ -814,7 +728,7 @@ function renderDireccionesRadios(direcciones) {
     contenedor.innerHTML = html;
 }
 
-// 5. Activar botón confirmar dirección
+// 3. Activar botón confirmar dirección
 window.activarBotonConfirmar = function() {
     const selector = document.querySelector('input[name="radio_direccion"]:checked');
     if (selector) {
@@ -827,7 +741,7 @@ window.activarBotonConfirmar = function() {
     }
 };
 
-// 6. Al confirmar la dirección, actualizar la tarjeta lateral con el nombre del cliente
+// 4. Al confirmar la dirección, actualizar la tarjeta lateral con el nombre del cliente
 document.getElementById('btnConfirmarDelivery')?.addEventListener('click', function() {
     cerrarModal('modalDireccion');
     
@@ -948,7 +862,7 @@ window.cambiarCliente = function() {
     }
 };
 
-// 1. Detectar al cargar la página si es "Para Llevar"
+// 5. Detectar al cargar la página si es "Para Llevar"
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const tipoParams = urlParams.get('tipo_pedido');
@@ -966,7 +880,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 2. Función para abrir el modal correcto al hacer clic en la tarjeta de tipo de pedido
+// 6. Función para abrir el modal correcto al hacer clic en la tarjeta de tipo de pedido
 window.abrirModalSegunTipo = function() {
     if (window.tipoPedidoActual === 'domicilio') {
         abrirModalDelivery(); // Tu función actual para abrir el de domicilio
@@ -976,7 +890,7 @@ window.abrirModalSegunTipo = function() {
     }
 };
 
-// 3. Confirmar el nombre temporal
+// 7. Confirmar el nombre temporal
 window.nombreClienteTemporal = null; // Variable global para guardar el nombre suelto
 
 window.confirmarClienteLlevar = function() {
@@ -1002,7 +916,18 @@ window.confirmarClienteLlevar = function() {
     cerrarModal('modalParaLlevar');
 };
 
-// --- 1. BUSCADOR INTELIGENTE (Detecta si es Domicilio o Llevar) ---
+// --- 8. BUSCADOR INTELIGENTE (Detecta si es Domicilio o Llevar) ---
+// NOTA: esta es la ÚNICA versión del listener de búsqueda. Antes existía
+// una copia previa (más simple, sin soporte "Para Llevar") que quedaba
+// registrada en paralelo a esta: al escribir en el buscador se disparaban
+// DOS peticiones a /pos/clientes/buscar por cada tecleo, y como esta versión
+// se ejecutaba después, terminaba sobreescribiendo el HTML de la otra. El
+// problema real era que, al generar el onclick de cada resultado, a esta
+// versión "nueva" se le olvidó reenviar los 4 datos de lealtad que el
+// backend sí manda (lealtad_sellos, lealtad_premio_disponible,
+// lealtad_siguiente_meta, lealtad_meta_requerida) — por eso la tarjeta de
+// lealtad siempre caía en "No hay metas configuradas" sin importar la
+// respuesta real del servidor. Fix: se agregan esos 4 argumentos al onclick.
 document.addEventListener('input', function(e) {
     if (e.target && e.target.id === 'inputBuscarCliente') {
         clearTimeout(timeoutBuscador);
@@ -1054,10 +979,17 @@ document.addEventListener('input', function(e) {
                 clientes.forEach(c => {
                     const jsonDirecciones = encodeURIComponent(JSON.stringify(c.direcciones || []));
                     const nombreCompleto = `${c.nombre} ${c.apellido || ''}`.trim();
-                    
+
+                    // FIX: se agregan los 4 argumentos de lealtad al onclick,
+                    // igual que los manda el backend (ver PosClienteController@buscar).
+                    // Se escapan comillas simples en los textos de premio/meta por
+                    // si algún día contienen apóstrofes.
+                    const premioSeguro = (c.lealtad_premio_disponible || 'null').toString().replace(/'/g, "\\'");
+                    const metaSegura = (c.lealtad_siguiente_meta || 'null').toString().replace(/'/g, "\\'");
+
                     html += `
                     <div class="flex justify-between items-center p-3 border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer transition-colors" 
-                         onclick="window.seleccionarClienteDelivery(${c.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '${c.telefono}', '${jsonDirecciones}')">
+                         onclick="window.seleccionarClienteDelivery(${c.id}, '${nombreCompleto.replace(/'/g, "\\'")}', '${c.telefono}', '${jsonDirecciones}', ${c.lealtad_sellos || 0}, '${premioSeguro}', '${metaSegura}', ${c.lealtad_meta_requerida || 0})">
                         <div>
                             <p class="font-bold text-slate-800 text-sm">${nombreCompleto}</p>
                             <p class="text-xs text-slate-500"><i class="fas fa-phone mr-1"></i>${c.telefono}</p>
@@ -1075,7 +1007,7 @@ document.addEventListener('input', function(e) {
     }
 });
 
-// --- 2. FUNCIÓN PARA GUARDAR EL CLIENTE TEMPORAL ---
+// 9. Función para guardar el cliente temporal (flujo "Para Llevar")
 window.confirmarClienteTemporal = function(nombre) {
     window.nombreClienteTemporal = nombre;
     window.clienteSeleccionadoId = null; 
@@ -1092,29 +1024,55 @@ window.confirmarClienteTemporal = function(nombre) {
     if (typeof mostrarExito === 'function') mostrarExito("Nombre temporal asignado");
 };
 
-// --- 3. SELECCIÓN INTELIGENTE (Salta la dirección si es "Para Llevar") ---
-window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEncoded) {
+// 10. SELECCIÓN INTELIGENTE (Lealtad + Domicilio / Llevar)
+// NOTA: esta es la ÚNICA versión de seleccionarClienteDelivery (antes había
+// una copia previa más simple que quedaba sobreescrita por esta).
+window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEncoded, sellos = 0, premio = null, metaNombre = null, metaReq = 0) {
     window.clienteSeleccionadoId = id;
     window.nombreClienteTemporal = nombre; 
 
-    const esLlevar = (window.tipoPedidoActual === 'llevar') || (new URLSearchParams(window.location.search).get('tipo_pedido') === 'llevar');
+    // ACTUALIZACIÓN DE LA TARJETA DE LEALTAD
+    const tarjetaLealtad = document.getElementById('tarjeta-lealtad');
+    const lealtadSellos = document.getElementById('lealtad-sellos');
+    const lealtadMensaje = document.getElementById('lealtad-mensaje');
 
-    // SI ES PARA LLEVAR: Asignamos el nombre, saltamos las direcciones y cerramos
+    if (tarjetaLealtad) {
+        tarjetaLealtad.classList.remove('hidden');
+        lealtadSellos.innerHTML = `${sellos} <i class="fas fa-star text-[8px] ml-0.5"></i>`;
+
+        if (premio && premio !== 'null') {
+            tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-sm relative overflow-hidden";
+            lealtadSellos.className = "bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse";
+            lealtadMensaje.innerHTML = `<span class="text-emerald-700 font-bold">¡Premio Disponible!</span><br><span class="text-slate-800">${premio}</span>`;
+        } 
+        else if (metaNombre && metaNombre !== 'null' && metaNombre !== "Configurar Niveles") {
+            tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 shadow-sm relative overflow-hidden";
+            lealtadSellos.className = "bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm";
+            let faltan = metaReq - sellos;
+            lealtadMensaje.innerHTML = `Falta(n) <b class="text-indigo-600">${faltan} compra(s)</b> para:<br><span class="text-slate-800 font-semibold">${metaNombre}</span>`;
+        } else {
+            tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-slate-100 to-white border border-slate-200 shadow-sm relative overflow-hidden";
+            lealtadSellos.className = "bg-slate-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm";
+            lealtadMensaje.innerHTML = "No hay metas de lealtad configuradas.";
+        }
+    }
+
+    const esLlevar = (window.tipoPedidoActual === 'llevar') || (new URLSearchParams(window.location.search).get('tipo_pedido') === 'llevar');
     if (esLlevar) {
         const lblBoton = document.getElementById('lbl-tipo-pedido-actual');
-        if (lblBoton) {
-            lblBoton.textContent = nombre;
-            lblBoton.className = 'text-[11px] font-black text-blue-500 mt-1 truncate max-w-full px-1';
+        if (lblBoton) { 
+            lblBoton.textContent = nombre; 
+            lblBoton.className = 'text-[11px] font-black text-blue-500 mt-1 truncate max-w-full px-1'; 
         }
         if (typeof window.cerrarModal === 'function') window.cerrarModal('modalDireccion'); 
         if (typeof mostrarExito === 'function') mostrarExito("Cliente asignado para llevar.");
-        return; // Cortamos la ejecución aquí
+        return; 
     }
 
-    // SI ES DOMICILIO: Sigue su flujo normal hacia las direcciones
+    // SI ES DOMICILIO: Flujo normal de direcciones
     const inputClienteId = document.getElementById('nd_cliente_id');
     if (inputClienteId) inputClienteId.value = id; 
-
+    
     const lblNombre = document.getElementById('lbl-nombre-cliente');
     const lblTel = document.getElementById('lbl-tel-cliente');
     if (lblNombre) lblNombre.textContent = nombre;
@@ -1123,8 +1081,8 @@ window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEn
     try {
         const direcciones = JSON.parse(decodeURIComponent(direccionesEncoded));
         renderDireccionesRadios(direcciones);
-    } catch(err) {
-        renderDireccionesRadios([]);
+    } catch(err) { 
+        renderDireccionesRadios([]); 
     }
 
     const vistaBuscador = document.getElementById('vista-buscador-clientes');

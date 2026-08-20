@@ -69,6 +69,29 @@
 </button>
 @endif
 
+        {{-- ========================================== --}}
+        {{-- NUEVO: TARJETA DE LEALTAD (OCULTA POR DEFECTO) --}}
+        {{-- ========================================== --}}
+        <div id="tarjeta-lealtad" class="col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 hidden shadow-sm relative overflow-hidden">
+            <!-- Destello de fondo decorativo -->
+            <div class="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-indigo-500/10 rounded-full blur-xl"></div>
+            
+            <div class="flex justify-between items-start mb-2 relative z-10">
+                <div class="flex items-center gap-1.5">
+                    <i class="fas fa-crown text-indigo-500 text-sm"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-indigo-800">Lealtad</span>
+                </div>
+                <span id="lealtad-sellos" class="bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    0 Sellos
+                </span>
+            </div>
+            
+            <p id="lealtad-mensaje" class="text-[11px] font-medium text-slate-600 leading-tight relative z-10">
+                Selecciona un cliente para ver sus beneficios.
+            </p>
+        </div>
+        {{-- ========================================== --}}
+
         @if($esCapitan ?? false)
             <button type="button" onclick="llamarCapitan()" class="col-span-2 mt-1 h-12 flex items-center justify-center gap-2 rounded-[16px] bg-gradient-to-b from-blue-600 to-blue-600 border border-slate-200 hover:opacity-90 hover:shadow-lg transition-all duration-150 active:scale-95 group text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50">
                 <i class="fas fa-shield-alt text-[11px]"></i>
