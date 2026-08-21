@@ -50,15 +50,15 @@ class MesaController extends Controller
 
         $categorias = Categoria::all();
 
-        // Consulta limpia sin hacer referencia a la columna 'imagen'
-        $productos = Producto::with(['categoria', 'modificadores'])
+       // Consulta corregida con soporte para variantes:
+        $productos = Producto::with(['categoria', 'modificadores', 'variantes'])
             ->select([
                 'id', 'categoria_id', 'nombre', 'descripcion', 'precio',
-                'se_vende_por_peso', 'precio_por_100g', 'esta_disponible',
+                'se_vende_por_peso', 'precio_por_100g', 'tiene_variantes', 'esta_disponible',
             ])
             ->orderBy('nombre', 'asc')
             ->get();
-
+            
         $nombreRol = strtolower(trim($usuario->rol?->nombre ?? ''));
         $esAdmin = $nombreRol === 'administrador';
 

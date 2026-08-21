@@ -8,6 +8,7 @@ use App\Models\Direccion;
 // --- IMPORTAMOS LOS MODELOS DE LEALTAD ---
 use App\Models\FidelidadCliente;
 use App\Models\NivelFidelidad;
+use Illuminate\Support\Collection;
 
 class PosClienteController extends Controller
 {
@@ -28,45 +29,14 @@ class PosClienteController extends Controller
             ->take(10) 
             ->get();
 
-        // --- NUEVO: LÓGICA DE LEALTAD OPTIMIZADA ---
+        // Los niveles se calculan UNA sola vez aquí y se reutilizan para
+        // todos los clientes de este resultado (evita repetir la consulta
+        // a niveles_fidelidad por cada cliente encontrado).
         $niveles = NivelFidelidad::orderBy('compras_requeridas', 'asc')->get();
 
         // Iteramos sobre los clientes encontrados para inyectarles sus sellos
         $clientes->map(function ($cliente) use ($niveles) {
-            $fidelidad = FidelidadCliente::where('cliente_id', $cliente->id)->first();
-            $sellos = $fidelidad ? $fidelidad->compras_acumuladas : 0;
-            
-            $premioDisponible = null;
-            $siguienteMeta = null;
-            $metaRequerida = 0;
-
-            if ($niveles->count() > 0) {
-                foreach ($niveles as $nivel) {
-                    if ($sellos >= $nivel->compras_requeridas) {
-                        $premioDisponible = $nivel->premio_descripcion;
-                    }
-                    if ($sellos < $nivel->compras_requeridas && !$siguienteMeta) {
-                        $siguienteMeta = $nivel->premio_descripcion;
-                        $metaRequerida = $nivel->compras_requeridas;
-                        break;
-                    }
-                }
-                
-                // Si ya completó todo, ponemos un mensaje claro
-                if (!$siguienteMeta && $premioDisponible) {
-                    $siguienteMeta = "¡Nivel máximo alcanzado!";
-                }
-            } else {
-                $siguienteMeta = "Configurar Niveles";
-                $metaRequerida = 0;
-            }
-
-            // Inyectamos las variables al objeto cliente
-            $cliente->lealtad_sellos = $sellos;
-            $cliente->lealtad_premio_disponible = $premioDisponible;
-            $cliente->lealtad_siguiente_meta = $siguienteMeta;
-            $cliente->lealtad_meta_requerida = $metaRequerida;
-
+            $this->inyectarLealtad($cliente, $niveles);
             return $cliente;
         });
 
@@ -87,6 +57,19 @@ class PosClienteController extends Controller
             'telefono' => $request->telefono,
             'status' => 1, 
         ]);
+
+        // NUEVO: le inyectamos la lealtad directo aquí, igual que en
+        // buscar(), en vez de dejar que el frontend tenga que volver a
+        // buscar al cliente para conseguir esta información. Un cliente
+        // recién creado siempre tiene 0 compras, pero de todas formas debe
+        // mostrar la primera meta a alcanzar (ej. "Falta(n) 5 compra(s)
+        // para: Papas a la francesa chicas"), no un mensaje vacío.
+        $niveles = NivelFidelidad::orderBy('compras_requeridas', 'asc')->get();
+        $this->inyectarLealtad($cliente, $niveles);
+
+        // direcciones vacío explícito: el frontend espera este campo para
+        // poder armar el radio de "Dirección de Entrega" sin romperse.
+        $cliente->setRelation('direcciones', collect());
 
         return response()->json([
             'success' => true,
@@ -115,5 +98,53 @@ class PosClienteController extends Controller
             'success' => true,
             'direccion' => $direccion
         ]);
+    }
+
+    /**
+     * Calcula los sellos, el premio disponible (si ya lo alcanzó) y la
+     * siguiente meta de lealtad de un cliente, y los inyecta directo como
+     * atributos del modelo (para que salgan tal cual al convertirlo a JSON).
+     *
+     * Extraído de buscar() para poder reutilizarlo también en
+     * guardarClienteExpress() sin duplicar esta lógica en dos lugares —
+     * que fue exactamente el bug original: guardarClienteExpress() nunca
+     * calculaba nada de esto, así que un cliente recién registrado siempre
+     * mostraba "No hay metas de lealtad configuradas" hasta que lo volvías
+     * a buscar por separado.
+     */
+    private function inyectarLealtad(Cliente $cliente, Collection $niveles): void
+    {
+        $fidelidad = FidelidadCliente::where('cliente_id', $cliente->id)->first();
+        $sellos = $fidelidad ? $fidelidad->compras_acumuladas : 0;
+
+        $premioDisponible = null;
+        $siguienteMeta = null;
+        $metaRequerida = 0;
+
+        if ($niveles->count() > 0) {
+            foreach ($niveles as $nivel) {
+                if ($sellos >= $nivel->compras_requeridas) {
+                    $premioDisponible = $nivel->premio_descripcion;
+                }
+                if ($sellos < $nivel->compras_requeridas && !$siguienteMeta) {
+                    $siguienteMeta = $nivel->premio_descripcion;
+                    $metaRequerida = $nivel->compras_requeridas;
+                    break;
+                }
+            }
+
+            // Si ya completó todo, ponemos un mensaje claro
+            if (!$siguienteMeta && $premioDisponible) {
+                $siguienteMeta = "¡Nivel máximo alcanzado!";
+            }
+        } else {
+            $siguienteMeta = "Configurar Niveles";
+            $metaRequerida = 0;
+        }
+
+        $cliente->lealtad_sellos = $sellos;
+        $cliente->lealtad_premio_disponible = $premioDisponible;
+        $cliente->lealtad_siguiente_meta = $siguienteMeta;
+        $cliente->lealtad_meta_requerida = $metaRequerida;
     }
 }

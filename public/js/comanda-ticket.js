@@ -51,7 +51,40 @@
     // producto se vende por peso, NO se agrega directo: se abre el modal
     // de Gramaje (comanda-gramaje.js) y la línea se crea hasta que el
     // mesero confirma el peso, ya con el precio calculado.
-    window.agregarAlTicket = function (id, nombre, precio, categoria, arrayModificadores = [], sePorPeso = false, precioPor100g = 0) {
+   // Punto de entrada al hacer clic en una tarjeta del menú o desde el modal de variantes.
+    window.agregarAlTicket = function (idOrObj, nombreOrVariante, precioOriginal, categoriaOriginal, arrayModificadores = [], sePorPesoOriginal = false, precioPor100gOriginal = 0) {
+        
+        let id, nombre, precio, categoria, sePorPeso, precioPor100g;
+        let varianteId = null;
+
+        // Si el primer parámetro es un objeto, viene del nuevo flujo con variantes
+        if (typeof idOrObj === 'object' && idOrObj !== null) {
+            const prod = idOrObj;
+            const variante = nombreOrVariante; // El segundo parámetro es la variante elegida
+
+            id = prod.id;
+            precio = parseFloat(prod.precio || 0);
+            categoria = prod.categoria ? prod.categoria.nombre : (prod.categoria_id || 'Menú');
+            sePorPeso = !!prod.se_vende_por_peso;
+            precioPor100g = parseFloat(prod.precio_por_100g || 0);
+            nombre = prod.nombre;
+
+            // Si el cliente eligió un tamaño específico (Variante)
+            if (variante) {
+                nombre = `${prod.nombre} (${variante.nombre})`; // Ej: Alitas (10pz)
+                precio = parseFloat(variante.precio || 0);
+                varianteId = variante.id;
+            }
+        } else {
+            // Flujo legacy (parámetros sueltos) por si otros scripts aún lo usan
+            id = idOrObj;
+            nombre = nombreOrVariante;
+            precio = parseFloat(precioOriginal || 0);
+            categoria = categoriaOriginal;
+            sePorPeso = sePorPesoOriginal;
+            precioPor100g = precioPor100gOriginal;
+        }
+
         cambiarTab('nueva-orden', document.getElementById('btn-tab-nueva-orden'));
 
         if (sePorPeso) {
@@ -60,32 +93,39 @@
         }
 
         _insertarItemEnTicket({
-            id, nombre,
-            precioUnitario: parseFloat(precio),
+            id, 
+            nombre,
+            precioUnitario: precio,
             categoria,
             arrayModificadores,
             sePorPeso: false,
             precioPor100g: 0,
-            gramaje: gramajePendiente
+            gramaje: gramajePendiente,
+            varianteId // Pasamos el ID del tamaño para que no se agrupen diferentes presentaciones
         });
 
-        if (gramajePendiente) { gramajePendiente = null; document.getElementById('indicador-gramaje-pendiente').classList.add('hidden'); }
+        if (gramajePendiente) { 
+            gramajePendiente = null; 
+            const indicador = document.getElementById('indicador-gramaje-pendiente');
+            if (indicador) indicador.classList.add('hidden'); 
+        }
     };
 
-    // Inserta (o agrupa) una línea en el ticket. Compartida por el flujo
-    // normal y por el flujo de productos por peso (una vez calculado el
-    // precio a partir del gramaje capturado en comanda-gramaje.js).
-    window._insertarItemEnTicket = function ({ id, nombre, precioUnitario, categoria, arrayModificadores, sePorPeso, precioPor100g, gramaje }) {
+    // Inserta (o agrupa) una línea en el ticket.
+    window._insertarItemEnTicket = function ({ id, nombre, precioUnitario, categoria, arrayModificadores, sePorPeso, precioPor100g, gramaje, varianteId = null }) {
         estadoVacio.classList.add('hidden');
 
-        const modsString = JSON.stringify(arrayModificadores).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+        const modsString = JSON.stringify(arrayModificadores || []).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
         const gramajeKey = gramaje ? gramaje.toString() : 'sin-gramaje';
+        const varianteKey = varianteId ? varianteId.toString() : 'sin-variante';
 
+        // Buscamos si ya existe el MISMO producto, con la MISMA variante y MODIFICADORES
         const existingItem = Array.from(listaTicket.querySelectorAll('.ticket-item')).find(item => {
             return parseInt(item.dataset.productoId, 10) === id
                 && item.dataset.modificadores === modsString
                 && item.dataset.gramaje === gramajeKey
-                && item.dataset.tiempo === tiempoGlobal;
+                && item.dataset.tiempo === tiempoGlobal
+                && (item.dataset.varianteId || 'sin-variante') === varianteKey; // Regla de separación por tamaño
         });
 
         if (existingItem) {
@@ -120,7 +160,7 @@
             : '';
 
         const itemHTML = `
-            <div id="${itemId}" data-producto-id="${id}" data-cantidad="1" data-precio="${precioUnitario}" data-modificadores="${modsString}" data-gramaje="${gramajeKey}" data-tiempo="${tiempoGlobal}" data-se-por-peso="${sePorPeso ? '1' : '0'}" data-precio100g="${precioPor100g}" class="ticket-item animate-item relative w-full rounded-[18px] bg-[var(--bg-panel)] border border-[var(--border-color)] shadow-sm p-4 flex flex-col gap-3 cursor-pointer transition-all duration-300 outline-none" onclick="seleccionarItem('${itemId}')">
+            <div id="${itemId}" data-producto-id="${id}" data-variante-id="${varianteId || ''}" data-cantidad="1" data-precio="${precioUnitario}" data-modificadores="${modsString}" data-gramaje="${gramajeKey}" data-tiempo="${tiempoGlobal}" data-se-por-peso="${sePorPeso ? '1' : '0'}" data-precio100g="${precioPor100g}" class="ticket-item animate-item relative w-full rounded-[18px] bg-[var(--bg-panel)] border border-[var(--border-color)] shadow-sm p-4 flex flex-col gap-3 cursor-pointer transition-all duration-300 outline-none" onclick="seleccionarItem('${itemId}')">
 
                 <div class="flex justify-between items-start gap-2">
                     <div class="flex-1">
@@ -161,7 +201,7 @@
         listaTicket.parentElement.scrollTop = listaTicket.parentElement.scrollHeight;
         return itemId;
     };
-
+    
     window.seleccionarItem = function (id) {
         deseleccionarTicket();
         itemActivo = document.getElementById(id);

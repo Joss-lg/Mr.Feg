@@ -16,6 +16,7 @@ class Producto extends Model
         'precio',
         'se_vende_por_peso',
         'precio_por_100g',
+        'tiene_variantes',
         'descripcion',
         'esta_disponible'
     ];
@@ -27,6 +28,7 @@ class Producto extends Model
         'precio' => 'decimal:2',
         'se_vende_por_peso' => 'boolean',
         'precio_por_100g' => 'decimal:2',
+        'tiene_variantes' => 'boolean',
         'tiempo_preparacion' => 'integer',
         'esta_disponible' => 'boolean',
     ];
@@ -60,6 +62,12 @@ class Producto extends Model
     public function promociones()
     {
         return $this->belongsToMany(Promocion::class, 'promocion_productos');
+    }
+
+    // Agregar esto dentro de la clase Producto:
+    public function variantes()
+    {
+        return $this->hasMany(Variante::class);
     }
 
     // Lógica de imágenes desactivada temporalmente.

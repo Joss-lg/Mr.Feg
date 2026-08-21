@@ -1024,22 +1024,36 @@ window.confirmarClienteTemporal = function(nombre) {
     if (typeof mostrarExito === 'function') mostrarExito("Nombre temporal asignado");
 };
 
-// 10. SELECCIÓN INTELIGENTE (Lealtad + Domicilio / Llevar)
-// NOTA: esta es la ÚNICA versión de seleccionarClienteDelivery (antes había
-// una copia previa más simple que quedaba sobreescrita por esta).
+// NUEVO: abre el buscador de clientes en "modo simple" — solo asigna
+// el cliente para lealtad, sin pedir dirección (una mesa física no
+// necesita dirección de entrega). Se usa desde el badge "Cliente" que
+// ahora aparece en cualquier tipo de mesa, no solo en Para Llevar/Domicilio.
+window.abrirSeleccionClienteMesa = function() {
+    window.modoAsignarClienteSimple = true;
+    window.manejarClickTipoPedido();
+};
+
+// SELECCIÓN INTELIGENTE (Lealtad + Domicilio / Llevar / Mesa física)
 window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEncoded, sellos = 0, premio = null, metaNombre = null, metaReq = 0) {
     window.clienteSeleccionadoId = id;
-    window.nombreClienteTemporal = nombre; 
+    window.nombreClienteTemporal = nombre;
 
+ // Guardamos el último estado de lealtad calculado en una variable
+    // global. Cualquier otra función que necesite volver a llamar a
+    // seleccionarClienteDelivery más adelante (ej. al agregar una nueva
+    // dirección) puede leer este valor en vez de dejarlo en blanco por
+    // accidente y resetear la tarjeta de lealtad.
+    window.__ultimaLealtad = { sellos, premio, metaNombre, metaReq };
+ 
     // ACTUALIZACIÓN DE LA TARJETA DE LEALTAD
     const tarjetaLealtad = document.getElementById('tarjeta-lealtad');
     const lealtadSellos = document.getElementById('lealtad-sellos');
     const lealtadMensaje = document.getElementById('lealtad-mensaje');
-
+ 
     if (tarjetaLealtad) {
         tarjetaLealtad.classList.remove('hidden');
         lealtadSellos.innerHTML = `${sellos} <i class="fas fa-star text-[8px] ml-0.5"></i>`;
-
+ 
         if (premio && premio !== 'null') {
             tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-sm relative overflow-hidden";
             lealtadSellos.className = "bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse";
@@ -1056,19 +1070,38 @@ window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEn
             lealtadMensaje.innerHTML = "No hay metas de lealtad configuradas.";
         }
     }
-
+ 
     const esLlevar = (window.tipoPedidoActual === 'llevar') || (new URLSearchParams(window.location.search).get('tipo_pedido') === 'llevar');
-    if (esLlevar) {
+ 
+    // NUEVO: "modo simple" cubre dos casos que NO necesitan dirección:
+    // 1) Para Llevar (ya existía), y
+    // 2) Mesa física normal, activado por abrirSeleccionClienteMesa()
+    //    cuando el mesero solo quiere ligar un cliente para lealtad
+    //    sin que sea un pedido de domicilio.
+    const esModoSimple = esLlevar || window.modoAsignarClienteSimple;
+ 
+    if (esModoSimple) {
+        // Mesa virtual "Para Llevar": actualiza su propia etiqueta.
         const lblBoton = document.getElementById('lbl-tipo-pedido-actual');
         if (lblBoton) { 
             lblBoton.textContent = nombre; 
             lblBoton.className = 'text-[11px] font-black text-blue-500 mt-1 truncate max-w-full px-1'; 
         }
+ 
+        // Mesa física: actualiza el badge de cliente asignado.
+        const lblClienteMesa = document.getElementById('lbl-cliente-mesa-fisica');
+        if (lblClienteMesa) {
+            lblClienteMesa.textContent = nombre;
+            lblClienteMesa.className = 'block text-sm font-black text-emerald-600 truncate';
+        }
+ 
+        window.modoAsignarClienteSimple = false; // se resetea para no quedar pegado a futuras selecciones
+ 
         if (typeof window.cerrarModal === 'function') window.cerrarModal('modalDireccion'); 
-        if (typeof mostrarExito === 'function') mostrarExito("Cliente asignado para llevar.");
+        if (typeof mostrarExito === 'function') mostrarExito("Cliente asignado a la mesa.");
         return; 
     }
-
+ 
     // SI ES DOMICILIO: Flujo normal de direcciones
     const inputClienteId = document.getElementById('nd_cliente_id');
     if (inputClienteId) inputClienteId.value = id; 
@@ -1077,20 +1110,20 @@ window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEn
     const lblTel = document.getElementById('lbl-tel-cliente');
     if (lblNombre) lblNombre.textContent = nombre;
     if (lblTel) lblTel.textContent = 'Tel: ' + telefono;
-
+ 
     try {
         const direcciones = JSON.parse(decodeURIComponent(direccionesEncoded));
         renderDireccionesRadios(direcciones);
     } catch(err) { 
         renderDireccionesRadios([]); 
     }
-
+ 
     const vistaBuscador = document.getElementById('vista-buscador-clientes');
     const vistaDirecciones = document.getElementById('vista-direcciones-cliente');
     
     if (vistaBuscador) vistaBuscador.classList.add('hidden');
     if (vistaDirecciones) vistaDirecciones.classList.remove('hidden');
-
+ 
     const btnConfirmar = document.getElementById('btnConfirmarDelivery');
     if (btnConfirmar) {
         btnConfirmar.disabled = true;
@@ -1134,9 +1167,22 @@ window.guardarNuevoClienteAjax = async function(event) {
             // 2. Limpiamos el formulario
             document.getElementById('formNuevoCliente').reset();
 
-            // 3. Opcional: Seleccionamos automáticamente al cliente recién creado en la vista de delivery
+            // 3. NUEVO: pos.clientes.express ahora calcula y devuelve la
+            // lealtad directo en la respuesta (mismo cálculo que usa el
+            // buscador), así que ya no hace falta una segunda petición
+            // para conseguir esos datos — se leen directo de data.cliente.
             const nombreCompleto = `${data.cliente.nombre} ${data.cliente.apellido || ''}`.trim();
-            window.seleccionarClienteDelivery(data.cliente.id, nombreCompleto, data.cliente.telefono, encodeURIComponent(JSON.stringify([])));
+
+            window.seleccionarClienteDelivery(
+                data.cliente.id,
+                nombreCompleto,
+                data.cliente.telefono,
+                encodeURIComponent(JSON.stringify(data.cliente.direcciones || [])),
+                data.cliente.lealtad_sellos || 0,
+                data.cliente.lealtad_premio_disponible || 'null',
+                data.cliente.lealtad_siguiente_meta || 'null',
+                data.cliente.lealtad_meta_requerida || 0
+            );
 
             if (typeof mostrarExito === 'function') {
                 mostrarExito("¡Cliente registrado y guardado con éxito!");
@@ -1149,7 +1195,6 @@ window.guardarNuevoClienteAjax = async function(event) {
         alert('Ocurrió un error de conexión al guardar el cliente.');
     }
 };
-
 window.guardarNuevaDireccionAjax = async function(event) {
     event.preventDefault();
 
@@ -1190,12 +1235,24 @@ window.guardarNuevaDireccionAjax = async function(event) {
             cerrarModal('modalNuevaDireccion');
             document.getElementById('formNuevaDireccion').reset();
 
+            // NUEVO: reutilizamos el último estado de lealtad conocido
+            // (guardado por seleccionarClienteDelivery en window.__ultimaLealtad)
+            // en vez de omitir esos 4 argumentos. Antes, al agregar una
+            // dirección nueva, esta misma llamada reseteaba la tarjeta de
+            // lealtad a "No hay metas configuradas" sin importar que ya
+            // se hubiera cargado correctamente segundos antes.
+            const lealtadPrevia = window.__ultimaLealtad || {};
+
             // Recargamos las direcciones del cliente para que aparezcan de inmediato en el radio
             window.seleccionarClienteDelivery(
                 clienteId, 
                 document.getElementById('lbl-nombre-cliente').textContent, 
                 document.getElementById('lbl-tel-cliente').textContent.replace('Tel: ', ''), 
-                encodeURIComponent(JSON.stringify([data.direccion]))
+                encodeURIComponent(JSON.stringify([data.direccion])),
+                lealtadPrevia.sellos || 0,
+                lealtadPrevia.premio || 'null',
+                lealtadPrevia.metaNombre || 'null',
+                lealtadPrevia.metaReq || 0
             );
 
             if (typeof mostrarExito === 'function') {

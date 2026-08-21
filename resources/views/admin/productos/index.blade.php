@@ -72,8 +72,8 @@
                autocomplete="off"
                class="w-full pl-11 pr-11 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm">
         <button type="button" id="limpiarBusquedaAdmin"
-                class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
-                title="Limpiar búsqueda">
+               class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+               title="Limpiar búsqueda">
             <i class="fas fa-xmark text-sm"></i>
         </button>
     </div>
@@ -94,15 +94,15 @@
 @include('admin.productos.modal-eliminar')
 
 <script>
-    const RUTA_PRODUCTOS     = "{{ route('admin.productos.api.productos') }}";
+    const RUTA_PRODUCTOS    = "{{ route('admin.productos.api.productos') }}";
     const RUTA_ESTADISTICAS = "{{ route('admin.productos.api.estadisticas') }}";
-    const RUTA_STORE         = "{{ route('admin.productos.api.store') }}";
+    const RUTA_STORE        = "{{ route('admin.productos.api.store') }}";
     const RUTA_API_BASE     = "{{ url('/productos/api/') }}/";
- 
+
     let estadoGlobal = { productos: {}, productosMap: {}, editandoId: null };
     let tienePermisoEditar = false, tienePermisoEliminar = false, tienePermisoGestionar = false;
     let categoriasDisponibles = [], insumosDisponibles = [];
- 
+
     document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('categorias-container');
         if (container) {
@@ -112,12 +112,12 @@
         }
         categoriasDisponibles = {!! Illuminate\Support\Js::from($categorias->map(fn($c) => ['id' => $c->id, 'nombre' => $c->nombre])) !!};
         insumosDisponibles    = @json($insumos);
- 
+
         cargarProductos();
         cargarEstadisticas();
         setInterval(cargarEstadisticas, 10000);
     });
- 
+
     function cargarProductos() {
         const scrollY = window.scrollY;
 
@@ -134,7 +134,7 @@
             })
             .catch(e => console.error('Error cargando productos:', e));
     }
- 
+
     function cargarEstadisticas() {
         fetch(RUTA_ESTADISTICAS)
             .then(r => r.json())
@@ -148,7 +148,7 @@
             })
             .catch(e => console.error('Error cargando estadísticas:', e));
     }
- 
+
     let filtroProductos = '';
 
     function normalizarTexto(texto) {
@@ -236,11 +236,11 @@
             });
         }
     });
- 
+
     function crearCardProducto(producto) {
         const card = document.createElement('div');
         card.className = 'bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition-all group flex flex-col relative';
- 
+
         const mods = producto.modificadores?.length
             ? `<p class="text-[10px] text-slate-400 mt-1.5 truncate font-semibold"><i class="fas fa-list-ul mr-1 opacity-70"></i> ${producto.modificadores.map(m => m.nombre).join(', ')}</p>`
             : '';
@@ -250,27 +250,52 @@
             ? `<span class="text-[8px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.5 rounded-md uppercase tracking-widest inline-flex items-center gap-1 mt-1.5"><i class="fas fa-weight-hanging"></i> Por peso</span>`
             : '';
 
-        const precioMostrado = esPorPeso
-            ? `$${parseFloat(producto.precio_por_100g ?? 0).toFixed(2)} <span class="text-[10px] sm:text-[11px] font-bold text-slate-400">/100g</span>`
-            : `$${parseFloat(producto.precio).toFixed(2)}`;
- 
+        const tieneVariantes = !!producto.tiene_variantes && Array.isArray(producto.variantes) && producto.variantes.length > 0;
+
+        // Render de pastillas con variantes o precio simple
+        let precioContenidoHTML = '';
+        let pastillasVariantesHTML = '';
+
+        if (tieneVariantes) {
+            pastillasVariantesHTML = `
+                <div class="flex flex-wrap gap-1.5 mt-2.5">
+                    ${producto.variantes.map(v => `
+                        <span class="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200/80 text-blue-700 text-[10px] font-black px-2 py-0.5 rounded-lg shadow-xs">
+                            <span class="text-slate-600">${v.nombre}:</span>
+                            <span>$${parseFloat(v.precio || 0).toFixed(2)}</span>
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+            precioContenidoHTML = `
+                <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest bg-blue-50 border border-blue-200 px-2 py-1 rounded-lg">
+                    ${producto.variantes.length} Tamaños
+                </span>
+            `;
+        } else if (esPorPeso) {
+            precioContenidoHTML = `<span class="text-sm sm:text-[16px] font-black text-slate-800 tracking-tight">$${parseFloat(producto.precio_por_100g ?? 0).toFixed(2)} <span class="text-[10px] sm:text-[11px] font-bold text-slate-400">/100g</span></span>`;
+        } else {
+            precioContenidoHTML = `<span class="text-sm sm:text-[16px] font-black text-slate-800 tracking-tight">$${parseFloat(producto.precio || 0).toFixed(2)}</span>`;
+        }
+
         const botonesHTML = [
             tienePermisoEditar   ? `<button class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center transition active:scale-95 shadow-sm" onclick="editarProducto(${producto.id})" title="Editar"><i class="fas fa-pen text-[11px]"></i></button>` : '',
             tienePermisoEliminar ? `<button class="w-9 h-9 sm:w-8 sm:h-8 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white flex items-center justify-center transition active:scale-95 shadow-sm" onclick="eliminarProducto(${producto.id})" title="Eliminar"><i class="fas fa-trash text-[11px]"></i></button>` : '',
         ].join('');
- 
+
         const toggleHTML = tienePermisoEditar
             ? `<button class="w-9 h-5 rounded-full transition-colors duration-200 relative shrink-0 ${producto.esta_disponible ? 'bg-emerald-500' : 'bg-slate-300'}" onclick="toggleDisponibilidad(this, ${producto.id})" title="Cambiar disponibilidad"><div class="w-4 h-4 bg-white rounded-full shadow-sm absolute top-0.5 transition-transform duration-200 ${producto.esta_disponible ? 'translate-x-[18px]' : 'translate-x-0.5'}"></div></button>`
             : `<div class="w-9 h-5 rounded-full relative shrink-0 ${producto.esta_disponible ? 'bg-emerald-500' : 'bg-slate-300'} opacity-50 cursor-not-allowed" title="Sin permisos"><div class="w-4 h-4 bg-white rounded-full shadow-sm absolute top-0.5 ${producto.esta_disponible ? 'translate-x-[18px]' : 'translate-x-0.5'}"></div></div>`;
- 
+
         card.innerHTML = `
             <div class="flex justify-between items-start mb-3 sm:mb-4 gap-2">
-                <div class="flex items-start gap-2.5 sm:gap-3 overflow-hidden min-w-0">
-                    <div class="overflow-hidden min-w-0">
+                <div class="flex items-start gap-2.5 sm:gap-3 overflow-hidden min-w-0 w-full">
+                    <div class="overflow-hidden min-w-0 w-full">
                         <h3 class="text-sm sm:text-[15px] font-bold text-slate-800 tracking-tight truncate">${producto.nombre}</h3>
                         <p class="text-[11px] sm:text-[12px] text-slate-500 mt-1 line-clamp-2">${producto.descripcion ?? 'Sin descripción'}</p>
                         ${mods}
                         ${badgePorPeso}
+                        ${pastillasVariantesHTML}
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity shrink-0">${botonesHTML}</div>
@@ -280,35 +305,35 @@
                     ${toggleHTML}
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest texto-estado">${producto.esta_disponible ? 'Disponible' : 'Agotado'}</span>
                 </div>
-                <span class="text-sm sm:text-[16px] font-black text-slate-800 tracking-tight">${precioMostrado}</span>
+                <div>${precioContenidoHTML}</div>
             </div>
         `;
         return card;
     }
- 
+
     function obtenerIconoCategoria(nombre) {
         const n = nombre.toLowerCase();
-        if (n.includes('pizza'))                             return 'fas fa-pizza-slice';
-        if (n.includes('pasta'))                             return 'fas fa-utensils';
+        if (n.includes('pizza'))                                return 'fas fa-pizza-slice';
+        if (n.includes('pasta'))                                return 'fas fa-utensils';
         if (n.includes('bebida') || n.includes('cocteleria'))  return 'fas fa-glass-water';
-        if (n.includes('postre'))                            return 'fas fa-cake-slice';
-        if (n.includes('ensalada') || n.includes('verdura'))   return 'fas fa-leaf';
-        if (n.includes('carne') || n.includes('parrillada'))   return 'fas fa-drumstick-bite';
-        if (n.includes('marisco') || n.includes('pescado'))    return 'fas fa-fish';
-        if (n.includes('sopa'))                              return 'fas fa-bowl-food';
-        if (n.includes('abarrote'))                          return 'fas fa-box-open';
+        if (n.includes('postre'))                               return 'fas fa-cake-slice';
+        if (n.includes('ensalada') || n.includes('verdura'))    return 'fas fa-leaf';
+        if (n.includes('carne') || n.includes('parrillada'))    return 'fas fa-drumstick-bite';
+        if (n.includes('marisco') || n.includes('pescado'))     return 'fas fa-fish';
+        if (n.includes('sopa'))                                 return 'fas fa-bowl-food';
+        if (n.includes('abarrote'))                             return 'fas fa-box-open';
         return 'fas fa-concierge-bell';
     }
- 
+
     function eliminarProducto(id) {
         if (!tienePermisoEliminar) { mostrarNotificacion('Sin permisos para eliminar', 'error'); return; }
         const producto = estadoGlobal.productosMap[id];
         if (producto) abrirModalEliminar(id, producto.nombre);
     }
- 
+
     function toggleDisponibilidad(btn, id) {
         if (!tienePermisoEditar) { mostrarNotificacion('Sin autorización', 'error'); return; }
-        const circulo    = btn.querySelector('div');
+        const circulo     = btn.querySelector('div');
         const estaActivo = btn.classList.contains('bg-emerald-500');
         const textoEstado = btn.nextElementSibling;
         _setToggleEstado(btn, circulo, textoEstado, !estaActivo);
@@ -322,18 +347,18 @@
             mostrarNotificacion('Error al cambiar disponibilidad', 'error');
         });
     }
- 
+
     function limpiarIngredientesContainer(tipo) {
         document.getElementById(`ingredientes-container-${tipo}`).innerHTML = '';
     }
- 
+
     function agregarIngrediente(tipo = 'crear', ingrediente = {}) {
         const container = document.getElementById(`ingredientes-container-${tipo}`);
         if (container) container.appendChild(crearFilaIngrediente(ingrediente));
     }
- 
+
     function eliminarIngredienteRow(button) { button.closest('.ingrediente-row').remove(); }
- 
+
     function crearFilaIngrediente(ingrediente = {}) {
         const row = document.createElement('div');
         row.className = 'flex flex-col md:grid md:grid-cols-12 gap-3 items-stretch md:items-end p-4 md:p-0 bg-slate-50 md:bg-transparent rounded-2xl border border-slate-200 md:border-0 ingrediente-row relative mb-3 md:mb-0';
@@ -377,7 +402,7 @@
         if (insumoValue) { select.value = insumoValue; sincronizarInsumo(select); }
         return row;
     }
- 
+
     function sincronizarInsumo(select) {
         const opt = select.options[select.selectedIndex];
         const row = select.closest('.ingrediente-row');
@@ -400,13 +425,13 @@
             if (stockLabel) stockLabel.innerHTML = '';
         }
     }
- 
+
     function llenarIngredientesEdicion(producto) {
         limpiarIngredientesContainer('editar');
         if (producto.insumos?.length) {
             producto.insumos.forEach(ins => agregarIngrediente('editar', {
                 insumo_id:    ins.id,
-                cantidad:      ins.pivot?.cantidad_usada ?? '',
+                cantidad:     ins.pivot?.cantidad_usada ?? '',
                 unidad_medida: ins.unidad_medida        ?? '',
                 stock_actual:  ins.stock_actual          ?? ''
             }));
@@ -414,12 +439,12 @@
             agregarIngrediente('editar');
         }
     }
- 
+
     function obtenerCategoriaIdPorNombre(nombre) {
         if (!nombre) return null;
         return categoriasDisponibles.find(c => c.nombre.toLowerCase() === nombre.toLowerCase())?.id ?? null;
     }
- 
+
     function ejecutarPeticion(url, data, boton, textoBoton, cerrarModalFn) {
         fetch(url, {
             method: 'POST',
@@ -435,14 +460,14 @@
         .catch(e  => mostrarNotificacion(e.message || 'Error en el servidor', 'error'))
         .finally(() => { boton.textContent = textoBoton; boton.disabled = false; });
     }
- 
+
     function _abrirModal(modalId, panelId) {
         const modal = document.getElementById(modalId);
         const panel = document.getElementById(panelId);
         modal.classList.remove('hidden');
         setTimeout(() => { modal.classList.add('opacity-100'); panel.classList.add('opacity-100', 'translate-y-0'); }, 10);
     }
- 
+
     function _cerrarModal(modalId, panelId) {
         const modal = document.getElementById(modalId);
         const panel = document.getElementById(panelId);
@@ -450,7 +475,7 @@
         panel.classList.remove('opacity-100', 'translate-y-0');
         setTimeout(() => modal.classList.add('hidden'), 300);
     }
- 
+
     function _setToggleEstado(btn, circulo, texto, activo) {
         btn.classList.toggle('bg-emerald-500', activo);
         btn.classList.toggle('bg-slate-300', !activo);
@@ -458,7 +483,7 @@
         circulo.classList.toggle('translate-x-0.5', !activo);
         if (texto) texto.textContent = activo ? 'DISPONIBLE' : 'AGOTADO';
     }
- 
+
     function _serializarFormulario(formId) {
         const data = {};
         new FormData(document.getElementById(formId)).forEach((value, key) => {

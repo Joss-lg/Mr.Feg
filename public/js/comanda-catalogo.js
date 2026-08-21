@@ -40,11 +40,11 @@
                     ? `$${precioPor100g.toFixed(2)} <span class="text-[11px] font-semibold text-slate-500">/100g</span>`
                     : `$${precioNum.toFixed(2)}`;
 
-                gridProd.innerHTML += `
+              gridProd.innerHTML += `
                     <button type="button"
                          data-categoria-item="${catNombre}" 
                          data-nombre-item="${(prod.nombre || '').toLowerCase()}" 
-                         onclick='agregarAlTicket(${prod.id}, "${prod.nombre}", ${precioNum}, "${catNombre}", ${modsJSON}, ${sePorPeso ? 'true' : 'false'}, ${precioPor100g}); event.stopPropagation();'
+                         onclick="procesarClicProducto(${prod.id}); event.stopPropagation();"
                          class="producto-card group relative flex flex-col justify-between text-left rounded-[20px] border border-blue-200/60 bg-white p-4 shadow-sm min-h-[130px] hover:border-blue-500 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 transition-all duration-150">
 
                         <h3 class="text-[14px] sm:text-[15px] font-black text-slate-900 leading-tight uppercase mb-4 pr-2">

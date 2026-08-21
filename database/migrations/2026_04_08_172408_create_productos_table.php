@@ -26,6 +26,10 @@ return new class extends Migration
             // (precio_por_100g / 100) * gramos elegidos en el modal de Gramaje.
             $table->decimal('precio_por_100g', 10, 2)->nullable();
 
+            // --- NUEVO CAMPO AÑADIDO AQUÍ ---
+            // Bandera para saber si el producto abrirá el modal de extras/tamaños
+            $table->boolean('tiene_variantes')->default(false);
+
             $table->boolean('esta_disponible')->default(true);
             // Lógica de imágenes desactivada temporalmente.
             // $table->binary('imagen')->nullable()->comment('Los bytes binarios de la imagen');

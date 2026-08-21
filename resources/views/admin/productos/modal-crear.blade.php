@@ -54,6 +54,68 @@
                     </label>
                 </div>
 
+                {{-- Toggle: Tiene Variantes (Tamaños) --}}
+                <div class="col-span-2">
+                    <label class="flex items-center justify-between gap-3 bg-blue-50/50 border border-blue-200/80 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none shadow-sm">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fas fa-layer-group text-blue-500 text-sm"></i>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800">Tiene diferentes tamaños/presentaciones</span>
+                        </span>
+                        <span class="relative inline-flex items-center">
+                            <input type="checkbox" id="tiene_variantes" name="tiene_variantes" class="peer sr-only" onchange="toggleVariantes('crear')">
+                            <span class="w-11 h-6 rounded-full bg-slate-300 peer-checked:bg-blue-500 transition-colors"></span>
+                            <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
+                        </span>
+                    </label>
+                </div>
+
+                {{-- Sección Dinámica de Variantes --}}
+                <div class="col-span-2 hidden" id="seccion-variantes-crear">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1 block">Tamaños y Precios</label>
+                            <p class="text-[9px] text-slate-400 font-bold mt-1 ml-1 tracking-wide uppercase">
+                                Ej: 6pz ($80), 10pz ($135)...
+                            </p>
+                        </div>
+                        <button type="button" onclick="agregarFilaVariante('crear')" class="inline-flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                            <i class="fas fa-plus"></i> AGREGAR TAMAÑO
+                        </button>
+                    </div>
+                    <div id="contenedor-variantes-crear" class="space-y-2"></div>
+                </div>
+
+                {{-- Toggle: Tiene Modificadores / Extras --}}
+                <div class="col-span-2">
+                    <label class="flex items-center justify-between gap-3 bg-purple-50/50 border border-purple-200/80 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none shadow-sm">
+                        <span class="flex items-center gap-2.5">
+                            <i class="fas fa-puzzle-piece text-purple-500 text-sm"></i>
+                            <span class="text-xs sm:text-sm font-bold text-slate-800">Tiene complementos / extras (Papas, etc.)</span>
+                        </span>
+                        <span class="relative inline-flex items-center">
+                            <input type="checkbox" id="tiene_modificadores" name="tiene_modificadores" class="peer sr-only" onchange="toggleModificadores('crear')">
+                            <span class="w-11 h-6 rounded-full bg-slate-300 peer-checked:bg-purple-600 transition-colors"></span>
+                            <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
+                        </span>
+                    </label>
+                </div>
+
+                {{-- Sección Dinámica de Modificadores --}}
+                <div class="col-span-2 hidden" id="seccion-modificadores-crear">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
+                        <div>
+                            <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios</label>
+                            <p class="text-[9px] text-slate-400 font-bold mt-1 ml-1 tracking-wide uppercase">
+                                Ej: Papas Francesas ($20), Papas Gajo ($35)...
+                            </p>
+                        </div>
+                        <button type="button" onclick="agregarFilaModificador('crear')" class="inline-flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                            <i class="fas fa-plus"></i> AGREGAR EXTRA
+                        </button>
+                    </div>
+                    <div id="contenedor-modificadores-crear" class="space-y-2"></div>
+                </div>
+
                 {{-- Precio fijo --}}
                 <div class="col-span-2 sm:col-span-1" id="grupo-precio-fijo-crear">
                     <label class="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1 mb-1.5 block">Precio</label>
@@ -117,6 +179,9 @@
 </div>
 
 <script>
+    window.contadorModificadoresCrear = 0;
+    window.contadorVariantes = window.contadorVariantes || 0;
+
     window.bloquearScrollFondo = function () {
         document.body.style.overflow = 'hidden';
     };
@@ -148,38 +213,40 @@
         } else {
             const modal = document.getElementById('modal-crear-alimento');
             const panel = document.getElementById('modal-crear-panel');
-            
-            modal.classList.add('opacity-0');
-            panel.classList.add('opacity-0', 'translate-y-8');
-            
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
+            if (modal && panel) {
+                modal.classList.add('opacity-0');
+                panel.classList.add('opacity-0', 'translate-y-8');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
         }
         desbloquearScrollFondo();
         const form = document.getElementById('formulario-crear-producto');
         if (form) form.reset();
     };
 
-    function toggleModoVentaPeso(tipo) {
+    window.toggleModoVentaPeso = function(tipo) {
         const checkbox  = document.getElementById(tipo === 'crear' ? 'se_vende_por_peso' : 'edit-se_vende_por_peso');
         const grupoFijo  = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
         const grupoPeso  = document.getElementById(tipo === 'crear' ? 'grupo-precio-peso-crear' : 'grupo-precio-peso-editar');
         const inputFijo  = document.getElementById(tipo === 'crear' ? 'precio' : 'edit-precio');
         const inputPeso  = document.getElementById(tipo === 'crear' ? 'precio_por_100g' : 'edit-precio_por_100g');
 
+        if (!checkbox) return;
         const esPorPeso = checkbox.checked;
 
-        grupoFijo.classList.toggle('hidden', esPorPeso);
-        grupoPeso.classList.toggle('hidden', !esPorPeso);
+        if (grupoFijo) grupoFijo.classList.toggle('hidden', esPorPeso);
+        if (grupoPeso) grupoPeso.classList.toggle('hidden', !esPorPeso);
 
-        inputFijo.required = !esPorPeso;
-        inputPeso.required = esPorPeso;
+        if (inputFijo) {
+            inputFijo.required = !esPorPeso;
+            if (esPorPeso) inputFijo.value = 0;
+        }
+        if (inputPeso) inputPeso.required = esPorPeso;
+    };
 
-        if (esPorPeso) { inputFijo.value = 0; }
-    }
-
-    function enviarFormularioConImagen(url, formData, btn, textoOriginal, onSuccess) {
+    window.enviarFormularioConImagen = function(url, formData, btn, textoOriginal, onSuccess) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
         fetch(url, {
@@ -227,29 +294,146 @@
             btn.textContent = textoOriginal;
             btn.disabled = false;
         });
-    }
+    };
 
-    function guardarProducto(event) {
+    window.toggleVariantes = function(tipo) {
+        const checkVariantes = document.getElementById(tipo === 'crear' ? 'tiene_variantes' : 'edit-tiene_variantes');
+        const checkPeso = document.getElementById(tipo === 'crear' ? 'se_vende_por_peso' : 'edit-se_vende_por_peso');
+        
+        const seccionVariantes = document.getElementById(tipo === 'crear' ? 'seccion-variantes-crear' : 'seccion-variantes-editar');
+        const grupoFijo = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
+        const inputFijo = document.getElementById(tipo === 'crear' ? 'precio' : 'edit-precio');
+        const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
+
+        if (!checkVariantes || !seccionVariantes) return;
+        const tieneVariantes = checkVariantes.checked;
+
+        if (tieneVariantes) {
+            if (checkPeso && checkPeso.checked) {
+                checkPeso.checked = false;
+                window.toggleModoVentaPeso(tipo);
+            }
+            
+            if (grupoFijo) grupoFijo.classList.add('hidden');
+            if (inputFijo) {
+                inputFijo.required = false;
+                inputFijo.value = 0;
+            }
+            
+            seccionVariantes.classList.remove('hidden');
+
+            if (contenedor && contenedor.children.length === 0) {
+                window.agregarFilaVariante(tipo);
+            }
+        } else {
+            seccionVariantes.classList.add('hidden');
+            if (grupoFijo) grupoFijo.classList.remove('hidden');
+            if (inputFijo) inputFijo.required = true;
+        }
+    };
+
+    window.agregarFilaVariante = function(tipo) {
+        const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
+        if (!contenedor) return;
+        const index = window.contadorVariantes++;
+        
+        const htmlFila = `
+            <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-variante" id="variante-${index}">
+                <input type="text" name="variantes[${index}][nombre]" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" placeholder="Ej: 6pz" required>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <span class="pl-2 text-slate-400 font-bold">$</span>
+                <input type="number" step="0.01" name="variantes[${index}][precio]" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" placeholder="80.00" required>
+                <button type="button" onclick="document.getElementById('variante-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        `;
+        
+        contenedor.insertAdjacentHTML('beforeend', htmlFila);
+    };
+
+    // ─── Modificadores / Extras Globales ─────────────────────────────────────
+    window.toggleModificadores = function(tipo) {
+        const checkId = (tipo === 'crear') ? 'tiene_modificadores' : 'edit-tiene_modificadores';
+        const seccionId = (tipo === 'crear') ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar';
+        const contId = (tipo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
+
+        const check = document.getElementById(checkId);
+        const seccion = document.getElementById(seccionId);
+        if (!check || !seccion) return;
+
+        if (check.checked) {
+            seccion.classList.remove('hidden');
+            const cont = document.getElementById(contId);
+            if (cont && cont.children.length === 0) {
+                window.agregarFilaModificador(tipo);
+            }
+        } else {
+            seccion.classList.add('hidden');
+        }
+    };
+
+    window.agregarFilaModificador = function(tipo, datos = null) {
+        const contId = (tipo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
+        const contenedor = document.getElementById(contId);
+        if (!contenedor) return;
+
+        const index = (tipo === 'crear') ? window.contadorModificadoresCrear++ : (window.contadorModificadores || 0);
+        if (tipo !== 'crear') window.contadorModificadores = (window.contadorModificadores || 0) + 1;
+
+        const id = datos?.id ?? '';
+        const nombre = datos?.nombre ?? '';
+        const precio = datos?.precio ?? '';
+
+        const html = `
+            <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-modificador" id="modificador-${tipo}-${index}">
+                <input type="hidden" name="modificadores[${index}][id]" value="${id}">
+                <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <span class="pl-2 text-slate-400 font-bold">$</span>
+                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
+                <button type="button" onclick="document.getElementById('modificador-${tipo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        `;
+        contenedor.insertAdjacentHTML('beforeend', html);
+    };
+
+    window.guardarProducto = function(event) {
         event.preventDefault();
         const btn = document.getElementById('btn-guardar');
         if (!btn || btn.disabled) return;
         const original = btn.textContent;
         btn.textContent = 'GUARDANDO...';
-        btn.disabled    = true;
+        btn.disabled = true;
 
         const catNombre = document.getElementById('categoria_nombre').value;
-        const catId     = obtenerCategoriaIdPorNombre(catNombre);
+        const catId = typeof obtenerCategoriaIdPorNombre === 'function' 
+            ? obtenerCategoriaIdPorNombre(catNombre) 
+            : document.getElementById('categoria_id').value;
+
         if (!catId) {
-            mostrarNotificacion('Selecciona una categoría válida', 'error');
-            btn.textContent = original; btn.disabled = false; return;
+            if (typeof mostrarNotificacion === 'function') {
+                mostrarNotificacion('Selecciona una categoría válida', 'error');
+            } else {
+                alert('Selecciona una categoría válida');
+            }
+            btn.textContent = original;
+            btn.disabled = false;
+            return;
         }
         document.getElementById('categoria_id').value = catId;
 
-        const formEl   = document.getElementById('formulario-crear-producto');
+        const formEl = document.getElementById('formulario-crear-producto');
         const formData = new FormData(formEl);
         formData.set('categoria_id', catId);
         formData.set('se_vende_por_peso', document.getElementById('se_vende_por_peso').checked ? '1' : '0');
+        formData.set('tiene_variantes', document.getElementById('tiene_variantes').checked ? '1' : '0');
 
-        enviarFormularioConImagen(RUTA_STORE, formData, btn, original, closeModalCrear);
-    }
+        const tieneModsCheck = document.getElementById('tiene_modificadores');
+        formData.set('tiene_modificadores', (tieneModsCheck && tieneModsCheck.checked) ? '1' : '0');
+
+        window.enviarFormularioConImagen(RUTA_STORE, formData, btn, original, window.closeModalCrear);
+    };
 </script>

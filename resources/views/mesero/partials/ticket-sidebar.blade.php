@@ -14,7 +14,7 @@
         </button>
     </div>
 
-    <div class="flex items-center justify-between mb-6 p-3 rounded-2xl bg-gradient-to-br from-white to-transparent border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-3 p-3 rounded-2xl bg-gradient-to-br from-white to-transparent border border-slate-200 shadow-sm">
         <div class="flex flex-col">
             <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 mb-1">Activa</span>
             <h3 class="text-2xl font-black tracking-tight text-slate-800 leading-none">
@@ -30,6 +30,29 @@
             <div class="relative w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)] border border-slate-50"></div>
         </div>
     </div>
+
+    {{-- NUEVO: badge de cliente, SOLO visible en mesas físicas reales
+         (no en Para Llevar, Domicilio, ni pedidos de plataformas de
+         delivery como Rappi/Uber/DiDi — esas ya tienen su propio
+         selector "Tipo de Pedido / Cliente" más abajo). --}}
+    @php
+        $esMesaVirtualParaBadge = \Illuminate\Support\Str::startsWith(strtoupper($mesa->numero), ['DOM', 'LLEVAR']);
+        $esMesaFisica = !$esMesaVirtualParaBadge && !$mesa->esDelivery();
+    @endphp
+
+    @if($esMesaFisica)
+    <button type="button" onclick="abrirSeleccionClienteMesa()"
+        class="w-full flex items-center gap-2.5 mb-3 p-3 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all shadow-sm text-left group">
+        <span class="w-9 h-9 shrink-0 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+            <i class="fas fa-id-card text-sm"></i>
+        </span>
+        <span class="min-w-0 flex-1">
+            <span class="block text-[9px] font-bold uppercase tracking-widest text-slate-400">Cliente</span>
+            <span id="lbl-cliente-mesa-fisica" class="block text-sm font-black text-slate-400 truncate">Sin asignar (opcional)</span>
+        </span>
+        <i class="fas fa-chevron-right text-slate-300 text-xs shrink-0"></i>
+    </button>
+    @endif
 
     <div class="grid grid-cols-2 gap-2 flex-1 overflow-y-auto hide-scroll pb-2">
         <button type="button" onclick="ajustarPersonas()" class="flex flex-col items-center justify-center p-3 rounded-[16px] bg-white border border-slate-200 hover:bg-slate-100 hover:border-blue-500/30 hover:shadow-md transition-all duration-150 active:scale-95 group shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50">
@@ -70,7 +93,9 @@
 @endif
 
         {{-- ========================================== --}}
-        {{-- NUEVO: TARJETA DE LEALTAD (OCULTA POR DEFECTO) --}}
+        {{-- TARJETA DE LEALTAD (OCULTA POR DEFECTO)
+             Sin cambios: ya estaba correctamente colocada fuera del
+             @if($esMesaVirtual), asi que funciona para cualquier mesa. --}}
         {{-- ========================================== --}}
         <div id="tarjeta-lealtad" class="col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 hidden shadow-sm relative overflow-hidden">
             <!-- Destello de fondo decorativo -->
@@ -110,22 +135,12 @@
 {{-- ========================================== --}}
 {{-- ═══════════════════════════════════════════════════════════
      BARRA FIJA INFERIOR — Solo móvil (< md)
-     Siempre visible, con acciones rápidas del platillo y botón
-     para abrir el panel completo del ticket.
-
-     FIX: este contenedor no tenía "flex", así que los botones
-     (que usan shrink-0/whitespace-nowrap pensando en un layout de
-     fila) se apilaban verticalmente como bloques normales,
-     generando la tarjeta flotante rara que aparecía sobre el
-     catálogo en móvil. Con flex + overflow-x-auto quedan en una
-     sola fila horizontal con scroll, como se pensó originalmente.
      ════════════════════════════════════════════════════════════ --}}
 <div id="barra-acciones-mobile-wrapper" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-50 border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.12)]" style="padding-bottom: env(safe-area-inset-bottom)">
 
 <div id="barra-acciones-mobile"
      class="flex items-center gap-2 overflow-x-auto hide-scroll px-3 py-2.5">
 
-  {{-- Botón Móvil: Tipo de Pedido - Solo para Llevar o Domicilio --}}
 @php
     $esMesaVirtual = \Illuminate\Support\Str::startsWith(strtoupper($mesa->numero), ['DOM', 'LLEVAR']);
 @endphp
@@ -137,6 +152,16 @@
     <span id="lbl-tipo-pedido-mobile">Comedor</span>
 </button>
 @endif
+
+        {{-- NUEVO: mismo botón de cliente que en escritorio, solo en
+             mesas físicas (misma condición $esMesaFisica calculada arriba) --}}
+        @if($esMesaFisica)
+        <button type="button" onclick="abrirSeleccionClienteMesa()"
+            class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] font-bold text-slate-800 shadow-sm active:scale-95 whitespace-nowrap">
+            <i class="fas fa-id-card text-blue-500 text-[10px]"></i> Cliente
+        </button>
+        @endif
+
         <button type="button" onclick="ajustarPersonas()"
             class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-[11px] font-bold text-slate-800 shadow-sm active:scale-95 whitespace-nowrap">
             <i class="fas fa-users text-blue-500 text-[10px]"></i>
@@ -160,9 +185,6 @@
         </button>
 </div>
 
-    {{-- Degradado indicador de scroll: avisa visualmente que hay más
-         botones a la derecha. Se oculta solo con JS cuando ya no queda
-         nada por deslizar (ver script más abajo). --}}
     <div id="fade-scroll-acciones" class="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-slate-50 to-transparent transition-opacity duration-200"></div>
 </div>
 
@@ -173,14 +195,12 @@
     if (!barra || !fade) return;
 
     function actualizarFade() {
-        // Si ya se llegó al final del scroll (con 4px de margen), se oculta el degradado.
         const alFinal = barra.scrollLeft + barra.clientWidth >= barra.scrollWidth - 4;
         fade.style.opacity = alFinal ? '0' : '1';
     }
 
     barra.addEventListener('scroll', actualizarFade, { passive: true });
     window.addEventListener('resize', actualizarFade);
-    // Estado inicial (por si en pantallas grandes ya caben todos los botones)
     actualizarFade();
 })();
 </script>
@@ -193,7 +213,6 @@
         const csrf    = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const dashboard = config.rutas?.dashboard || '/mesero/dashboard';
 
-        // Si es delivery y no tiene items en el ticket, cancelar la mesa virtual
         if (mesa.esDelivery) {
             const ticketItems = document.querySelectorAll('#listaTicket .ticket-item').length;
             const enviadosDB  = (window.platillosEnviadosDB || []).length;
@@ -204,9 +223,7 @@
                         method: 'DELETE',
                         headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
                     });
-                } catch (e) {
-                    // Si falla, igual redirigir
-                }
+                } catch (e) {}
                 window.location.href = dashboard;
                 return;
             }
@@ -218,26 +235,19 @@
 </script>
 
 <section id="col-ticket" class="
-    /* --- ESTILOS PARA TABLET/DESKTOP (≥768px) --- */
     md:flex md:w-[300px] lg:w-[320px] xl:w-[360px] md:flex-shrink-0 md:h-full md:flex-col md:bg-slate-50 md:border-r md:border-slate-200 md:relative md:z-10 md:shadow-[20px_0_40px_-15px_rgba(0,0,0,0.06)] md:translate-y-0 md:rounded-none
-
-    /* --- ESTILOS PARA TELÉFONO (Panel Inferior) --- */
     fixed inset-x-0 bottom-0 z-50 flex flex-col bg-slate-50 rounded-t-[24px]
     h-[85vh] shadow-[0_-10px_40px_rgba(0,0,0,0.15)]
     transition-transform duration-300 translate-y-full
 ">
 
-    {{-- CABECERA MÓVIL (Botón Salir + Manija + Info Mesa) --}}
     <div class="md:hidden w-full flex items-center justify-between px-4 pt-3 pb-2 border-b border-slate-200">
         <button type="button" onclick="window.location.href='{{ route('mesero.dashboard') }}'" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-[11px] font-bold text-red-500 shadow-sm active:scale-95">
             <i class="fas fa-sign-out-alt"></i> Salir
         </button>
-
-        {{-- Zona central para arrastrar --}}
         <div class="flex-1 flex justify-center cursor-pointer px-4 py-2" onclick="toggleOrdenMobile()">
             <div class="w-12 h-1.5 rounded-full bg-slate-200"></div>
         </div>
-
         <div class="flex items-center gap-1.5 text-[12px] font-black tracking-tight text-slate-800">
             <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></div>
             @if($mesa->esDelivery())
@@ -248,7 +258,6 @@
         </div>
     </div>
 
-    {{-- CABECERA TABLET (768–1023px): solo nombre de mesa, sin manija de arrastre --}}
     <div class="hidden md:flex lg:hidden items-center justify-between px-4 py-3 border-b border-slate-200">
         <button type="button" onclick="salirComanda()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-800 shadow-sm hover:bg-slate-100 active:scale-95">
             <i class="fas fa-arrow-left text-slate-500"></i> Mesas
@@ -277,14 +286,10 @@
                 <div id="tab-slider" class="h-full w-1/2 rounded-lg bg-slate-800 shadow-md transition-transform duration-300 ease-out"></div>
             </div>
             <button type="button" onclick="cambiarTab('nueva-orden', this)" id="btn-tab-nueva-orden" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold text-slate-50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">Orden</button>
-            {{-- Tab "Enviado" oculto: el submenú de productos ya pedidos se ocultó por solicitud --}}
             <button type="button" onclick="cambiarTab('comanda', this)" id="btn-tab-comanda" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">Total</button>
         </div>
-
-        {{-- Fila de Tiempos eliminada por solicitud --}}
     </div>
 
-    {{-- VISTA 1: NUEVA ORDEN --}}
     <div id="vista-nueva-orden" class="panel-fade flex-1 overflow-y-auto hide-scroll p-4 flex flex-col relative bg-slate-50">
         <div class="flex justify-between text-[11px] md:text-[10px] font-bold text-slate-500 mb-3 px-1">
             <span>CANT. / PLATILLO</span>
@@ -299,7 +304,6 @@
         </div>
     </div>
 
-    {{-- VISTA 2: ENVIADOS --}}
     <div id="vista-enviados" class="hidden panel-fade flex-1 overflow-y-auto hide-scroll p-4 flex-col relative bg-slate-50">
         @if(isset($platillosEnviados) && count($platillosEnviados) > 0)
             <div class="flex flex-col gap-2">
@@ -337,7 +341,6 @@
         @endif
     </div>
 
-    {{-- VISTA 3: COMANDA TOTAL --}}
     <div id="vista-comanda" class="hidden panel-fade flex-1 overflow-y-auto hide-scroll p-4 flex-col relative bg-slate-50">
         <div id="items-db-total" class="flex flex-col gap-2">
             @if(isset($platillosEnviados) && count($platillosEnviados) > 0)
@@ -372,9 +375,6 @@
         </div>
     </div>
 
-    {{-- Barra de acciones mobile movida a barra-acciones-mobile (fija, fuera del panel) --}}
-
-    {{-- FOOTER DE TOTALES (PREMIUM) --}}
     <div class="p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] md:pb-5 border-t border-slate-200 bg-gradient-to-b from-white to-white flex-shrink-0 z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.04)] relative">
         <div class="flex justify-between items-center mb-1">
             <span class="text-xs md:text-[11px] text-slate-500 font-medium">Subtotal</span>
@@ -389,9 +389,6 @@
             <span class="text-[13px] md:text-[12px] font-bold text-emerald-500" id="txtPropina">$0.00</span>
         </div>
 
-        {{-- --- NUEVO: comisión de plataforma de delivery ---
-             Oculto por defecto; comanda-ticket.js lo muestra solo cuando la
-             mesa es un pedido de Rappi/Uber/DiDi. --}}
         <div id="bloqueComisionDelivery" class="hidden mb-4 p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 space-y-1">
             <p class="text-[10px] font-black uppercase tracking-widest text-orange-500 flex items-center gap-1.5">
                 <i class="fas fa-motorcycle"></i>
@@ -411,7 +408,6 @@
             </div>
         </div>
 
-        {{-- Total final (incluye comisión cuando aplica) --}}
         <div class="flex justify-between items-center mb-4 pt-2 border-t border-slate-200">
             <span class="text-[13px] md:text-xs text-slate-800 font-black uppercase tracking-wide">Total</span>
             <span class="text-base md:text-sm font-black text-slate-800" id="txtTotalComanda">$0.00</span>
@@ -425,7 +421,6 @@
 </section>
 
 <style>
-    /* Transición suave al cambiar de tab */
     @media (prefers-reduced-motion: no-preference) {
         .panel-fade:not(.hidden) { animation: panelFadeIn .18s ease-out; }
     }

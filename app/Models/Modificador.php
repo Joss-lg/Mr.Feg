@@ -9,21 +9,21 @@ class Modificador extends Model
 {
     use HasFactory;
 
-    // Le decimos a Laravel exactamente cómo se llama tu tabla en PostgreSQL
+    // Le decimos a Laravel exactamente cómo se llama tu tabla
     protected $table = 'modificadores';
 
-    // Los campos que vas a guardar
+    // Los campos permitidos para asignación masiva
     protected $fillable = [
         'nombre', 
+        'precio',
+        'esta_activo',
     ];
 
     // ==========================================
-    // RELACIÓN INVERSA (Buena práctica)
+    // RELACIÓN INVERSA
     // ==========================================
     public function productos()
     {
-        // Un modificador puede pertenecer a muchos productos a través de la tabla pivote
-        // Nota: Asegúrate de que aquí diga Producto::class o Alimento::class, dependiendo de cómo se llame tu modelo principal
         return $this->belongsToMany(Producto::class, 'producto_modificadores');
     }
 }

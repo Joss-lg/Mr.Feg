@@ -64,6 +64,7 @@
 
         <button type="button"
             data-producto-id="{{ $producto->id ?? 0 }}"
+            onclick="procesarClicProducto({{ $producto->id ?? 0 }})"
             class="btn-producto group relative flex flex-col justify-between text-left rounded-[20px] border border-blue-200/60
                    bg-white p-4
                    shadow-sm min-h-[130px]
@@ -121,6 +122,331 @@
             <i class="fas fa-chevron-up text-[11px] opacity-70"></i>
         </span>
     </button>
+</section>
+
+{{-- MODAL COMANDA: SELECCIONAR TAMAÑO Y COMPLEMENTOS --}}
+<div id="modal-variantes-comanda" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 transition-all duration-300 opacity-0" style="display: none;">
+    <div class="relative bg-white border border-slate-200/80 w-full max-w-sm sm:max-w-md rounded-[2rem] shadow-2xl p-6 sm:p-7 transform opacity-0 translate-y-8 transition-all duration-300" id="panel-variantes-comanda">
+        
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+            <div>
+                <h3 class="text-lg sm:text-xl font-black text-slate-800 tracking-tight" id="titulo-modal-variantes">Platillo</h3>
+                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-0.5" id="subtitulo-modal-variantes">Selecciona una opción</p>
+            </div>
+            <button onclick="cerrarModalVariantes()" type="button" class="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-rose-500 rounded-xl bg-slate-50 border border-slate-100 transition-all active:scale-95 outline-none">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+
+        <div id="lista-opciones-variantes" class="space-y-2.5 max-h-[60vh] overflow-y-auto overscroll-contain pr-1">
+            <!-- Inyección dinámica de JS -->
+        </div>
+
+        {{-- Botón para regresar al paso 1 --}}
+        <button id="btn-volver-tamano" type="button" onclick="volverPasoAnterior()" class="hidden w-full mt-4 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all uppercase tracking-wider outline-none">
+            <i class="fas fa-arrow-left mr-1.5"></i> Volver al paso anterior
+        </button>
+    </div>
+</div>
+
+<script>
+    window.productoActivoParaComanda = null;
+    window.estadoPersonalizacion = {};
+    window.volverPasoAnterior = null;
+
+    window.procesarClicProducto = function(idProducto) {
+        const prod = (typeof productosDB !== 'undefined') 
+            ? productosDB.find(p => p.id === Number(idProducto)) 
+            : null;
+        
+        if (!prod) return;
+
+        window.productoActivoParaComanda = prod;
+        const nombreLower = (prod.nombre || '').toLowerCase();
+        const catLower = (prod.categoria?.nombre || '').toLowerCase();
+
+        window.estadoPersonalizacion = {
+            id: prod.id,
+            nombreBase: prod.nombre,
+            categoria: catLower,
+            precioBase: parseFloat(prod.precio) || 0,
+            tamanoSeleccionado: null,
+            detalles: [],
+            extraAcumulado: 0
+        };
+
+        // 1. Caso Bebidas con variantes (500ml / 1L / 12oz / 16oz)
+        if (catLower.includes('bebida') || catLower.includes('frapp') || catLower.includes('malteada') || catLower.includes('smoothie')) {
+            if (prod.tiene_variantes && prod.variantes?.length > 0) {
+                mostrarSelectorTamanos(prod.variantes, 'tamano_bebida');
+                abrirContenedorModal();
+                return;
+            }
+        }
+
+        // 2. Caso Alitas y Boneless (Variantes de tamaño/peso)
+        if (prod.tiene_variantes && prod.variantes?.length > 0) {
+            mostrarSelectorTamanos(prod.variantes, 'tamano_snack');
+            abrirContenedorModal();
+            return;
+        }
+
+        // 3. Caso Banderillas Coreanas (Cubiertas + Papas)
+        if (nombreLower.includes('banderilla') || catLower.includes('banderilla')) {
+            mostrarPasoCubiertasBanderilla();
+            abrirContenedorModal();
+            return;
+        }
+
+        // 4. Caso Snacks individuales (Dedos de queso, Salchipulpos, Dino-Nuggets, Aros de cebolla)
+        if (nombreLower.includes('dedos') || nombreLower.includes('salchipulpos') || nombreLower.includes('aros') || nombreLower.includes('dino') || nombreLower.includes('donas de queso')) {
+            mostrarSelectorPapasGenerico(20, 35);
+            abrirContenedorModal();
+            return;
+        }
+
+        // 5. Producto estándar directo al ticket
+        agregarAlTicket(
+            prod.id, 
+            prod.nombre, 
+            parseFloat(prod.precio) || 0, 
+            prod.categoria?.nombre || 'Menú', 
+            prod.modificadores || [], 
+            !!prod.se_vende_por_peso, 
+            parseFloat(prod.precio_por_100g || 0)
+        );
+    };
+
+    function abrirContenedorModal() {
+        const modal = document.getElementById('modal-variantes-comanda');
+        const panel = document.getElementById('panel-variantes-comanda');
+        if (modal && panel) {
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0');
+                panel.classList.remove('opacity-0', 'translate-y-8'); 
+            }, 10);
+        }
+    }
+
+    // --- SELECTOR DE TAMAÑOS ---
+    function mostrarSelectorTamanos(variantes, tipoFlujo) {
+        const prod = window.productoActivoParaComanda;
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Selecciona el tamaño';
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        variantes.forEach(v => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.estadoPersonalizacion.precioBase = parseFloat(v.precio);
+                window.estadoPersonalizacion.tamanoSeleccionado = v.nombre;
+                
+                if (tipoFlujo === 'tamano_snack') {
+                    evaluarPapasPorTamano(v.nombre);
+                } else if (tipoFlujo === 'tamano_bebida') {
+                    mostrarExtrasBebida(v.nombre);
+                }
+            };
+
+            btn.innerHTML = `
+                <span class="font-bold text-slate-800 text-sm sm:text-base">${v.nombre}</span>
+                <span class="font-black text-blue-600 text-sm sm:text-base">$${parseFloat(v.precio).toFixed(2)}</span>
+            `;
+            cont.appendChild(btn);
+        });
+    }
+
+   // ─── EVALUAR EXTRAS / COMPLEMENTOS DESDE BASE DE DATOS ───────────────────
+    function evaluarPapasPorTamano(nombreTamano) {
+        const prod = window.productoActivoParaComanda;
+        
+        // Si el platillo tiene modificadores guardados en la BD, mostramos el Paso 2
+        if (prod && Array.isArray(prod.modificadores) && prod.modificadores.length > 0) {
+            const opciones = [
+                { nombre: 'Sin Extras / Complementos', extra: 0 }
+            ];
+
+            prod.modificadores.forEach(mod => {
+                opciones.push({
+                    nombre: mod.nombre,
+                    extra: parseFloat(mod.precio) || 0
+                });
+            });
+
+            const tam = window.estadoPersonalizacion.tamanoSeleccionado;
+            document.getElementById('titulo-modal-variantes').textContent = tam ? `${prod.nombre} (${tam})` : prod.nombre;
+            document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Deseas agregar complementos?';
+
+            const btnVolver = document.getElementById('btn-volver-tamano');
+            btnVolver.classList.remove('hidden');
+            window.volverPasoAnterior = () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack');
+
+            renderOpcionesFinales(opciones);
+        } else {
+            // Si no tiene extras asignados, enviamos directo al ticket con el precio base
+            finalizarTicket(window.estadoPersonalizacion.precioBase);
+        }
+    }
+
+    function mostrarSelectorPapasGenerico(costoFrancesa, costoGajo, callbackVolver = null) {
+        const prod = window.productoActivoParaComanda;
+        const tam = window.estadoPersonalizacion.tamanoSeleccionado;
+        document.getElementById('titulo-modal-variantes').textContent = tam ? `${prod.nombre} (${tam})` : prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Agregar papas?';
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        if (callbackVolver) {
+            btnVolver.classList.remove('hidden');
+            window.volverPasoAnterior = callbackVolver;
+        } else {
+            btnVolver.classList.add('hidden');
+        }
+
+        const opciones = [
+            { nombre: 'Sin Papas', extra: 0 },
+            { nombre: 'c/ Papas Francesa', extra: costoFrancesa },
+            { nombre: 'c/ Papas Gajo', extra: costoGajo }
+        ];
+
+        renderOpcionesFinales(opciones);
+    }
+
+    // --- EXTRAS DE BEBIDAS ---
+    function mostrarExtrasBebida(nombreTamano) {
+        const prod = window.productoActivoParaComanda;
+        const es1L = nombreTamano.toLowerCase().includes('1l') || nombreTamano.toLowerCase().includes('16oz');
+        const costoChamoyada = es1L ? 8 : 5;
+
+        document.getElementById('titulo-modal-variantes').textContent = `${prod.nombre} (${nombreTamano})`;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: Extras opcionales';
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        btnVolver.classList.remove('hidden');
+        window.volverPasoAnterior = () => mostrarSelectorTamanos(prod.variantes, 'tamano_bebida');
+
+        const opciones = [
+            { nombre: 'Natural (Sin extras)', extra: 0 },
+            { nombre: 'Chamoyada', extra: costoChamoyada },
+            { nombre: 'Perlas Explosivas', extra: 15 },
+            { nombre: 'Crema Batida', extra: 10 }
+        ];
+
+        renderOpcionesFinales(opciones);
+    }
+
+    // --- BANDERILLAS ---
+    function mostrarPasoCubiertasBanderilla() {
+        const prod = window.productoActivoParaComanda;
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Elige la cubierta';
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        const cubiertas = [
+            { nombre: 'Flamin', extra: 0, tipo: 'Clásica' },
+            { nombre: 'Cheddar', extra: 0, tipo: 'Clásica' },
+            { nombre: 'Panko', extra: 0, tipo: 'Clásica' },
+            { nombre: 'Cubitos de Papas', extra: 8, tipo: 'Especial' },
+            { nombre: 'Boneless', extra: 8, tipo: 'Especial' },
+            { nombre: 'Ramen', extra: 8, tipo: 'Especial' }
+        ];
+
+        cubiertas.forEach(c => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-3.5 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.estadoPersonalizacion.detalles.push(c.nombre);
+                window.estadoPersonalizacion.extraAcumulado += c.extra;
+                mostrarSelectorPapasGenerico(20, 35, () => mostrarPasoCubiertasBanderilla());
+            };
+
+            btn.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800 text-sm block">${c.nombre}</span>
+                    <span class="text-[10px] uppercase font-bold ${c.extra > 0 ? 'text-amber-500' : 'text-slate-400'}">${c.tipo}</span>
+                </div>
+                <span class="font-black ${c.extra > 0 ? 'text-blue-600' : 'text-slate-400'} text-sm">
+                    ${c.extra > 0 ? '+$' + c.extra.toFixed(2) : 'Incluida'}
+                </span>
+            `;
+            cont.appendChild(btn);
+        });
+    }
+
+    // --- FINALIZACIÓN AL TICKET ---
+    function renderOpcionesFinales(opciones) {
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        opciones.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+
+            const precioFinal = window.estadoPersonalizacion.precioBase + window.estadoPersonalizacion.extraAcumulado + opt.extra;
+
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (opt.extra > 0) window.estadoPersonalizacion.detalles.push(opt.nombre);
+                finalizarTicket(precioFinal);
+            };
+
+            btn.innerHTML = `
+                <div class="flex flex-col">
+                    <span class="font-bold text-slate-800 text-sm sm:text-base">${opt.nombre}</span>
+                    <span class="text-[11px] font-semibold text-slate-400">${opt.extra > 0 ? '+$' + opt.extra.toFixed(2) : 'Sin costo extra'}</span>
+                </div>
+                <span class="font-black text-blue-600 text-sm sm:text-base">$${precioFinal.toFixed(2)}</span>
+            `;
+            cont.appendChild(btn);
+        });
+    }
+
+    function finalizarTicket(precioTotal) {
+        cerrarModalVariantes();
+        const est = window.estadoPersonalizacion;
+        const prod = window.productoActivoParaComanda;
+
+        let partes = [];
+        if (est.tamanoSeleccionado) partes.push(est.tamanoSeleccionado);
+        if (est.detalles.length > 0) partes.push(est.detalles.join(', '));
+
+        const nombreFinal = partes.length > 0 ? `${est.nombreBase} (${partes.join(' - ')})` : est.nombreBase;
+
+        agregarAlTicket(
+            prod.id, 
+            nombreFinal, 
+            precioTotal, 
+            prod.categoria?.nombre || 'Menú', 
+            prod.modificadores || [], 
+            false, 
+            0
+        );
+    }
+
+    window.cerrarModalVariantes = function() {
+        const modal = document.getElementById('modal-variantes-comanda');
+        const panel = document.getElementById('panel-variantes-comanda');
+        if (panel) panel.classList.add('opacity-0', 'translate-y-8');
+        if (modal) modal.classList.add('opacity-0');
+        setTimeout(() => {
+            if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
+            window.productoActivoParaComanda = null;
+        }, 300);
+    };
+</script>
 
 {{-- TECLADO VIRTUAL --}}
 <div id="teclado-virtual-overlay"
@@ -272,4 +598,3 @@
     }
 })();
 </script>
-</section>

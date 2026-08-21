@@ -18,7 +18,6 @@
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm -ml-[74px] sm:ml-0" onclick="closeModalEditar()"></div>
     
     <div id="modal-editar-wrapper" class="flex min-h-screen items-center justify-center p-3 sm:p-4">
-        {{-- Panel principal en fondo #F2F2F2 --}}
         <div class="relative bg-[#F2F2F2] border border-slate-300/70 w-full max-w-2xl rounded-[2rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300 overflow-hidden" id="modal-editar-panel">
             
             <div class="p-6 sm:p-8 pb-4 sm:pb-6 border-b border-slate-300/60 flex justify-between items-start">
@@ -53,6 +52,62 @@
                                 <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
                             </span>
                         </label>
+                    </div>
+
+                    {{-- Toggle: Tiene Variantes (Tamaños) Editar --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="flex items-center justify-between gap-3 bg-blue-50/50 border border-blue-200/80 rounded-2xl p-4 cursor-pointer select-none shadow-sm">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-layer-group text-blue-500 text-sm"></i>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800">Tiene diferentes tamaños/presentaciones</span>
+                            </span>
+                            <span class="relative inline-flex items-center">
+                                <input type="checkbox" id="edit-tiene_variantes" name="tiene_variantes" class="peer sr-only" onchange="toggleVariantes('editar')">
+                                <span class="w-11 h-6 rounded-full bg-slate-300 peer-checked:bg-blue-500 transition-colors"></span>
+                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    {{-- Sección Dinámica de Variantes Editar --}}
+                    <div class="col-span-1 sm:col-span-2 hidden" id="seccion-variantes-editar">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1 block">Tamaños y Precios</label>
+                            </div>
+                            <button type="button" onclick="agregarFilaVariante('editar')" class="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-plus"></i> AGREGAR TAMAÑO
+                            </button>
+                        </div>
+                        <div id="contenedor-variantes-editar" class="space-y-2"></div>
+                    </div>
+
+                    {{-- Toggle: Tiene Modificadores/Extras Editar --}}
+                    <div class="col-span-1 sm:col-span-2">
+                        <label class="flex items-center justify-between gap-3 bg-purple-50/50 border border-purple-200/80 rounded-2xl p-4 cursor-pointer select-none shadow-sm">
+                            <span class="flex items-center gap-3">
+                                <i class="fas fa-puzzle-piece text-purple-500 text-sm"></i>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800">Tiene complementos / extras (Papas, etc.)</span>
+                            </span>
+                            <span class="relative inline-flex items-center">
+                                <input type="checkbox" id="edit-tiene_modificadores" name="tiene_modificadores" class="peer sr-only" onchange="toggleModificadores('editar')">
+                                <span class="w-11 h-6 rounded-full bg-slate-300 peer-checked:bg-purple-600 transition-colors"></span>
+                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-5"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    {{-- Sección Dinámica de Modificadores Editar --}}
+                    <div class="col-span-1 sm:col-span-2 hidden" id="seccion-modificadores-editar">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios</label>
+                            </div>
+                            <button type="button" onclick="agregarFilaModificador('editar')" class="inline-flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-plus"></i> AGREGAR EXTRA
+                            </button>
+                        </div>
+                        <div id="contenedor-modificadores-editar" class="space-y-2"></div>
                     </div>
 
                     {{-- Precio Fijo --}}
@@ -108,6 +163,9 @@
 </div>
 
 <script>
+    // ─── Contadores de filas dinámicas ───────────────────────────────────────
+    let contadorModificadores = 0;
+
     // ─── Bloqueo/desbloqueo de scroll del fondo ─────────────────────────
     window.bloquearScrollFondo = function () {
         document.body.style.overflow = 'hidden';
@@ -175,19 +233,119 @@
         });
     }
 
+// ─── Gestión Unificada de Modificadores / Extras ──────────────────────────
+    function toggleModificadores(modo) {
+        const idCheck = (modo === 'crear') ? 'tiene_modificadores' : 'edit-tiene_modificadores';
+        const idSeccion = (modo === 'crear') ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar';
+        const idCont = (modo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
+
+        const check = document.getElementById(idCheck);
+        const seccion = document.getElementById(idSeccion);
+        if (!check || !seccion) return;
+
+        if (check.checked) {
+            seccion.classList.remove('hidden');
+            const cont = document.getElementById(idCont);
+            if (cont && cont.children.length === 0) {
+                agregarFilaModificador(modo);
+            }
+        } else {
+            seccion.classList.add('hidden');
+        }
+    }
+
+    function agregarFilaModificador(modo, datos = null) {
+        const idCont = (modo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
+        const contenedor = document.getElementById(idCont);
+        if (!contenedor) return;
+
+        const index = contadorModificadores++;
+        const id = datos?.id ?? '';
+        const nombre = datos?.nombre ?? '';
+        const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
+            ? parseFloat(datos.precio).toFixed(2) 
+            : '';
+
+        const html = `
+            <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-modificador" id="modificador-${modo}-${index}">
+                <input type="hidden" name="modificadores[${index}][id]" value="${id}">
+                <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <span class="pl-2 text-slate-400 font-bold">$</span>
+                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
+                <button type="button" onclick="document.getElementById('modificador-${modo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+        `;
+        contenedor.insertAdjacentHTML('beforeend', html);
+    }
+
+    function llenarModificadoresEdicion(producto) {
+        const contenedor = document.getElementById('contenedor-modificadores-editar');
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+
+        const tieneMods = Array.isArray(producto.modificadores) && producto.modificadores.length > 0;
+        const check = document.getElementById('edit-tiene_modificadores');
+        if (check) check.checked = tieneMods;
+
+        if (tieneMods) {
+            producto.modificadores.forEach(mod => {
+                agregarFilaModificador('editar', mod);
+            });
+        }
+        toggleModificadores('editar');
+    }
+
+    // ─── Función para rellenar las variantes al editar ────────────────────────
+    function llenarVariantesEdicion(producto) {
+        const contenedor = document.getElementById('contenedor-variantes-editar');
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+        
+        if (producto.tiene_variantes && producto.variantes && producto.variantes.length > 0) {
+            producto.variantes.forEach(variante => {
+                const index = contadorVariantes++;
+                const htmlFila = `
+                    <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-variante" id="variante-edit-${index}">
+                        <input type="hidden" name="variantes[${index}][id]" value="${variante.id}">
+                        <input type="text" name="variantes[${index}][nombre]" value="${variante.nombre}" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
+                        <div class="w-px h-6 bg-slate-200"></div>
+                        <span class="pl-2 text-slate-400 font-bold">$</span>
+                        <input type="number" step="0.01" name="variantes[${index}][precio]" value="${variante.precio}" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
+                        <button type="button" onclick="document.getElementById('variante-edit-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                contenedor.insertAdjacentHTML('beforeend', htmlFila);
+            });
+        }
+    }
+
     // ─── Abrir modal con datos del producto ──────────────────────────────────
     function editarProducto(id) {
         if (!tienePermisoEditar) { mostrarNotificacion('Sin permisos para editar', 'error'); return; }
         const producto = estadoGlobal.productosMap[id];
         if (!producto) return;
+        
         estadoGlobal.editandoId = id;
-        document.getElementById('edit-nombre').value           = producto.nombre              ?? '';
-        document.getElementById('edit-precio').value           = producto.precio              ?? '';
-        document.getElementById('edit-precio_por_100g').value  = producto.precio_por_100g      ?? '';
+        document.getElementById('edit-nombre').value           = producto.nombre           ?? '';
+        document.getElementById('edit-precio').value           = producto.precio           ?? '';
+        document.getElementById('edit-precio_por_100g').value  = producto.precio_por_100g  ?? '';
         document.getElementById('edit-se_vende_por_peso').checked = !!producto.se_vende_por_peso;
-        document.getElementById('edit-descripcion').value      = producto.descripcion         ?? '';
-        document.getElementById('edit-categoria_nombre').value = producto.categoria?.nombre   ?? '';
-        document.getElementById('edit-categoria_id').value     = producto.categoria?.id       ?? '';
+        document.getElementById('edit-descripcion').value      = producto.descripcion      ?? '';
+        document.getElementById('edit-categoria_nombre').value = producto.categoria?.nombre ?? '';
+        document.getElementById('edit-categoria_id').value     = producto.categoria?.id     ?? '';
+
+        // Variantes (Tamaños)
+        document.getElementById('edit-tiene_variantes').checked = !!producto.tiene_variantes;
+        llenarVariantesEdicion(producto);
+        toggleVariantes('editar');
+
+        // Modificadores (Extras/Papas)
+        llenarModificadoresEdicion(producto);
 
         toggleModoVentaPeso('editar');
         llenarIngredientesEdicion(producto);
@@ -201,7 +359,7 @@
         _abrirModal('modal-editar-alimento', 'modal-editar-panel');
     }
 
-    // ─── Actualizar producto ─────────────────────────────────────────────────
+    // ─── Actualizar producto (Envío) ─────────────────────────────────────────
     function actualizarProducto(event) {
         event.preventDefault();
         if (!tienePermisoEditar) { mostrarNotificacion('Sin autorización para editar', 'error'); return; }
@@ -223,6 +381,12 @@
         const formData = new FormData(formEl);
         formData.set('categoria_id', catId);
         formData.set('se_vende_por_peso', document.getElementById('edit-se_vende_por_peso').checked ? '1' : '0');
+        formData.set('tiene_variantes', document.getElementById('edit-tiene_variantes').checked ? '1' : '0');
+        
+        // Estado del switch de modificadores
+        const tieneModsCheck = document.getElementById('edit-tiene_modificadores');
+        formData.set('tiene_modificadores', (tieneModsCheck && tieneModsCheck.checked) ? '1' : '0');
+        
         formData.set('_method', 'PUT');
 
         enviarFormularioConImagen(RUTA_API_BASE + estadoGlobal.editandoId, formData, btn, original, closeModalEditar);
