@@ -414,28 +414,31 @@
         });
     }
 
-    function finalizarTicket(precioTotal) {
+function finalizarTicket(precioTotal) {
         cerrarModalVariantes();
         const est = window.estadoPersonalizacion;
         const prod = window.productoActivoParaComanda;
 
+        // 1. Extraemos los detalles seleccionados
         let partes = [];
         if (est.tamanoSeleccionado) partes.push(est.tamanoSeleccionado);
-        if (est.detalles.length > 0) partes.push(est.detalles.join(', '));
+        if (est.detalles && est.detalles.length > 0) partes.push(est.detalles.join(', '));
 
         const nombreFinal = partes.length > 0 ? `${est.nombreBase} (${partes.join(' - ')})` : est.nombreBase;
+        const notasParaCocina = partes.length > 0 ? partes.join(' - ') : null;
 
+        // 2. Enviamos al ticket pasando las notas/extras seleccionados
         agregarAlTicket(
             prod.id, 
             nombreFinal, 
             precioTotal, 
             prod.categoria?.nombre || 'Menú', 
-            prod.modificadores || [], 
+            partes,             // <-- Pasamos los modificadores seleccionados reales
             false, 
-            0
+            0,
+            notasParaCocina     // <-- Pasamos el texto de notas para la orden
         );
     }
-
     window.cerrarModalVariantes = function() {
         const modal = document.getElementById('modal-variantes-comanda');
         const panel = document.getElementById('panel-variantes-comanda');

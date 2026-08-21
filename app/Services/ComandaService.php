@@ -83,11 +83,22 @@ class ComandaService
 
             foreach ($platillos as $platillo) {
                 
-                $notasArray = $platillo['modificadores'] ?? [];
-                if (!empty($platillo['notas'])) {
-                    $notasArray[] = $platillo['notas'];
+              // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
+                $variante = $platillo['variante_info'] ?? null;
+                $notaManual = !empty($platillo['notas']) ? trim($platillo['notas']) : null;
+
+                if (!$variante) {
+                    $tempV = [];
+                    if (!empty($platillo['tamano'])) $tempV[] = $platillo['tamano'];
+                    elseif (!empty($platillo['variante'])) $tempV[] = is_array($platillo['variante']) ? ($platillo['variante']['nombre'] ?? '') : $platillo['variante'];
+                    if (!empty($tempV)) $variante = implode(' - ', array_filter(array_map('trim', $tempV)));
                 }
-                $notasFinales = !empty($notasArray) ? implode(', ', $notasArray) : null;
+
+                if ($variante && $notaManual) {
+                    $notasFinales = "{$variante} ||| {$notaManual}";
+                } else {
+                    $notasFinales = $variante ?? $notaManual ?? null;
+                }
 
                 $detalleData = [
                     'orden_id' => $orden->id,
@@ -262,11 +273,22 @@ class ComandaService
 
             foreach ($productosNuevos as $platillo) {
                 // El tiempo YA NO se anexa a 'notas': tiene su propia columna.
-                $notasArray = $platillo['modificadores'] ?? [];
-                if (!empty($platillo['notas'])) {
-                    $notasArray[] = $platillo['notas'];
+               // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
+                $variante = $platillo['variante_info'] ?? null;
+                $notaManual = !empty($platillo['notas']) ? trim($platillo['notas']) : null;
+
+                if (!$variante) {
+                    $tempV = [];
+                    if (!empty($platillo['tamano'])) $tempV[] = $platillo['tamano'];
+                    elseif (!empty($platillo['variante'])) $tempV[] = is_array($platillo['variante']) ? ($platillo['variante']['nombre'] ?? '') : $platillo['variante'];
+                    if (!empty($tempV)) $variante = implode(' - ', array_filter(array_map('trim', $tempV)));
                 }
-                $notasFinales = !empty($notasArray) ? implode(', ', $notasArray) : null;
+
+                if ($variante && $notaManual) {
+                    $notasFinales = "{$variante} ||| {$notaManual}";
+                } else {
+                    $notasFinales = $variante ?? $notaManual ?? null;
+                }
 
                 $detalleData = [
                     'orden_id'        => $ordenDestino->id,

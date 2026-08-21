@@ -182,16 +182,31 @@
         }
         // ----------------------------------------------------------------
 
-        const platillosData = [];
+     const platillosData = [];
         itemsHTML.forEach(item => {
             const nomEl = item.querySelector('.nombre-platillo');
-            const nombre = nomEl ? nomEl.innerText : 'Producto';
+            const nombreCompleto = nomEl ? nomEl.innerText.trim() : 'Producto';
+            
+            // 1. Notas manuales / modificadores agregados manualmente (rojos)
             const modsElementos = item.querySelectorAll('.nota-texto-real');
-            const mods = []; modsElementos.forEach(m => mods.push(m.innerText.replace('•', '').trim()));
+            const notasManuales = []; 
+            modsElementos.forEach(m => notasManuales.push(m.innerText.replace('•', '').trim()));
+            
+            // 2. Tamaño y complementos del modal: Ej "6pz - con papas" (morado)
+            let varianteInfo = null;
+            const matchParentesis = nombreCompleto.match(/\(([^)]+)\)/);
+            if (matchParentesis && matchParentesis[1]) {
+                varianteInfo = matchParentesis[1].trim();
+            }
+
             platillosData.push({
-                id: parseInt(item.dataset.productoId, 10), nombre: nombre,
-                cantidad: parseInt(item.dataset.cantidad, 10), precio: parseFloat(item.dataset.precio),
-                modificadores: mods,
+                id: parseInt(item.dataset.productoId, 10),
+                nombre: nombreCompleto,
+                cantidad: parseInt(item.dataset.cantidad, 10),
+                precio: parseFloat(item.dataset.precio),
+                variante_info: varianteInfo, // <-- Tamaño / Complementos (Morado)
+                notas: notasManuales.length > 0 ? notasManuales.join(', ') : null, // <-- Instrucción especial (Rojo)
+                modificadores: notasManuales,
                 gramaje: item.dataset.gramaje === 'sin-gramaje' ? null : item.dataset.gramaje,
                 tiempo: item.dataset.tiempo
             });

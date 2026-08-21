@@ -82,7 +82,7 @@
                 </div>
 
                 <div class="p-4 flex-1 min-w-0">
-                    <ul class="space-y-2">
+                    <ul class="space-y-2.5">
                         @foreach($comanda->detalles as $detalle)
                             @php
                                 $tiempoClases = [
@@ -92,46 +92,76 @@
                                     'tercer-tiempo'  => ['label' => '3', 'clase' => 'text-rose-600 bg-rose-50 border-rose-100'],
                                 ];
                                 $tInfo = $tiempoClases[$detalle->tiempo] ?? null;
-                            @endphp
-                           <li class="flex flex-col text-sm gap-1.5 detalle-item"
-                               data-detalle-id="{{ $detalle->id }}"
-                               data-estado="{{ $detalle->estado_preparacion }}">
-    <div class="flex items-center justify-between gap-2">
-        <span class="font-bold break-words flex flex-wrap items-center gap-1.5 nombre-producto transition-all
-              {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'line-through opacity-40 text-slate-400' : 'text-slate-800' }}">
-        {{ $detalle->cantidad }}x {{ $detalle->producto->nombre ?? 'Producto Eliminado' }}
-        @if($tInfo)
-            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-md border {{ $tInfo['clase'] }}">
-                <i class="fas fa-clock"></i>Tiempo {{ $tInfo['label'] }}
-            </span>
-        @endif
-        @if($detalle->gramaje)
-            @php
-                $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.');
-            @endphp
-            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
-                <i class="fas fa-weight-hanging"></i>{{ $gramajeLimpio }}g
-            </span>
-        @endif
-        </span>
 
-        {{-- Boton de tachar: marca este producto como listo sin avanzar toda la comanda --}}
-        <button type="button"
-            class="btn-tachar shrink-0 w-8 h-8 rounded-xl border-2 transition-all flex items-center justify-center
-                   {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida'])
-                       ? 'bg-emerald-600 border-emerald-600 text-white scale-95'
-                       : 'border-slate-300 text-slate-400 hover:border-emerald-500 hover:text-emerald-600 hover:scale-105' }}"
-            title="{{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'Desmarcar' : 'Marcar como listo' }}">
-            <i class="fas fa-check text-[11px]"></i>
-        </button>
-    </div>
-    @if($detalle->notas)
-        <span class="flex items-start gap-2 px-3 py-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold w-full break-words leading-snug">
-            <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
-            <span>{{ $detalle->notas }}</span>
-        </span>
-    @endif
-</li>
+                                // Desglose limpio entre Variante/Tamaño y Nota/Alerta Especial
+                                $textoVariante = null;
+                                $textoAlerta   = null;
+
+                                if (!empty($detalle->notas)) {
+                                    if (str_contains($detalle->notas, '|||')) {
+                                        [$textoVariante, $textoAlerta] = explode('|||', $detalle->notas, 2);
+                                        $textoVariante = trim($textoVariante);
+                                        $textoAlerta   = trim($textoAlerta);
+                                    } else {
+                                        // Si no trae delimitador, se muestra como pastilla morada de especificación
+                                        $textoVariante = trim($detalle->notas);
+                                    }
+                                }
+                            @endphp
+
+                            <li class="flex flex-col text-sm gap-1.5 detalle-item"
+                                data-detalle-id="{{ $detalle->id }}"
+                                data-estado="{{ $detalle->estado_preparacion }}">
+                                
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="font-bold break-words flex flex-wrap items-center gap-1.5 nombre-producto transition-all
+                                              {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'line-through opacity-40 text-slate-400' : 'text-slate-800' }}">
+                                            {{ $detalle->cantidad }}x {{ $detalle->producto->nombre ?? 'Producto Eliminado' }}
+                                            
+                                            @if($tInfo)
+                                                <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-1.5 py-0.5 rounded-md border {{ $tInfo['clase'] }}">
+                                                    <i class="fas fa-clock"></i>Tiempo {{ $tInfo['label'] }}
+                                                </span>
+                                            @endif
+                                            @if($detalle->gramaje)
+                                                @php
+                                                    $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.');
+                                                @endphp
+                                                <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                                                    <i class="fas fa-weight-hanging"></i>{{ $gramajeLimpio }}g
+                                                </span>
+                                            @endif
+                                        </span>
+
+                                        {{-- 1. Badge Morado: Tamaño y Complementos (ej: 6pz - con papas) --}}
+                                        @if(!empty($textoVariante))
+                                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-lg mt-1 w-fit shadow-xs">
+                                                <i class="fas fa-layer-group text-[10px] text-purple-500"></i>
+                                                <span>{{ $textoVariante }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Botón de tachar --}}
+                                    <button type="button"
+                                        class="btn-tachar shrink-0 w-8 h-8 rounded-xl border-2 transition-all flex items-center justify-center
+                                               {{ in_array($detalle->estado_preparacion, ['listo_cocina','servida'])
+                                                   ? 'bg-emerald-600 border-emerald-600 text-white scale-95'
+                                                   : 'border-slate-300 text-slate-400 hover:border-emerald-500 hover:text-emerald-600 hover:scale-105' }}"
+                                        title="{{ in_array($detalle->estado_preparacion, ['listo_cocina','servida']) ? 'Desmarcar' : 'Marcar como listo' }}">
+                                        <i class="fas fa-check text-[11px]"></i>
+                                    </button>
+                                </div>
+
+                                {{-- 2. Recuadro Rojo: Únicamente para notas especiales/alertas escritas --}}
+                                @if(!empty($textoAlerta))
+                                    <span class="flex items-start gap-2 px-3 py-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold w-full break-words leading-snug">
+                                        <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
+                                        <span>{{ $textoAlerta }}</span>
+                                    </span>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </div>
