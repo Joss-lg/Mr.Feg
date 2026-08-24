@@ -26,12 +26,14 @@ class ComandaService
     ): Orden {
         return DB::transaction(function () use ($mesa, $platillos, $usuario, $personas, $descuentoPorcentaje, $permitirSinStock, $datosExtra) {
             
-            // --- ACTUALIZACIÓN LIMPIA DE LA MESA VIRTUAL ---
-            // Si es un pedido para llevar y trae nombre temporal, actualizamos 
-            // el número de la mesa virtual existente sin tocar la estructura de la BD.
-                if (!empty($datosExtra['nombre_temporal'])) {
+           // --- ACTUALIZACIÓN LIMPIA DE LA MESA VIRTUAL ---
+            // Detecta si es a domicilio o para llevar según el tipo real del pedido
+            if (!empty($datosExtra['nombre_temporal'])) {
+                $tipoPedidoReal = strtolower($datosExtra['tipo_pedido'] ?? 'llevar');
+                $prefijo = ($tipoPedidoReal === 'domicilio') ? 'DOM-' : 'LLEVAR-';
+
                 $mesa->update([
-                    'numero' => 'LLEVAR-' . strtoupper($datosExtra['nombre_temporal']) . '-' . $mesa->id
+                    'numero' => $prefijo . strtoupper($datosExtra['nombre_temporal']) . '-' . $mesa->id
                 ]);
             }
  

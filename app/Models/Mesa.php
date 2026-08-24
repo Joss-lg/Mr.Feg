@@ -56,6 +56,53 @@ class Mesa extends Model
         return $this->tipo === self::TIPO_DELIVERY;
     }
 
+    public function esParaLlevar(): bool
+    {
+        $ordenActiva = $this->ordenesActivas()->first();
+        if ($ordenActiva && $ordenActiva->tipo_pedido) {
+            return strtolower($ordenActiva->tipo_pedido) === 'llevar';
+        }
+
+        return str_starts_with(strtoupper((string)($this->numero ?? '')), 'LLEVAR-');
+    }
+
+    public function esADomicilio(): bool
+    {
+        $ordenActiva = $this->ordenesActivas()->first();
+        if ($ordenActiva && $ordenActiva->tipo_pedido) {
+            return strtolower($ordenActiva->tipo_pedido) === 'domicilio';
+        }
+
+        return str_starts_with(strtoupper((string)($this->numero ?? '')), 'DOM-');
+    }
+
+    public function getNombreVisualAttribute(): string
+    {
+        $num = (string)($this->numero ?? 'S/N');
+
+        // Apps de Delivery externas (DiDi, Uber, Rappi)
+        if ($this->esDelivery()) {
+            return strtoupper($this->plataformaDelivery->nombre ?? 'DELIVERY');
+        }
+
+        // Para Llevar
+        if ($this->esParaLlevar()) {
+            $nombre = preg_replace('/^LLEVAR-/i', '', $num);
+            return preg_replace('/-\d+$/', '', $nombre);
+        }
+
+        // A Domicilio propio
+        if ($this->esADomicilio()) {
+            $nombre = preg_replace('/^DOM-/i', '', $num);
+            return preg_replace('/-\d+$/', '', $nombre);
+        }
+
+        // Comedor / Mesas físicas
+        return str_starts_with(strtolower($num), 'mesa') 
+            ? strtoupper($num) 
+            : 'MESA ' . strtoupper($num);
+    }
+
     public function scopeSoloLocales($query)
     {
         return $query->where(function ($q) {
@@ -69,7 +116,7 @@ class Mesa extends Model
         return $this->hasMany(Orden::class, 'mesa_id');
     }
 
-    // Relación con Órdenes activas (usando las constantes de Orden si es posible)
+    // Relación con Órdenes activas
     public function ordenesActivas()
     {
         return $this->ordenes()
@@ -96,7 +143,6 @@ class Mesa extends Model
 
     public function getTotalConsumoAttribute()
     {
-        // Si ya tienes la relación cargada en el controlador, úsala de la memoria
         $total = $this->ordenesActivas->sum(function($orden) {
             return $orden->detalles->sum(function($detalle) {
                 return $detalle->cantidad * $detalle->precio_unitario;
@@ -121,10 +167,8 @@ class Mesa extends Model
         return $this->getProductosAttribute()->where('estado', '!=', 'entregado')->count();
     }
 
-    // --- Método actualizado con la constante ---
     public function getEstadoVisualAttribute()
     {
-        // Usamos la constante en lugar del string "duro"
         if ($this->estado === self::ESTADO_DISPONIBLE) {
             return 'blue'; 
         }
