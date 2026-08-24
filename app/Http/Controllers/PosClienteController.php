@@ -112,10 +112,10 @@ class PosClienteController extends Controller
      * mostraba "No hay metas de lealtad configuradas" hasta que lo volvías
      * a buscar por separado.
      */
-    private function inyectarLealtad(Cliente $cliente, Collection $niveles): void
+   private function inyectarLealtad(Cliente $cliente, Collection $niveles): void
     {
         $fidelidad = FidelidadCliente::where('cliente_id', $cliente->id)->first();
-        $sellos = $fidelidad ? $fidelidad->compras_acumuladas : 0;
+        $sellos = $fidelidad ? (int)$fidelidad->compras_acumuladas : 0;
 
         $premioDisponible = null;
         $siguienteMeta = null;
@@ -123,19 +123,22 @@ class PosClienteController extends Controller
 
         if ($niveles->count() > 0) {
             foreach ($niveles as $nivel) {
-                if ($sellos >= $nivel->compras_requeridas) {
+                $req = (int)$nivel->compras_requeridas;
+
+                if ($sellos >= $req) {
+                    // Guarda el premio más alto alcanzado que aún no canjea
                     $premioDisponible = $nivel->premio_descripcion;
-                }
-                if ($sellos < $nivel->compras_requeridas && !$siguienteMeta) {
+                } elseif (!$siguienteMeta) {
+                    // Primer nivel no alcanzado (próxima meta)
                     $siguienteMeta = $nivel->premio_descripcion;
-                    $metaRequerida = $nivel->compras_requeridas;
-                    break;
+                    $metaRequerida = $req;
                 }
             }
 
-            // Si ya completó todo, ponemos un mensaje claro
+            // Si superó todos los niveles existentes
             if (!$siguienteMeta && $premioDisponible) {
                 $siguienteMeta = "¡Nivel máximo alcanzado!";
+                $metaRequerida = (int)$niveles->max('compras_requeridas');
             }
         } else {
             $siguienteMeta = "Configurar Niveles";
@@ -147,4 +150,67 @@ class PosClienteController extends Controller
         $cliente->lealtad_siguiente_meta = $siguienteMeta;
         $cliente->lealtad_meta_requerida = $metaRequerida;
     }
+
+ public function canjearPremio(Request $request)
+{
+    $request->validate([
+        'cliente_id' => 'required|exists:clientes,id',
+    ]);
+
+    $fidelidad = FidelidadCliente::where('cliente_id', $request->cliente_id)->first();
+    $sellosActuales = $fidelidad ? (int)$fidelidad->compras_acumuladas : 0;
+
+    $nivelAlcanzado = NivelFidelidad::where('compras_requeridas', '<=', $sellosActuales)
+        ->orderBy('compras_requeridas', 'desc')
+        ->first();
+
+    if (!$nivelAlcanzado) {
+        return response()->json([
+            'success' => false,
+            'message' => "El cliente tiene {$sellosActuales} sellos y no cuenta con premios disponibles."
+        ], 400);
+    }
+
+    // Guardamos cuántos sellos tenía en total para poder devolvérselos si cancela el canje
+    $sellosConsumidos = $sellosActuales;
+
+    // Reseteamos el contador completamente a 0
+    $fidelidad->compras_acumuladas = 0;
+    $fidelidad->increment('total_canjes_realizados', 1);
+    $fidelidad->save();
+
+    return response()->json([
+        'success' => true,
+        'nuevos_sellos' => 0,
+        'premio' => $nivelAlcanzado->premio_descripcion,
+        'costo_sellos' => $sellosConsumidos, // Enviamos el total reseteado para el ticket
+        'message' => 'Premio canjeado exitosamente.'
+    ]);
+}
+
+public function revertirCanje(Request $request)
+{
+    $request->validate([
+        'cliente_id' => 'required|exists:clientes,id',
+        'sellos_a_revertir' => 'required|integer|min:1',
+    ]);
+
+    $fidelidad = FidelidadCliente::where('cliente_id', $request->cliente_id)->first();
+
+    if ($fidelidad) {
+        // Restauramos los sellos que tenía antes de presionar canjear
+        $fidelidad->compras_acumuladas += (int)$request->sellos_a_revertir;
+        if ($fidelidad->total_canjes_realizados > 0) {
+            $fidelidad->decrement('total_canjes_realizados', 1);
+        }
+        $fidelidad->save();
+    }
+
+    return response()->json([
+        'success' => true,
+        'nuevos_sellos' => $fidelidad ? $fidelidad->compras_acumuladas : 0,
+        'message' => 'Sellos devueltos exitosamente.'
+    ]);
+}
+ 
 }

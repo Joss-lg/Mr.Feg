@@ -1054,11 +1054,17 @@ window.seleccionarClienteDelivery = function(id, nombre, telefono, direccionesEn
         tarjetaLealtad.classList.remove('hidden');
         lealtadSellos.innerHTML = `${sellos} <i class="fas fa-star text-[8px] ml-0.5"></i>`;
  
-        if (premio && premio !== 'null') {
-            tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-sm relative overflow-hidden";
-            lealtadSellos.className = "bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse";
-            lealtadMensaje.innerHTML = `<span class="text-emerald-700 font-bold">¡Premio Disponible!</span><br><span class="text-slate-800">${premio}</span>`;
-        } 
+       if (premio && premio !== 'null') {
+    tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-sm relative overflow-hidden";
+    lealtadSellos.className = "bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse";
+    lealtadMensaje.innerHTML = `
+        <span class="text-emerald-700 font-bold">¡Premio Disponible!</span><br>
+        <span class="text-slate-800">${premio}</span>
+        <button type="button" onclick="window.canjearPremioLealtad('${premio}', ${id})" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black py-1.5 px-3 rounded-xl shadow-sm transition-all active:scale-95">
+        <i class="fas fa-gift mr-1"></i> Canjear Premio
+        </button>
+    `;
+}
         else if (metaNombre && metaNombre !== 'null' && metaNombre !== "Configurar Niveles") {
             tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 shadow-sm relative overflow-hidden";
             lealtadSellos.className = "bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm";
@@ -1315,4 +1321,61 @@ window.confirmarDomicilioExpress = function() {
     }
 };
 
+window.canjearPremioLealtad = function(descripcionPremio, clienteId = null) {
+    const idFinal = clienteId || window.clienteSeleccionadoId;
+
+    if (!idFinal) {
+        if (typeof mostrarError === 'function') mostrarError("Debes seleccionar un cliente primero.");
+        else alert("Debes seleccionar un cliente primero.");
+        return;
+    }
+
+    fetch('/pos/clientes/canjear-premio', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ cliente_id: idFinal })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof mostrarExito === 'function') mostrarExito("¡Premio canjeado con éxito!");
+
+            // Insertar con metadatos para reversión si se elimina
+            if (typeof window._insertarItemEnTicket === 'function') {
+                window._insertarItemEnTicket({
+                    id: 0,
+                    nombre: `🎁 PREMIO: ${descripcionPremio}`,
+                    precioUnitario: 0.00,
+                    categoria: 'Lealtad',
+                    esPremioLealtad: true,
+                    sellosCanjeados: data.costo_sellos,
+                    clienteId: idFinal,
+                    arrayModificadores: [{ nombre: 'Canje de lealtad (Gratis)' }],
+                    sePorPeso: false,
+                    precioPor100g: 0,
+                    gramaje: null
+                });
+            }
+
+            // Ocultar botón y actualizar contador
+            const tarjetaLealtad = document.getElementById('tarjeta-lealtad');
+            const lealtadSellos = document.getElementById('lealtad-sellos');
+            const lealtadMensaje = document.getElementById('lealtad-mensaje');
+            
+            if (lealtadSellos) lealtadSellos.innerHTML = `${data.nuevos_sellos} <i class="fas fa-star text-[8px] ml-0.5"></i>`;
+            if (lealtadMensaje) lealtadMensaje.innerHTML = `<span class="text-slate-600">Premio canjeado exitosamente.</span>`;
+            if (tarjetaLealtad) tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-slate-100 to-white border border-slate-200 shadow-sm relative overflow-hidden";
+        } else {
+            alert(data.message || 'Error al canjear el premio.');
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Error de red al procesar el canje.');
+    });
+};
 </script>

@@ -112,21 +112,22 @@
     };
 
     // Inserta (o agrupa) una línea en el ticket.
-    window._insertarItemEnTicket = function ({ id, nombre, precioUnitario, categoria, arrayModificadores, sePorPeso, precioPor100g, gramaje, varianteId = null }) {
+    // Inserta (o agrupa) una línea en el ticket.
+    window._insertarItemEnTicket = function ({ id, nombre, precioUnitario, categoria, arrayModificadores, sePorPeso, precioPor100g, gramaje, varianteId = null, esPremioLealtad = false, sellosCanjeados = 0, clienteId = null }) {
         estadoVacio.classList.add('hidden');
 
         const modsString = JSON.stringify(arrayModificadores || []).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
         const gramajeKey = gramaje ? gramaje.toString() : 'sin-gramaje';
         const varianteKey = varianteId ? varianteId.toString() : 'sin-variante';
 
-        // Buscamos si ya existe el MISMO producto, con la MISMA variante y MODIFICADORES
-        const existingItem = Array.from(listaTicket.querySelectorAll('.ticket-item')).find(item => {
+        // Buscamos si ya existe el MISMO producto, con la MISMA variante y MODIFICADORES (solo si NO es premio)
+        const existingItem = !esPremioLealtad ? Array.from(listaTicket.querySelectorAll('.ticket-item')).find(item => {
             return parseInt(item.dataset.productoId, 10) === id
                 && item.dataset.modificadores === modsString
                 && item.dataset.gramaje === gramajeKey
                 && item.dataset.tiempo === tiempoGlobal
-                && (item.dataset.varianteId || 'sin-variante') === varianteKey; // Regla de separación por tamaño
-        });
+                && (item.dataset.varianteId || 'sin-variante') === varianteKey;
+        }) : null;
 
         if (existingItem) {
             const cantidadSpan = existingItem.querySelector('.cantidad-platillo');
@@ -160,7 +161,21 @@
             : '';
 
         const itemHTML = `
-            <div id="${itemId}" data-producto-id="${id}" data-variante-id="${varianteId || ''}" data-cantidad="1" data-precio="${precioUnitario}" data-modificadores="${modsString}" data-gramaje="${gramajeKey}" data-tiempo="${tiempoGlobal}" data-se-por-peso="${sePorPeso ? '1' : '0'}" data-precio100g="${precioPor100g}" class="ticket-item animate-item relative w-full rounded-[18px] bg-[var(--bg-panel)] border border-[var(--border-color)] shadow-sm p-4 flex flex-col gap-3 cursor-pointer transition-all duration-300 outline-none" onclick="seleccionarItem('${itemId}')">
+            <div id="${itemId}" 
+                data-producto-id="${id}" 
+                data-variante-id="${varianteId || ''}" 
+                data-cantidad="1" 
+                data-precio="${precioUnitario}" 
+                data-modificadores="${modsString}" 
+                data-gramaje="${gramajeKey}" 
+                data-tiempo="${tiempoGlobal}" 
+                data-se-por-peso="${sePorPeso ? '1' : '0'}" 
+                data-precio100g="${precioPor100g}" 
+                data-es-premio-lealtad="${esPremioLealtad ? '1' : '0'}" 
+                data-sellos-canjeados="${sellosCanjeados}" 
+                data-cliente-id="${clienteId || ''}" 
+                class="ticket-item animate-item relative w-full rounded-[18px] bg-[var(--bg-panel)] border border-[var(--border-color)] shadow-sm p-4 flex flex-col gap-3 cursor-pointer transition-all duration-300 outline-none" 
+                onclick="seleccionarItem('${itemId}')">
 
                 <div class="flex justify-between items-start gap-2">
                     <div class="flex-1">
@@ -201,7 +216,7 @@
         listaTicket.parentElement.scrollTop = listaTicket.parentElement.scrollHeight;
         return itemId;
     };
-    
+
     window.seleccionarItem = function (id) {
         deseleccionarTicket();
         itemActivo = document.getElementById(id);
@@ -286,11 +301,78 @@
 
     window.eliminarItemFila = function (btn) {
         const fila = btn.closest('.ticket-item');
-        ticketSubtotal -= (parseInt(fila.dataset.cantidad, 10) * parseFloat(fila.dataset.precio));
-        fila.remove(); actualizarTotales(); deseleccionarTicket();
-        if (document.getElementById('listaTicket').children.length === 0) document.getElementById('estadoVacio').classList.remove('hidden');
-    };
+        if (!fila) return;
 
+        // --- REVERSO DE LEALTAD SI ES UN PREMIO ---
+        const esPremio = fila.dataset.esPremioLealtad === '1';
+        const sellosCanjeados = parseInt(fila.dataset.sellosCanjeados, 10) || 0;
+        const clienteId = fila.dataset.clienteId;
+
+        if (esPremio && sellosCanjeados > 0 && clienteId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || window.csrfToken;
+            
+            fetch('/pos/clientes/revertir-canje', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    cliente_id: clienteId,
+                    sellos_a_revertir: sellosCanjeados
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof mostrarExito === 'function') {
+                        mostrarExito("Canje cancelado. Sellos devueltos al cliente.");
+                    }
+                    
+                    // Actualizar visualmente la tarjeta de lealtad al estado previo
+                    const lealtadSellos = document.getElementById('lealtad-sellos');
+                    const lealtadMensaje = document.getElementById('lealtad-mensaje');
+                    const tarjetaLealtad = document.getElementById('tarjeta-lealtad');
+
+                    if (lealtadSellos) {
+                        lealtadSellos.innerHTML = `${data.nuevos_sellos} <i class="fas fa-star text-[8px] ml-0.5"></i>`;
+                    }
+                    
+                    // Si al devolver sellos vuelve a tener premio disponible
+                    if (tarjetaLealtad && window.__ultimaLealtad) {
+                        const premio = window.__ultimaLealtad.premio;
+                        const metaNombre = window.__ultimaLealtad.metaNombre;
+                        const metaReq = window.__ultimaLealtad.metaReq;
+                        
+                        if (premio && premio !== 'null') {
+                            tarjetaLealtad.className = "col-span-2 mt-2 flex flex-col p-3 rounded-[16px] bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 shadow-sm relative overflow-hidden";
+                            if (lealtadMensaje) {
+                                lealtadMensaje.innerHTML = `
+                                    <span class="text-emerald-700 font-bold">¡Premio Disponible!</span><br>
+                                    <span class="text-slate-800">${premio}</span>
+                                    <button type="button" onclick="window.canjearPremioLealtad('${premio}', ${clienteId})" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black py-1.5 px-3 rounded-xl shadow-sm transition-all active:scale-95">
+                                        <i class="fas fa-gift mr-1"></i> Canjear Premio
+                                    </button>
+                                `;
+                            }
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error("Error al revertir canje:", err));
+        }
+
+        ticketSubtotal -= (parseInt(fila.dataset.cantidad, 10) * parseFloat(fila.dataset.precio));
+        fila.remove(); 
+        actualizarTotales(); 
+        deseleccionarTicket();
+        
+        if (document.getElementById('listaTicket').children.length === 0) {
+            document.getElementById('estadoVacio').classList.remove('hidden');
+        }
+    };
+    
     if (typeof window.propinaGlobal === 'undefined') {
         window.propinaGlobal = 0;
     }

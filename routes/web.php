@@ -291,7 +291,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pos/clientes/buscar', [\App\Http\Controllers\PosClienteController::class, 'buscar'])->name('pos.clientes.buscar');
     Route::post('/pos/clientes/express', [\App\Http\Controllers\PosClienteController::class, 'guardarClienteExpress'])->name('pos.clientes.express');
     Route::post('/pos/direcciones/express', [\App\Http\Controllers\PosClienteController::class, 'guardarDireccionExpress'])->name('pos.direcciones.express');
-    
+    Route::post('/pos/clientes/canjear-premio', [\App\Http\Controllers\PosClienteController::class, 'canjearPremio'])->name('pos.clientes.canjear-premio');
+    Route::post('/pos/clientes/revertir-canje', [\App\Http\Controllers\PosClienteController::class, 'revertirCanje'])->name('pos.clientes.revertir-canje');
+
     // ==========================================
     // --- MÓDULO DE REPARTIDORES ---
     // ==========================================
