@@ -463,10 +463,10 @@ IVA_BLOCK_END */
     /**
      * Libera una mesa y limpia sus estados.
      */
-    public function liberarMesa(Mesa $mesa): bool
+  public function liberarMesa(Mesa $mesa): bool
     {
         return DB::transaction(function () use ($mesa) {
-            // Pasamos a pagadas todas las órdenes que estaban en proceso en la mesa
+            // 1. Marcar órdenes activas como pagadas
             $mesa->ordenes()
                 ->whereIn('estado', Orden::getEstadosActivos())
                 ->update([
@@ -474,29 +474,19 @@ IVA_BLOCK_END */
                     'cerrada_el' => Carbon::now(),
                 ]);
 
-            // Reseteamos por completo la mesa para dejarla lista para nuevos clientes
+            // 2. Restablecer el estado de la mesa a disponible
             $mesa->update([
                 'estado'        => Mesa::ESTADO_DISPONIBLE,
                 'mesero_id'     => null,
+                'personas'      => null,
                 'total_consumo' => 0,
                 'updated_at'    => Carbon::now(),
             ]);
 
-            // Limpiamos cualquier división de cuenta: ya está todo cobrado
-            // y la mesa queda libre para nuevos comensales.
             $mesa->cuentasDivision()->delete();
 
-            // --- NUEVO: las mesas de DELIVERY se retiran al cobrarse ---
-            // Una mesa de Rappi/Uber/DiDi es virtual: se crea para UN pedido
-            // concreto y no existe en el salón, así que no tiene sentido
-            // dejarla "disponible" esperando comensales. Si no se retirara,
-            // cada pedido de delivery iría acumulando una mesa fantasma en
-            // la pantalla de Caja para siempre.
-            //
-            // Se usa borrado SUAVE (SoftDeletes), no DELETE real, para no
-            // romper el historial: las órdenes, los pagos y el corte de caja
-            // siguen apuntando a esta mesa_id y deben poder consultarse.
-            if ($mesa->esDelivery()) {
+            // 3. Las mesas físicas se conservan; las virtuales son de un solo pedido.
+            if ($mesa->esMesaVirtual()) {
                 $mesa->delete();
             }
 

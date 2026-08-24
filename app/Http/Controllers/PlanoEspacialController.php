@@ -170,23 +170,22 @@ class PlanoEspacialController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            // 1. Validar los datos recibidos
             $validated = $request->validate([
                 'numero'    => 'required|string|max:50|unique:mesas,numero',
                 'capacidad' => 'required|integer|min:1|max:20',
                 'estado'    => 'required|in:disponible,reservada,limpieza',
             ]);
 
-            // 2. Crear la mesa con valores por defecto para el plano
             $mesa = Mesa::create([
                 'numero'     => $validated['numero'],
                 'capacidad'  => $validated['capacidad'],
                 'estado'     => $validated['estado'],
-                'zona'       => 'salon', // Zona por defecto
-                'forma'      => 'redonda', // Forma por defecto
-                'posicion_x' => 20, // Aparecerá en la esquina superior izquierda
+                'tipo'       => Mesa::TIPO_LOCAL, // Asignación explícita para evitar su eliminación
+                'zona'       => 'salon',
+                'forma'      => 'redonda',
+                'posicion_x' => 20,
                 'posicion_y' => 20,
-                'ancho'      => 60, // Tamaño estándar inicial
+                'ancho'      => 60,
                 'alto'       => 60,
             ]);
 

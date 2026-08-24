@@ -17,6 +17,7 @@ class Mesa extends Model
 
     const TIPO_LOCAL = 'local';
     const TIPO_DELIVERY = 'delivery';
+    const TIPO_VIRTUAL = 'virtual';
 
     protected $table = 'mesas';
 
@@ -188,4 +189,45 @@ class Mesa extends Model
             return 'red'; 
         }
     }
+
+/**
+    * Determina si es una mesa virtual generada al vuelo para pedidos
+     * rápidos/delivery/llevar (las cuales sí deben eliminarse al cobrar).
+     * Las mesas físicas del salón (con coordenadas o tipo 'local') nunca son virtuales.
+     */
+    public function esMesaVirtual(): bool
+    {
+        // Las mesas creadas en el salón nunca se eliminan al cobrar.
+        if ($this->tipo === self::TIPO_LOCAL) {
+            $numero = strtoupper((string)($this->numero ?? ''));
+
+            // Compatibilidad con pedidos rápidos creados antes del tipo virtual.
+            return str_starts_with($numero, 'LLEVAR-') ||
+                str_starts_with($numero, 'DOM-') ||
+                str_starts_with($numero, 'DEL-') ||
+                str_starts_with($numero, 'RAPIDO-') ||
+                str_starts_with($numero, 'PEDIDO-');
+        }
+
+        if (in_array($this->tipo, [self::TIPO_DELIVERY, self::TIPO_VIRTUAL], true)) {
+            return true;
+        }
+
+        $numero = strtoupper((string)($this->numero ?? ''));
+
+        // 2. Si el número inicia con prefijos de pedidos rápidos/temporales
+        if (
+            str_starts_with($numero, 'LLEVAR-') ||
+            str_starts_with($numero, 'DOM-') ||
+            str_starts_with($numero, 'DEL-') ||
+            str_starts_with($numero, 'RAPIDO-') ||
+            str_starts_with($numero, 'PEDIDO-')
+        ) {
+            return true;
+        }
+
+        // 3. Mesas físicas del plano (tienen posiciones asignadas o tipo 'local')
+        return false;
+    }
+
 }

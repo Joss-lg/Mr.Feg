@@ -356,8 +356,9 @@ public function transferirProductos(Request $request)
                 'capacidad' => 1,
                 'estado'    => 'ocupada',
                 'mesero_id' => auth()->id(),
-                'pos_x'     => 0,
-                'pos_y'     => 0,
+                'tipo'      => Mesa::TIPO_VIRTUAL,
+                'posicion_x' => 0,
+                'posicion_y' => 0,
             ]);
 
             return response()->json([
