@@ -43,35 +43,77 @@
                     $claseAlerta = 'alerta-amarilla';
                 }
 
-                // Formateo del número de mesa para evitar "Mesa mesa 45"
-                $numMesa = $comanda->mesa->numero ?? 'S/N';
-                $labelMesa = \Illuminate\Support\Str::startsWith(strtolower($numMesa), 'mesa') 
-                    ? $numMesa 
-                    : 'Mesa ' . $numMesa;
+                $mesa = $comanda->mesa;
+                $plataformaNombre = strtolower($mesa->plataformaDelivery->nombre ?? '');
 
-                // Delivery
-                $esDelivery  = $comanda->mesa && $comanda->mesa->esDelivery();
-                $plataforma  = $esDelivery ? optional($comanda->mesa->plataformaDelivery)->nombre : null;
-                $colorBorde  = $esDelivery ? 'border-t-orange-500' : 'border-t-emerald-500';
+                // Color del borde superior según el tipo
+                $colorBorde = 'border-t-emerald-500';
+                if ($mesa && $mesa->esDelivery()) {
+                    $colorBorde = 'border-t-orange-500';
+                } elseif ($mesa && $mesa->esADomicilio()) {
+                    $colorBorde = 'border-t-amber-500';
+                }
             @endphp
 
             <article class="bg-white w-full rounded-[1.5rem] border border-slate-200 border-t-[6px] {{ $colorBorde }} shadow-sm flex flex-col h-full overflow-hidden relative transition-all duration-300 comanda-card {{ $claseAlerta }}"
                      data-comanda-id="{{ $comanda->id }}"
                      data-lote="{{ $comanda->detalles->first()?->lote_envio ?? $comanda->id }}"
                      data-tiempo-inicio="{{ $fechaCarbon->getTimestampMs() }}">
+                
                 <div class="p-4 border-b border-slate-100 min-w-0 flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2 mb-0.5">
-                            <h3 class="font-black text-lg break-words uppercase leading-tight text-slate-800">{{ $labelMesa }}</h3>
-                            @if($esDelivery)
-                                <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500 text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
-                                    <i class="fas fa-motorcycle text-[8px]"></i>
-                                    {{ $plataforma ?? 'Delivery' }}
+                    <div class="min-w-0 flex-1">
+                        
+                        {{-- 1. BADGES EXACTOS COMO EN CAJA --}}
+                        @if($mesa)
+                            @if($mesa->esDelivery())
+                                @if(str_contains($plataformaNombre, 'didi'))
+                                    {{-- DiDi Food (Naranja) --}}
+                                    <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#ff6a00] text-white mb-2 shadow-xs">
+                                        <i class="fas fa-motorcycle text-[8px]"></i> DiDi Food
+                                    </span>
+                                @elseif(str_contains($plataformaNombre, 'rappi'))
+                                    {{-- Rappi (Rojo/Coral) --}}
+                                    <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#ff441f] text-white mb-2 shadow-xs">
+                                        <i class="fas fa-motorcycle text-[8px]"></i> Rappi
+                                    </span>
+                                @elseif(str_contains($plataformaNombre, 'uber'))
+                                    {{-- Uber Eats (Verde Esmeralda) --}}
+                                    <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#06c167] text-white mb-2 shadow-xs">
+                                        <i class="fas fa-motorcycle text-[8px]"></i> Uber Eats
+                                    </span>
+                                @else
+                                    {{-- Otra plataforma --}}
+                                    <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg text-white mb-2 shadow-xs"
+                                          style="background-color: {{ $mesa->plataformaDelivery->color ?? '#f97316' }}">
+                                        <i class="fas fa-motorcycle text-[8px]"></i> {{ $mesa->plataformaDelivery->nombre ?? 'Delivery' }}
+                                    </span>
+                                @endif
+
+                            {{-- 2. PARA LLEVAR (Verde) --}}
+                            @elseif($mesa->esParaLlevar())
+                                <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#10b981]/15 text-[#059669] border border-[#10b981]/30 mb-2 shadow-xs">
+                                    <i class="fas fa-bag-shopping text-[8px]"></i> Para Llevar
+                                </span>
+
+                            {{-- 3. A DOMICILIO PROPIO (Ámbar) --}}
+                            @elseif($mesa->esADomicilio())
+                                <span class="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#f59e0b]/15 text-[#d97706] border border-[#f59e0b]/30 mb-2 shadow-xs">
+                                    <i class="fas fa-motorcycle text-[8px]"></i> A Domicilio
                                 </span>
                             @endif
-                        </div>
-                        <p class="text-xs text-slate-400 font-semibold truncate">Mesero: {{ $comanda->mesero->nombre ?? 'N/A' }}</p>
+                        @endif
+
+                        {{-- Nombre de la mesa / Cliente Limpio con nombre_visual --}}
+                        <h3 class="font-black text-lg break-words uppercase leading-tight text-slate-800">
+                            {{ $mesa ? $mesa->nombre_visual : ('MESA ' . ($comanda->mesa->numero ?? 'S/N')) }}
+                        </h3>
+                        
+                        <p class="text-xs text-slate-400 font-semibold truncate mt-0.5">
+                            Mesero: {{ $comanda->mesero->nombre ?? 'N/A' }}
+                        </p>
                     </div>
+
+                    {{-- Tiempo de espera en esquina superior derecha --}}
                     <span
                         class="tiempo-espera shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wide whitespace-nowrap bg-slate-50 border-slate-200 text-slate-400"
                         data-creado="{{ $fechaCarbon->toIso8601String() }}"
@@ -81,6 +123,7 @@
                     </span>
                 </div>
 
+                {{-- Lista de platillos --}}
                 <div class="p-4 flex-1 min-w-0">
                     <ul class="space-y-2.5">
                         @foreach($comanda->detalles as $detalle)
@@ -103,7 +146,6 @@
                                         $textoVariante = trim($textoVariante);
                                         $textoAlerta   = trim($textoAlerta);
                                     } else {
-                                        // Si no trae delimitador, se muestra como pastilla morada de especificación
                                         $textoVariante = trim($detalle->notas);
                                     }
                                 }
@@ -134,7 +176,7 @@
                                             @endif
                                         </span>
 
-                                        {{-- 1. Badge Morado: Tamaño y Complementos (ej: 6pz - con papas) --}}
+                                        {{-- Badge Morado: Tamaño y Complementos --}}
                                         @if(!empty($textoVariante))
                                             <span class="inline-flex items-center gap-1.5 text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200/80 px-2.5 py-1 rounded-lg mt-1 w-fit shadow-xs">
                                                 <i class="fas fa-layer-group text-[10px] text-purple-500"></i>
@@ -154,7 +196,7 @@
                                     </button>
                                 </div>
 
-                                {{-- 2. Recuadro Rojo: Únicamente para notas especiales/alertas escritas --}}
+                                {{-- Recuadro Rojo: Notas especiales / alertas --}}
                                 @if(!empty($textoAlerta))
                                     <span class="flex items-start gap-2 px-3 py-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold w-full break-words leading-snug">
                                         <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
@@ -166,7 +208,7 @@
                     </ul>
                 </div>
 
-                {{-- Formulario con ÚNICO Botón para finalizar la comanda --}}
+                {{-- Botón para finalizar comanda --}}
                 <div class="p-3 sm:p-4 bg-slate-50 border-t border-slate-100">
                     <form action="{{ route('admin.cocina.orden.estado', $comanda->orden_id) }}" method="POST" class="form-avanzar-estado">
                         @csrf @method('PATCH')
