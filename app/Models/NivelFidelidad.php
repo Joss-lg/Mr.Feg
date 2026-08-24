@@ -15,6 +15,11 @@ class NivelFidelidad extends Model
         'compras_requeridas',
         'monto_minimo',
         'premio_descripcion',
-        'valor_premio'
+        'valor_premio',
+        'activo',
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
     ];
 }

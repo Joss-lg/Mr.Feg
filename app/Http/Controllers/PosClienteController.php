@@ -32,7 +32,12 @@ class PosClienteController extends Controller
         // Los niveles se calculan UNA sola vez aquí y se reutilizan para
         // todos los clientes de este resultado (evita repetir la consulta
         // a niveles_fidelidad por cada cliente encontrado).
-        $niveles = NivelFidelidad::orderBy('compras_requeridas', 'asc')->get();
+        // FIX: se agrega ->where('activo', true) — antes se traían TODOS
+        // los niveles sin importar el switch del admin, así que un nivel
+        // desactivado seguía apareciendo como meta/premio en el comandero.
+        $niveles = NivelFidelidad::where('activo', true)
+            ->orderBy('compras_requeridas', 'asc')
+            ->get();
 
         // Iteramos sobre los clientes encontrados para inyectarles sus sellos
         $clientes->map(function ($cliente) use ($niveles) {
@@ -64,7 +69,10 @@ class PosClienteController extends Controller
         // recién creado siempre tiene 0 compras, pero de todas formas debe
         // mostrar la primera meta a alcanzar (ej. "Falta(n) 5 compra(s)
         // para: Papas a la francesa chicas"), no un mensaje vacío.
-        $niveles = NivelFidelidad::orderBy('compras_requeridas', 'asc')->get();
+        // FIX: mismo ->where('activo', true) que en buscar(), por consistencia.
+        $niveles = NivelFidelidad::where('activo', true)
+            ->orderBy('compras_requeridas', 'asc')
+            ->get();
         $this->inyectarLealtad($cliente, $niveles);
 
         // direcciones vacío explícito: el frontend espera este campo para
@@ -111,6 +119,11 @@ class PosClienteController extends Controller
      * calculaba nada de esto, así que un cliente recién registrado siempre
      * mostraba "No hay metas de lealtad configuradas" hasta que lo volvías
      * a buscar por separado.
+     *
+     * NOTA: esta función ya NO filtra por activo — asume que la Collection
+     * $niveles que recibe ya viene pre-filtrada por quien la llama (ver
+     * buscar() y guardarClienteExpress(), que ahora agregan
+     * ->where('activo', true) antes de pasarla aquí).
      */
    private function inyectarLealtad(Cliente $cliente, Collection $niveles): void
     {
@@ -160,7 +173,12 @@ class PosClienteController extends Controller
     $fidelidad = FidelidadCliente::where('cliente_id', $request->cliente_id)->first();
     $sellosActuales = $fidelidad ? (int)$fidelidad->compras_acumuladas : 0;
 
+    // FIX: se agrega ->where('activo', true) — sin esto, un nivel
+    // desactivado desde el admin seguía siendo canjeable en caja, lo cual
+    // contradice por completo el propósito del switch (dejaba "vivo" un
+    // premio que el negocio ya no quiere seguir entregando).
     $nivelAlcanzado = NivelFidelidad::where('compras_requeridas', '<=', $sellosActuales)
+        ->where('activo', true)
         ->orderBy('compras_requeridas', 'desc')
         ->first();
 

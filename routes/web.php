@@ -14,6 +14,7 @@ use App\Http\Controllers\CocinaController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ComandaController;
 use App\Http\Controllers\PromocionController;
+use App\Http\Controllers\NivelFidelidadController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\FinanzasController;
 use App\Http\Controllers\MeserosFinanzasController;
@@ -219,6 +220,17 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{promocion}', [PromocionController::class, 'update'])->name('update')->middleware('permiso:Promociones,editar');
             Route::delete('/{promocion}', [PromocionController::class, 'destroy'])->name('destroy')->middleware('permiso:Promociones,eliminar');
         }); 
+
+        // --- FIDELIDAD (Niveles de lealtad) ---
+        Route::middleware(['permiso:Fidelidad,mostrar'])->prefix('fidelidad')->name('fidelidad.')->group(function () {
+            Route::get('/', [NivelFidelidadController::class, 'index'])->name('index');
+            Route::get('/crear', [NivelFidelidadController::class, 'create'])->name('create')->middleware('permiso:Fidelidad,crear');
+            Route::post('/', [NivelFidelidadController::class, 'store'])->name('store')->middleware('permiso:Fidelidad,crear');
+            Route::get('/{fidelidad}/editar', [NivelFidelidadController::class, 'edit'])->name('edit')->middleware('permiso:Fidelidad,editar');
+            Route::put('/{fidelidad}', [NivelFidelidadController::class, 'update'])->name('update')->middleware('permiso:Fidelidad,editar');
+            Route::patch('/{fidelidad}/toggle', [NivelFidelidadController::class, 'toggleActivo'])->name('toggle')->middleware('permiso:Fidelidad,editar');
+            Route::delete('/{fidelidad}', [NivelFidelidadController::class, 'destroy'])->name('destroy')->middleware('permiso:Fidelidad,eliminar');
+        });
 
         // --- ROLES ---
         Route::middleware(['permiso:Roles,mostrar'])->prefix('roles')->name('roles.')->group(function () {
