@@ -197,22 +197,17 @@ class Mesa extends Model
      */
     public function esMesaVirtual(): bool
     {
-        // Las mesas creadas en el salón nunca se eliminan al cobrar.
+        // El tipo explícito es la fuente de verdad: una mesa del salón
+        // nunca se elimina al cobrar, aunque su número tenga un prefijo.
         if ($this->tipo === self::TIPO_LOCAL) {
-            $numero = strtoupper((string)($this->numero ?? ''));
-
-            // Compatibilidad con pedidos rápidos creados antes del tipo virtual.
-            return str_starts_with($numero, 'LLEVAR-') ||
-                str_starts_with($numero, 'DOM-') ||
-                str_starts_with($numero, 'DEL-') ||
-                str_starts_with($numero, 'RAPIDO-') ||
-                str_starts_with($numero, 'PEDIDO-');
+            return false;
         }
 
         if (in_array($this->tipo, [self::TIPO_DELIVERY, self::TIPO_VIRTUAL], true)) {
             return true;
         }
 
+        // Compatibilidad con registros antiguos creados sin tipo explícito.
         $numero = strtoupper((string)($this->numero ?? ''));
 
         // 2. Si el número inicia con prefijos de pedidos rápidos/temporales

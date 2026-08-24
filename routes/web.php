@@ -27,7 +27,6 @@ use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\PlataformaDeliveryController;
 use App\Http\Controllers\CorteController;
-// IMPORTAMOS EL NUEVO CONTROLADOR DE CLIENTES
 use App\Http\Controllers\ClienteController;
 
 // ==========================================
@@ -41,13 +40,6 @@ Route::post('/login-pin', [LoginController::class, 'loginConPin'])->name('login.
 Auth::routes();
 
 // ==========================================
-// --- RUTAS PÚBLICAS (SIN AUTENTICACIÓN) ---
-// ==========================================
-// Lógica de imágenes desactivada temporalmente.
-// Route::get('/productos/api/{id}/imagen', [ProductoController::class, 'imagen'])->name('admin.productos.api.imagen');
-
-
-// ==========================================
 // --- RUTAS PROTEGIDAS (AUTH) ---
 // ==========================================
 Route::middleware(['auth'])->group(function () {
@@ -59,16 +51,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [MesaController::class, 'index'])->name('dashboard');
         Route::get('/comanda/{mesa}', [MesaController::class, 'show'])->name('comanda.show');
 
-        // "Mis mesas": lo que atendio HOY el mesero en sesion. Sin permisos de
-        // modulo a proposito: cada quien ve lo suyo y el controlador filtra por
-        // el usuario autenticado.
         Route::get('/mis-mesas', [MisMesasController::class, 'index'])->name('mis-mesas');
         Route::get('/mis-mesas/{orden}/detalle', [MisMesasController::class, 'detalle'])->name('mis-mesas.detalle');
 
-        // --- ACCIONES QUE GENERAN CONSUMO ---
-        // Requieren un turno de caja abierto. Si la caja está cerrada, lo
-        // que se levante aquí no entraría a ningún corte y descuadraría
-        // ventas e inventario.
         Route::middleware('caja.abierta')->group(function () {
             Route::post('/comanda/enviar', [MesaController::class, 'enviar'])->name('comanda.enviar');
             Route::post('/mesa/store', [MesaController::class, 'store'])->name('mesa.store');
@@ -78,13 +63,8 @@ Route::middleware(['auth'])->group(function () {
             Route::match(['get', 'post'], '/pedido-rapido', [ComandaController::class, 'crearPedidoRapido'])->name('pedido.rapido');
         });
 
-        // NUEVO: cancelación de un producto individual ya enviado a cocina,
-        // protegida por confirmación + NIP de Capitán/Administrador.
         Route::patch('/comanda/detalle/{detalle}/cancelar', [MesaController::class, 'cancelarProducto'])->name('comanda.detalle.cancelar');
-        
-        // --- NUEVA RUTA PARA GUARDAR LA PROPINA ---
         Route::get('/comanda/{mesa}/precuenta', [ComandaController::class, 'precuenta'])->name('comanda.precuenta');
-
         Route::post('/capitan/verify', [ComandaController::class, 'verificarCapitan'])->name('capitan.verify');
         Route::get('/mesas/abiertas', [ComandaController::class, 'apiMesasAbiertas'])->name('mesas.abiertas');
         Route::get('/meseros/activos', [ComandaController::class, 'apiMeserosActivos'])->name('meseros.activos');
@@ -137,9 +117,8 @@ Route::middleware(['auth'])->group(function () {
         // --- CATEGORÍAS ---
         Route::middleware(['permiso:Categorías,mostrar'])->resource('categorias', CategoriaController::class);
 
-       // --- MÓDULO CAJA ---
+        // --- MÓDULO CAJA ---
         Route::middleware(['permiso:Caja,mostrar'])->prefix('caja')->name('caja.')->group(function () {
-            
             Route::get('/', [CajaController::class, 'index'])->name('index');
             Route::get('/flujo', [CajaController::class, 'flujoDeCaja'])->name('flujo');
             Route::get('/reporte-pdf/{id}', [CajaController::class, 'generarReportePdf'])->name('reporte.pdf');
@@ -150,30 +129,21 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/venta/{id}/detalle', [CajaController::class, 'detalleVenta'])->name('venta.detalle');
             Route::get('/api/movimientos', [CajaController::class, 'getMovimientos'])->name('api.movimientos');
             Route::get('/api/promociones-activas', [CajaController::class, 'getPromocionesActivas'])->name('api.promociones');
-            
             Route::post('/abrir', [CajaController::class, 'abrir'])->name('abrir')->middleware('permiso:Caja,gestionar');
             Route::post('/cerrar', [CajaController::class, 'cerrar'])->name('cerrar')->middleware('permiso:Caja,gestionar');
             Route::post('/api/store', [CajaController::class, 'store'])->name('api.store')->middleware('permiso:Caja,crear');
-            
             Route::get('/cobrar/{id}', [MesaOperacionController::class, 'cobrar'])->name('cobrar');
             Route::post('/api/estado-mesa', [MesaOperacionController::class, 'getEstadoMesa'])->name('api.estado-mesa');
-            
             Route::post('/procesar-pago', [MesaOperacionController::class, 'procesarPago'])->name('procesar-pago')->middleware('permiso:Caja,crear');
             Route::patch('/orden/{id}/propina', [MesaOperacionController::class, 'actualizarPropina'])->name('orden.propina')->middleware('permiso:Caja,crear');
-
-            // --- DIVISIÓN DE CUENTA ---
             Route::post('/division/iniciar', [MesaOperacionController::class, 'iniciarDivision'])->name('division.iniciar')->middleware('permiso:Caja,crear');
             Route::post('/division/asignar', [MesaOperacionController::class, 'asignarProductoDivision'])->name('division.asignar')->middleware('permiso:Caja,crear');
             Route::post('/division/cancelar', [MesaOperacionController::class, 'cancelarDivision'])->name('division.cancelar')->middleware('permiso:Caja,crear');
-
             Route::post('/cuenta/cancelar', [MesaOperacionController::class, 'cancelarCuenta'])->name('cuenta.cancelar')->middleware('permiso:Caja,eliminar');
             Route::post('/cuenta/descuento', [MesaOperacionController::class, 'aplicarDescuento'])->name('cuenta.descuento')->middleware('permiso:Caja,editar');
-            
             Route::post('/api/liberar-mesa', [MesaOperacionController::class, 'liberarMesa'])->name('api.liberar-mesa')->middleware('permiso:Caja,gestionar');
             Route::post('/api/abrir-mesa', [MesaOperacionController::class, 'abrirMesa'])->name('api.abrir-mesa')->middleware('permiso:Caja,gestionar');
-
             Route::post('/toggle-iva', [ConfiguracionController::class, 'toggleIva'])->name('toggle-iva');
-
             Route::delete('/{id}', [MesaOperacionController::class, 'destroy'])->name('destroy')->middleware('permiso:Caja,eliminar');
         });
 
@@ -248,10 +218,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/corte-mensual', [FinanzasController::class, 'corteMensual'])->name('corte.mensual');
             Route::get('/corte-mensual/exportar', [FinanzasController::class, 'exportarCorteCSV'])->name('corte.exportar');
             Route::get('/corte-mensual/pdf', [FinanzasController::class, 'exportarCortePDF'])->name('corte.pdf');
-
             Route::get('/meseros', [MeserosFinanzasController::class, 'index'])->name('meseros');
             Route::get('/meseros/detalle', [MeserosFinanzasController::class, 'detalle'])->name('meseros.detalle');
-
             Route::post('/meseros/aporte', [MeserosFinanzasController::class, 'aplicarAporte'])
                 ->name('meseros.aporte')
                 ->middleware('permiso:Finanzas,editar');
@@ -295,24 +263,34 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ------------------------------------------
-    // CLIENTES (Nuevo Módulo)
+    // CLIENTES (Módulo admin con permisos granulares)
     // ------------------------------------------
-    Route::resource('clientes', ClienteController::class)->except(['create']);
+    Route::middleware(['permiso:Clientes,mostrar'])->prefix('clientes')->name('clientes.')->group(function () {
+        Route::get('/', [ClienteController::class, 'index'])->name('index');
+        Route::get('/{cliente}', [ClienteController::class, 'show'])->name('show');
+        Route::post('/', [ClienteController::class, 'store'])->name('store')->middleware('permiso:Clientes,crear');
+        Route::get('/{cliente}/edit', [ClienteController::class, 'edit'])->name('edit')->middleware('permiso:Clientes,editar');
+        Route::match(['put', 'patch'], '/{cliente}', [ClienteController::class, 'update'])->name('update')->middleware('permiso:Clientes,editar');
+        Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy')->middleware('permiso:Clientes,eliminar');
+    });
 
-    // Rutas AJAX para el módulo de Delivery / Clientes en el POS
+    // ------------------------------------------
+    // RUTAS AJAX DEL POS (solo auth, sin permiso de módulo —
+    // son parte del flujo operativo del comandero, no del admin)
+    // ------------------------------------------
     Route::get('/pos/clientes/buscar', [\App\Http\Controllers\PosClienteController::class, 'buscar'])->name('pos.clientes.buscar');
     Route::post('/pos/clientes/express', [\App\Http\Controllers\PosClienteController::class, 'guardarClienteExpress'])->name('pos.clientes.express');
     Route::post('/pos/direcciones/express', [\App\Http\Controllers\PosClienteController::class, 'guardarDireccionExpress'])->name('pos.direcciones.express');
     Route::post('/pos/clientes/canjear-premio', [\App\Http\Controllers\PosClienteController::class, 'canjearPremio'])->name('pos.clientes.canjear-premio');
     Route::post('/pos/clientes/revertir-canje', [\App\Http\Controllers\PosClienteController::class, 'revertirCanje'])->name('pos.clientes.revertir-canje');
 
-    // ==========================================
-    // --- MÓDULO DE REPARTIDORES ---
-    // ==========================================
+    // ------------------------------------------
+    // MÓDULO DE REPARTIDORES
+    // ------------------------------------------
     Route::middleware(['auth'])->prefix('admin/repartidores')->name('admin.repartidores.')->group(function () {
-    Route::get('/', [App\Http\Controllers\RepartidorController::class, 'index'])->name('index');
-    Route::post('/{id}/asignar', [App\Http\Controllers\RepartidorController::class, 'asignarRepartidor'])->name('asignar');
-    Route::patch('/{id}/entregado', [App\Http\Controllers\RepartidorController::class, 'marcarEntregado'])->name('entregado');
+        Route::get('/', [App\Http\Controllers\RepartidorController::class, 'index'])->name('index')->middleware('permiso:Repartidores,mostrar');
+        Route::post('/{id}/asignar', [App\Http\Controllers\RepartidorController::class, 'asignarRepartidor'])->name('asignar')->middleware('permiso:Repartidores,gestionar');
+        Route::patch('/{id}/entregado', [App\Http\Controllers\RepartidorController::class, 'marcarEntregado'])->name('entregado')->middleware('permiso:Repartidores,gestionar');
     });
 
     // ------------------------------------------
