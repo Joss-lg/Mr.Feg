@@ -120,28 +120,30 @@ class PlanoEspacialController extends Controller
     }
 
     /**
-     * Elimina la mesa permanentemente de la base de datos.
+     * Elimina la mesa permanentemente o vía soft-delete si tiene historial.
      */
     public function eliminarDelPlano($id): JsonResponse
     {
         try {
             $mesa = Mesa::findOrFail($id);
 
-            // Evita borrar una mesa que tiene órdenes/comandas activas (sin pagar)
-            $ordenesActivas = $mesa->ordenes()->where('estado', '!=', 'pagada')->count();
+            // Validar únicamente órdenes en curso real (excluyendo 'pagada' y 'cancelada')
+            $estadosActivos = ['pendiente', 'en proceso', 'servida'];
+            $ordenesActivas = $mesa->ordenes()->whereIn('estado', $estadosActivos)->count();
 
             if ($ordenesActivas > 0) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se puede eliminar: la mesa tiene órdenes activas sin cerrar.',
+                    'message' => 'No se puede eliminar: la mesa tiene órdenes activas en curso.',
                 ], 422);
             }
 
-            $mesa->forceDelete();
+            // Usamos delete() lógico para no romper integridad referencial
+            $mesa->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Mesa eliminada correctamente.',
+                'message' => 'Mesa retirada del plano correctamente.',
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -150,19 +152,11 @@ class PlanoEspacialController extends Controller
                 'message' => 'La mesa no existe o ya fue eliminada.',
             ], 404);
 
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Captura errores de restricción de clave foránea (ej. historial de órdenes pagadas)
-            Log::error('Error de BD al eliminar mesa: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'No se puede eliminar: la mesa tiene registros relacionados (órdenes, historial, etc.).',
-            ], 409);
-
         } catch (\Exception $e) {
             Log::error('Error al eliminar mesa: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al eliminar la mesa.',
+                'message' => 'Error al eliminar la mesa: ' . $e->getMessage(),
             ], 500);
         }
     }
