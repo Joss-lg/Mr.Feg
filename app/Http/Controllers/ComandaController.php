@@ -32,7 +32,7 @@ class ComandaController extends Controller
         }
 
         $categorias = Categoria::all();
-        $productos = Producto::with(['categoria', 'modificadores'])->orderBy('nombre', 'asc')->get();
+       $productos = Producto::with(['categoria', 'modificadores', 'variantes.modificadores'])->orderBy('nombre', 'asc')->get();
         $mesasAbiertas = $esCapitan ? Mesa::where('estado', 'ocupada')->orderBy('numero', 'asc')->get() : collect();
 
         $comandaActiva = Orden::where('mesa_id', $mesa->id)->where('estado', '!=', 'pagada')->latest()->first();

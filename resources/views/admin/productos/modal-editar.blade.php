@@ -257,7 +257,7 @@
         const varIndex = (modo === 'crear') ? window.contadorVariantes++ : contadorVariantesEditar++;
         const id = datos?.id ?? '';
         const nombre = datos?.nombre ?? '';
-        const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
+        const precio = (datos && datos.precio !== undefined && datos.precio !== null && parseFloat(datos.precio) > 0) 
             ? parseFloat(datos.precio).toFixed(2) 
             : '';
 
@@ -269,10 +269,10 @@
                         <i class="fas fa-layer-group text-[10px]"></i>
                     </span>
                     <input type="hidden" name="variantes[${varIndex}][id]" value="${id}">
-                    <input type="text" name="variantes[${varIndex}][nombre]" value="${nombre}" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 6pz, 10pz..." required>
+                    <input type="text" name="variantes[${varIndex}][nombre]" value="${nombre}" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 500ML, 1L, 6pz..." required>
                     <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2">
                         <span class="text-slate-400 font-black text-xs">$</span>
-                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" value="${precio}" class="w-20 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="80.00" required>
+                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" value="${precio}" class="w-28 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="0.00 (Opcional)">
                     </div>
                     <button type="button" onclick="document.getElementById('variante-${modo}-${varIndex}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors outline-none shrink-0" title="Eliminar tamaño">
                         <i class="fas fa-trash text-xs"></i>
@@ -283,7 +283,7 @@
                 <div class="pl-3 border-l-2 border-purple-200 space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-[9px] font-black text-purple-600 uppercase tracking-widest">
-                            <i class="fas fa-puzzle-piece mr-1"></i> Complementos de este tamaño
+                            <i class="fas fa-puzzle-piece mr-1"></i> Complementos / Bases de este tamaño
                         </span>
                         <button type="button" onclick="agregarExtraAVarianteEditar(${varIndex})" class="text-[9px] font-black text-purple-700 bg-purple-100 hover:bg-purple-200 px-2 py-1 rounded-lg transition uppercase tracking-wider">
                             + Extra
@@ -304,32 +304,32 @@
         }
     }
 
-    function agregarExtraAVarianteEditar(varIndex, datos = null) {
-        const contenedor = document.getElementById(`contenedor-extras-var-edit-${varIndex}`);
-        if (!contenedor) return;
-        const extraIndex = contenedor.children.length;
+  function agregarExtraAVarianteEditar(varIndex, datos = null) {
+    const contenedor = document.getElementById(`contenedor-extras-var-edit-${varIndex}`);
+    if (!contenedor) return;
+    const extraIndex = contenedor.children.length; // Índice secuencial (0, 1, 2...)
 
-        const id = datos?.id ?? '';
-        const nombre = datos?.nombre ?? '';
-        const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
-            ? parseFloat(datos.precio).toFixed(2) 
-            : '';
+    const id = datos?.id ?? '';
+    const nombre = datos?.nombre ?? '';
+    const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
+        ? parseFloat(datos.precio).toFixed(2) 
+        : '';
 
-        const html = `
-            <div class="flex items-center gap-2 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl" id="extra-var-edit-${varIndex}-${extraIndex}">
-                <input type="hidden" name="variantes[${varIndex}][extras][${extraIndex}][id]" value="${id}">
-                <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: C/N PAPAS" class="flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
-                <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-2">
-                    <span class="text-purple-400 font-black text-xs">+$</span>
-                    <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="19.00" class="w-16 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" required>
-                </div>
-                <button type="button" onclick="document.getElementById('extra-var-edit-${varIndex}-${extraIndex}').remove()" class="w-6 h-6 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
-                    <i class="fas fa-times text-[10px]"></i>
-                </button>
+    const html = `
+        <div class="flex items-center gap-2 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl fila-extra-variante" id="extra-var-edit-${varIndex}-${extraIndex}">
+            <input type="hidden" name="variantes[${varIndex}][extras][${extraIndex}][id]" value="${id}">
+            <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: AGUA, LECHE..." class="flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
+            <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-2">
+                <span class="text-purple-400 font-black text-xs">+$</span>
+                <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="0.00" class="w-16 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right">
             </div>
-        `;
-        contenedor.insertAdjacentHTML('beforeend', html);
-    }
+            <button type="button" onclick="this.closest('.fila-extra-variante').remove()" class="w-6 h-6 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
+                <i class="fas fa-times text-[10px]"></i>
+            </button>
+        </div>
+    `;
+    contenedor.insertAdjacentHTML('beforeend', html);
+}
 
     // ─── Modificadores Globales (para platillos sin variantes) ────────────────
     function agregarFilaModificador(modo, datos = null) {
@@ -350,7 +350,7 @@
                 <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
                 <div class="w-px h-6 bg-slate-200"></div>
                 <span class="pl-2 text-slate-400 font-bold">+$</span>
-                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
+                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400">
                 <button type="button" onclick="document.getElementById('modificador-${modo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
                     <i class="fas fa-trash text-xs"></i>
                 </button>

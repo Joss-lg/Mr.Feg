@@ -16,27 +16,31 @@ class ProductoController extends Controller
     /**
      * Muestra el catálogo de Alimentos (Menú) y sus recetas.
      */
-    public function index()
-    {
-        $productos = Producto::with(['categoria:id,nombre', 'insumos:id,nombre,unidad_medida', 'modificadores', 'variantes'])
-                             ->select([
-                                 'id', 'categoria_id', 'nombre', 'descripcion', 'precio',
-                                 'se_vende_por_peso', 'precio_por_100g', 'esta_disponible',
-                                 'created_at', 'updated_at', 'deleted_at',
-                             ])
-                             ->orderBy('nombre')
-                             ->get();
+   public function index()
+{
+    $productos = Producto::with([
+        'categoria:id,nombre', 
+        'insumos:id,nombre,unidad_medida', 
+        'modificadores', 
+        'variantes.modificadores' // <-- Asegura que cada variante cargue sus modificadores
+    ])
+    ->select([
+        'id', 'categoria_id', 'nombre', 'descripcion', 'precio',
+        'se_vende_por_peso', 'precio_por_100g', 'esta_disponible', 'tiene_variantes',
+        'created_at', 'updated_at', 'deleted_at',
+    ])
+    ->orderBy('nombre')
+    ->get();
 
-        $categorias = Categoria::orderBy('nombre')->select(['id', 'nombre'])->get();
+    $categorias = Categoria::orderBy('nombre')->select(['id', 'nombre'])->get();
 
-        $insumosDisponibles = Insumo::where('esta_activo', true)
-                                    ->orderBy('nombre')
-                                    ->select(['id', 'nombre', 'unidad_medida', 'stock_actual'])
-                                    ->get();
+    $insumosDisponibles = Insumo::where('esta_activo', true)
+                                ->orderBy('nombre')
+                                ->select(['id', 'nombre', 'unidad_medida', 'stock_actual'])
+                                ->get();
 
-        return view('admin.productos.index', compact('productos', 'categorias'), ['insumos' => $insumosDisponibles]);
-    }
-
+    return view('admin.productos.index', compact('productos', 'categorias'), ['insumos' => $insumosDisponibles]);
+}
     /**
      * Registra un nuevo platillo y guarda su receta (ingredientes), variantes y modificadores.
      */
@@ -54,17 +58,17 @@ class ProductoController extends Controller
             'se_vende_por_peso' => 'sometimes|boolean',
             'precio_por_100g'   => 'nullable|required_if:se_vende_por_peso,1|numeric|min:0',
             
-            // --- VALIDACIONES DE VARIANTES ---
+            // --- VALIDACIONES DE VARIANTES (Precio opcional / nullable) ---
             'tiene_variantes'   => 'sometimes|boolean',
             'variantes'         => 'required_if:tiene_variantes,1|array',
             'variantes.*.nombre'=> 'required_with:variantes|string',
-            'variantes.*.precio'=> 'required_with:variantes|numeric|min:0',
+            'variantes.*.precio'=> 'nullable|numeric|min:0',
 
-            // --- VALIDACIONES DE MODIFICADORES (EXTRAS) ---
+            // --- VALIDACIONES DE MODIFICADORES GLOBALES ---
             'tiene_modificadores'   => 'sometimes|boolean',
             'modificadores'         => 'nullable|array',
             'modificadores.*.nombre'=> 'required_with:modificadores|string',
-            'modificadores.*.precio'=> 'required_with:modificadores|numeric|min:0',
+            'modificadores.*.precio'=> 'nullable|numeric|min:0',
 
             'insumos'           => 'nullable|array',
             'insumos.*'         => 'exists:insumos,id',
@@ -83,7 +87,7 @@ class ProductoController extends Controller
                 'nombre'            => $request->nombre,
                 'descripcion'       => $request->descripcion,
                 'categoria_id'      => $request->categoria_id,
-                'precio'            => ($sePorPeso || $tieneVariantes) ? 0 : $request->precio,
+                'precio'            => ($sePorPeso || $tieneVariantes) ? 0 : ($request->precio ?? 0),
                 'se_vende_por_peso' => $sePorPeso,
                 'precio_por_100g'   => $sePorPeso ? $request->precio_por_100g : null,
                 'tiene_variantes'   => $tieneVariantes,
@@ -92,30 +96,58 @@ class ProductoController extends Controller
 
             $producto->save();
 
-            // 2. Lógica para guardar Variantes (Tamaños)
+            // 2. Lógica para guardar Variantes y sus Modificadores específicos
             if ($tieneVariantes && $request->has('variantes')) {
-                foreach ($request->variantes as $varianteData) {
-                    $producto->variantes()->create([
-                        'nombre' => $varianteData['nombre'],
-                        'precio' => $varianteData['precio'],
+                foreach ($request->variantes as $vData) {
+                    if (empty($vData['nombre'])) continue;
+
+                    $precioVariante = (!empty($vData['precio']) && is_numeric($vData['precio'])) 
+                        ? (float)$vData['precio'] 
+                        : 0.00;
+
+                    $variante = $producto->variantes()->create([
+                        'nombre'          => trim($vData['nombre']),
+                        'precio'          => $precioVariante,
                         'esta_disponible' => true
                     ]);
+
+                    // Guardar complementos/extras específicos pertenecientes a este tamaño
+                    if (!empty($vData['extras']) && is_array($vData['extras'])) {
+                        foreach ($vData['extras'] as $extraData) {
+                            if (!empty($extraData['nombre'])) {
+                                Modificador::create([
+                                    'variante_id' => $variante->id,
+                                    'nombre'      => trim($extraData['nombre']),
+                                    'tipo'        => 'extra',
+                                    'precio'      => (!empty($extraData['precio']) && is_numeric($extraData['precio'])) 
+                                                        ? (float)$extraData['precio'] 
+                                                        : 0.00,
+                                ]);
+                            }
+                        }
+                    }
                 }
             }
 
-            // 3. Lógica para guardar Modificadores (Extras / Complementos)
-            if ($request->boolean('tiene_modificadores') && $request->has('modificadores')) {
-                $modificadoresIds = [];
+            // 3. Lógica para guardar Modificadores Globales (solo si no tiene variantes)
+            if (!$tieneVariantes && $request->boolean('tiene_modificadores') && $request->has('modificadores')) {
+                $modificadoresGlobalesIds = [];
                 foreach ($request->modificadores as $modData) {
-                    if (!empty($modData['nombre']) && isset($modData['precio'])) {
+                    if (!empty($modData['nombre'])) {
                         $modificador = Modificador::create([
-                            'nombre' => trim($modData['nombre']),
-                            'precio' => (float) $modData['precio'],
+                            'variante_id' => null,
+                            'nombre'      => trim($modData['nombre']),
+                            'tipo'        => 'extra',
+                            'precio'      => (!empty($modData['precio']) && is_numeric($modData['precio'])) 
+                                                ? (float)$modData['precio'] 
+                                                : 0.00,
                         ]);
-                        $modificadoresIds[] = $modificador->id;
+                        $modificadoresGlobalesIds[] = $modificador->id;
                     }
                 }
-                $producto->modificadores()->sync($modificadoresIds);
+                if (!empty($modificadoresGlobalesIds)) {
+                    $producto->modificadores()->sync($modificadoresGlobalesIds);
+                }
             }
 
             // 4. Lógica para guardar Insumos (Receta)
@@ -140,7 +172,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error en ProductoController@store: ' . $e->getMessage());
-            return response()->json(['message' => 'Error inesperado al guardar el producto.'], 500);
+            return response()->json(['message' => 'Error al guardar: ' . $e->getMessage()], 500);
         }
     }
 
@@ -164,16 +196,16 @@ class ProductoController extends Controller
             // --- VALIDACIONES DE VARIANTES PARA ACTUALIZAR ---
             'tiene_variantes'   => 'sometimes|boolean',
             'variantes'         => 'required_if:tiene_variantes,1|array',
-            'variantes.*.id'    => 'nullable|exists:variantes,id',
+            'variantes.*.id'    => 'nullable',
             'variantes.*.nombre'=> 'required_with:variantes|string',
-            'variantes.*.precio'=> 'required_with:variantes|numeric|min:0',
+            'variantes.*.precio'=> 'nullable|numeric|min:0',
 
             // --- VALIDACIONES DE MODIFICADORES (EXTRAS) ---
             'tiene_modificadores'   => 'sometimes|boolean',
             'modificadores'         => 'nullable|array',
             'modificadores.*.id'    => 'nullable',
             'modificadores.*.nombre'=> 'required_with:modificadores|string',
-            'modificadores.*.precio'=> 'required_with:modificadores|numeric|min:0',
+            'modificadores.*.precio'=> 'nullable|numeric|min:0',
 
             'insumos'           => 'nullable|array',
             'insumos.*'         => 'exists:insumos,id',
@@ -193,63 +225,126 @@ class ProductoController extends Controller
                 'nombre'            => $request->nombre,
                 'descripcion'       => $request->descripcion,
                 'categoria_id'      => $request->categoria_id,
-                'precio'            => ($sePorPeso || $tieneVariantes) ? 0 : $request->precio,
+                'precio'            => ($sePorPeso || $tieneVariantes) ? 0 : ($request->precio ?? 0),
                 'se_vende_por_peso' => $sePorPeso,
                 'precio_por_100g'   => $sePorPeso ? $request->precio_por_100g : null,
                 'tiene_variantes'   => $tieneVariantes,
                 'esta_disponible'   => $request->boolean('esta_disponible', $producto->esta_disponible), 
             ]);
 
-            // 2. Sincronizar Variantes (Tamaños)
+            // 2. Sincronizar Variantes y sus Modificadores específicos
             if ($tieneVariantes && $request->has('variantes')) {
                 $variantesEnviadasIds = [];
 
-                foreach ($request->variantes as $varianteData) {
-                    if (!empty($varianteData['id'])) {
-                        $variante = $producto->variantes()->find($varianteData['id']);
+                foreach ($request->variantes as $vData) {
+                    if (empty($vData['nombre'])) continue;
+
+                    $precioVariante = (!empty($vData['precio']) && is_numeric($vData['precio'])) 
+                        ? (float)$vData['precio'] 
+                        : 0.00;
+
+                    $idVariante = (!empty($vData['id']) && is_numeric($vData['id'])) ? (int)$vData['id'] : null;
+
+                    if ($idVariante) {
+                        $variante = $producto->variantes()->find($idVariante);
                         if ($variante) {
                             $variante->update([
-                                'nombre' => $varianteData['nombre'],
-                                'precio' => $varianteData['precio']
+                                'nombre' => trim($vData['nombre']),
+                                'precio' => $precioVariante
                             ]);
-                            $variantesEnviadasIds[] = $variante->id;
                         }
                     } else {
-                        $nuevaVariante = $producto->variantes()->create([
-                            'nombre' => $varianteData['nombre'],
-                            'precio' => $varianteData['precio'],
+                        $variante = $producto->variantes()->create([
+                            'nombre'          => trim($vData['nombre']),
+                            'precio'          => $precioVariante,
                             'esta_disponible' => true
                         ]);
-                        $variantesEnviadasIds[] = $nuevaVariante->id;
+                    }
+
+                    if ($variante) {
+                        $variantesEnviadasIds[] = $variante->id;
+
+                        // Sincronizar modificadores/extras de esta variante
+                        $extrasEnviadosIds = [];
+                        if (!empty($vData['extras']) && is_array($vData['extras'])) {
+                            foreach ($vData['extras'] as $extraData) {
+                                if (empty($extraData['nombre'])) continue;
+
+                                $precioExtra = (!empty($extraData['precio']) && is_numeric($extraData['precio'])) 
+                                    ? (float)$extraData['precio'] 
+                                    : 0.00;
+
+                                $idExtra = (!empty($extraData['id']) && is_numeric($extraData['id'])) ? (int)$extraData['id'] : null;
+
+                                if ($idExtra) {
+                                    $mod = Modificador::where('variante_id', $variante->id)->find($idExtra);
+                                    if ($mod) {
+                                        $mod->update([
+                                            'nombre' => trim($extraData['nombre']),
+                                            'precio' => $precioExtra
+                                        ]);
+                                        $extrasEnviadosIds[] = $mod->id;
+                                    }
+                                } else {
+                                    $nuevoMod = Modificador::create([
+                                        'variante_id' => $variante->id,
+                                        'nombre'      => trim($extraData['nombre']),
+                                        'tipo'        => 'extra',
+                                        'precio'      => $precioExtra,
+                                    ]);
+                                    $extrasEnviadosIds[] = $nuevoMod->id;
+                                }
+                            }
+                        }
+                        // Eliminar extras que se borraron en la edición de este tamaño
+                        Modificador::where('variante_id', $variante->id)
+                                   ->whereNotIn('id', $extrasEnviadosIds)
+                                   ->delete();
                     }
                 }
 
-                $producto->variantes()->whereNotIn('id', $variantesEnviadasIds)->delete();
-                
+                // Eliminar variantes que ya no existen
+                $variantesAEliminar = $producto->variantes()->whereNotIn('id', $variantesEnviadasIds)->get();
+                foreach ($variantesAEliminar as $vEliminar) {
+                    Modificador::where('variante_id', $vEliminar->id)->delete();
+                    $vEliminar->delete();
+                }
+
             } elseif (!$tieneVariantes) {
-                $producto->variantes()->delete();
+                foreach ($producto->variantes as $vEliminar) {
+                    Modificador::where('variante_id', $vEliminar->id)->delete();
+                    $vEliminar->delete();
+                }
             }
 
-            // 3. Sincronizar Modificadores (Extras / Complementos)
-            if ($request->boolean('tiene_modificadores') && $request->has('modificadores')) {
+            // 3. Sincronizar Modificadores Globales (para productos sin variantes)
+            if (!$tieneVariantes && $request->boolean('tiene_modificadores') && $request->has('modificadores')) {
                 $modificadoresIds = [];
 
                 foreach ($request->modificadores as $modData) {
-                    if (!empty($modData['nombre']) && isset($modData['precio'])) {
+                    if (!empty($modData['nombre'])) {
+                        $precioMod = (!empty($modData['precio']) && is_numeric($modData['precio'])) 
+                            ? (float)$modData['precio'] 
+                            : 0.00;
+
                         $idMod = (!empty($modData['id']) && is_numeric($modData['id'])) ? (int)$modData['id'] : null;
 
                         if ($idMod) {
                             $modificador = Modificador::find($idMod);
                             if ($modificador) {
-                                $modificador->nombre = trim($modData['nombre']);
-                                $modificador->precio = (float) $modData['precio'];
-                                $modificador->save();
+                                $modificador->update([
+                                    'variante_id' => null,
+                                    'nombre'      => trim($modData['nombre']),
+                                    'precio'      => $precioMod,
+                                ]);
                                 $modificadoresIds[] = $modificador->id;
                             }
                         } else {
                             $modificador = Modificador::create([
-                                'nombre' => trim($modData['nombre']),
-                                'precio' => (float) $modData['precio'],
+                                'variante_id' => null,
+                                'nombre'      => trim($modData['nombre']),
+                                'tipo'        => 'extra',
+                                'precio'      => $precioMod,
                             ]);
                             $modificadoresIds[] = $modificador->id;
                         }
@@ -280,7 +375,7 @@ class ProductoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error en ProductoController@update: ' . $e->getMessage());
-            return response()->json(['message' => 'Error inesperado al actualizar el producto.'], 500);
+            return response()->json(['message' => 'Error inesperado al actualizar el producto: ' . $e->getMessage()], 500);
         }
     }
 
@@ -318,23 +413,28 @@ class ProductoController extends Controller
      */
     public function getProductos(): JsonResponse
     {
-        $productos = Producto::with(['categoria', 'insumos', 'modificadores', 'variantes'])
-            ->select([
-                'id', 
-                'categoria_id', 
-                'nombre', 
-                'descripcion', 
-                'precio',
-                'se_vende_por_peso', 
-                'precio_por_100g', 
-                'tiene_variantes',
-                'esta_disponible',
-                'updated_at',
-            ])
-            ->get()
-            ->groupBy(function ($producto) {
-                return $producto->categoria->nombre ?? 'Sin Categoría';
-            });
+        $productos = Producto::with([
+            'categoria', 
+            'insumos', 
+            'modificadores', 
+            'variantes.modificadores'
+        ])
+        ->select([
+            'id', 
+            'categoria_id', 
+            'nombre', 
+            'descripcion', 
+            'precio',
+            'se_vende_por_peso', 
+            'precio_por_100g', 
+            'tiene_variantes',
+            'esta_disponible',
+            'updated_at',
+        ])
+        ->get()
+        ->groupBy(function ($producto) {
+            return $producto->categoria->nombre ?? 'Sin Categoría';
+        });
 
         return response()->json($productos);
     }

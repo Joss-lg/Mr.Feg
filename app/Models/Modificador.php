@@ -4,24 +4,37 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Modificador extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    // Le decimos a Laravel exactamente cómo se llama tu tabla
     protected $table = 'modificadores';
 
-    // Los campos permitidos para asignación masiva
     protected $fillable = [
+        'variante_id', // <-- Campo indispensable para asociarlo al tamaño
         'nombre', 
+        'tipo',
         'precio',
         'esta_activo',
     ];
 
     // ==========================================
-    // RELACIÓN INVERSA
+    // RELACIONES
     // ==========================================
+
+    /**
+     * Variante (tamaño) a la que pertenece este modificador/extra.
+     */
+    public function variante()
+    {
+        return $this->belongsTo(Variante::class, 'variante_id');
+    }
+
+    /**
+     * Platillos a los que está asociado directamente (si es extra global).
+     */
     public function productos()
     {
         return $this->belongsToMany(Producto::class, 'producto_modificadores');

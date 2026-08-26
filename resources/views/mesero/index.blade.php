@@ -109,7 +109,7 @@
             },
             esCapitan: @json($esCapitan ?? false),
             categorias: @json($categorias ?? []),
-            productos: @json($productos ?? []),
+            productos: @json(isset($productos) ? $productos->loadMissing(['categoria', 'modificadores', 'variantes.modificadores']) : []),
             platillosEnviados: @json($platillosEnviadosParaJs),
             iva: {
                 habilitado: @json($ivaHabilitado ?? true),

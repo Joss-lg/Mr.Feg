@@ -235,7 +235,7 @@
     function mostrarSelectorTamanos(variantes, tipoFlujo) {
         const prod = window.productoActivoParaComanda;
         document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
-        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Selecciona el tamaño';
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Selecciona la presentación';
         document.getElementById('btn-volver-tamano').classList.add('hidden');
 
         const cont = document.getElementById('lista-opciones-variantes');
@@ -245,22 +245,24 @@
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+            
+            const precioNum = parseFloat(v.precio) || 0;
+            const textoPrecio = precioNum > 0 
+                ? `<span class="font-black text-blue-600 text-sm sm:text-base">$${precioNum.toFixed(2)}</span>` 
+                : `<span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Elegir opción</span>`;
+
             btn.onclick = (e) => {
                 e.stopPropagation();
-                window.estadoPersonalizacion.precioBase = parseFloat(v.precio);
+                window.estadoPersonalizacion.precioBase = precioNum;
                 window.estadoPersonalizacion.tamanoSeleccionado = v.nombre;
                 window.estadoPersonalizacion.varianteIdSeleccionada = v.id;
                 
-                if (tipoFlujo === 'tamano_snack') {
-                    evaluarPapasPorTamano(v.nombre, v);
-                } else if (tipoFlujo === 'tamano_bebida') {
-                    mostrarExtrasBebida(v.nombre);
-                }
+                evaluarPapasPorTamano(v.nombre, v);
             };
 
             btn.innerHTML = `
                 <span class="font-bold text-slate-800 text-sm sm:text-base">${v.nombre}</span>
-                <span class="font-black text-blue-600 text-sm sm:text-base">$${parseFloat(v.precio).toFixed(2)}</span>
+                ${textoPrecio}
             `;
             cont.appendChild(btn);
         });
@@ -288,9 +290,12 @@
 
         // Si existen extras para este tamaño seleccionado, desplegamos el Paso 2
         if (extrasDisponibles.length > 0) {
-            const opciones = [
-                { nombre: 'Sin Extras / Complementos', extra: 0 }
-            ];
+            const opciones = [];
+
+            // Solo agregamos opción "Sin extras" si el tamaño ya tenía un precio base > 0
+            if (window.estadoPersonalizacion.precioBase > 0) {
+                opciones.push({ nombre: 'Sin Extras / Complementos', extra: 0 });
+            }
 
             extrasDisponibles.forEach(mod => {
                 opciones.push({
@@ -301,7 +306,9 @@
 
             const tam = window.estadoPersonalizacion.tamanoSeleccionado;
             document.getElementById('titulo-modal-variantes').textContent = tam ? `${prod.nombre} (${tam})` : prod.nombre;
-            document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Deseas agregar complementos?';
+            document.getElementById('subtitulo-modal-variantes').textContent = window.estadoPersonalizacion.precioBase === 0 
+                ? 'Paso 2: Selecciona la base o sabor' 
+                : 'Paso 2: ¿Deseas agregar complementos?';
 
             const btnVolver = document.getElementById('btn-volver-tamano');
             if (prod.tiene_variantes && prod.variantes?.length > 0) {
@@ -336,29 +343,6 @@
             { nombre: 'Sin Papas', extra: 0 },
             { nombre: 'c/ Papas Francesa', extra: costoFrancesa },
             { nombre: 'c/ Papas Gajo', extra: costoGajo }
-        ];
-
-        renderOpcionesFinales(opciones);
-    }
-
-    // --- EXTRAS DE BEBIDAS ---
-    function mostrarExtrasBebida(nombreTamano) {
-        const prod = window.productoActivoParaComanda;
-        const es1L = nombreTamano.toLowerCase().includes('1l') || nombreTamano.toLowerCase().includes('16oz');
-        const costoChamoyada = es1L ? 8 : 5;
-
-        document.getElementById('titulo-modal-variantes').textContent = `${prod.nombre} (${nombreTamano})`;
-        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: Extras opcionales';
-
-        const btnVolver = document.getElementById('btn-volver-tamano');
-        btnVolver.classList.remove('hidden');
-        window.volverPasoAnterior = () => mostrarSelectorTamanos(prod.variantes, 'tamano_bebida');
-
-        const opciones = [
-            { nombre: 'Natural (Sin extras)', extra: 0 },
-            { nombre: 'Chamoyada', extra: costoChamoyada },
-            { nombre: 'Perlas Explosivas', extra: 15 },
-            { nombre: 'Crema Batida', extra: 10 }
         ];
 
         renderOpcionesFinales(opciones);
@@ -421,14 +405,20 @@
 
             btn.onclick = (e) => {
                 e.stopPropagation();
-                if (opt.extra > 0) window.estadoPersonalizacion.detalles.push(opt.nombre);
+                if (opt.nombre !== 'Sin Extras / Complementos') {
+                    window.estadoPersonalizacion.detalles.push(opt.nombre);
+                }
                 finalizarTicket(precioFinal);
             };
+
+            const subtexto = window.estadoPersonalizacion.precioBase === 0 
+                ? 'Precio total' 
+                : (opt.extra > 0 ? '+$' + opt.extra.toFixed(2) : 'Sin costo extra');
 
             btn.innerHTML = `
                 <div class="flex flex-col">
                     <span class="font-bold text-slate-800 text-sm sm:text-base">${opt.nombre}</span>
-                    <span class="text-[11px] font-semibold text-slate-400">${opt.extra > 0 ? '+$' + opt.extra.toFixed(2) : 'Sin costo extra'}</span>
+                    <span class="text-[11px] font-semibold text-slate-400">${subtexto}</span>
                 </div>
                 <span class="font-black text-blue-600 text-sm sm:text-base">$${precioFinal.toFixed(2)}</span>
             `;
