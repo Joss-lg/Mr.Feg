@@ -143,7 +143,7 @@
         </div>
 
         {{-- Botón para regresar al paso 1 --}}
-        <button id="btn-volver-tamano" type="button" onclick="volverPasoAnterior()" class="hidden w-full mt-4 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all uppercase tracking-wider outline-none">
+        <button id="btn-volver-tamano" type="button" onclick="if(typeof window.volverPasoAnterior === 'function') window.volverPasoAnterior();" class="hidden w-full mt-4 py-2.5 text-xs font-black text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all uppercase tracking-wider outline-none">
             <i class="fas fa-arrow-left mr-1.5"></i> Volver al paso anterior
         </button>
     </div>
@@ -273,26 +273,21 @@
         const prod = window.productoActivoParaComanda;
         const varId = window.estadoPersonalizacion.varianteIdSeleccionada;
 
-        // Buscamos los modificadores que correspondan a esta variante específica
         let extrasDisponibles = [];
 
         if (varianteObj && Array.isArray(varianteObj.modificadores) && varianteObj.modificadores.length > 0) {
             extrasDisponibles = varianteObj.modificadores;
         } else if (prod && Array.isArray(prod.modificadores)) {
             if (varId) {
-                // Filtramos modificadores asignados a esta variante_id
                 extrasDisponibles = prod.modificadores.filter(m => Number(m.variante_id) === Number(varId));
             } else {
-                // Modificadores generales (sin variante_id)
                 extrasDisponibles = prod.modificadores.filter(m => !m.variante_id);
             }
         }
 
-        // Si existen extras para este tamaño seleccionado, desplegamos el Paso 2
         if (extrasDisponibles.length > 0) {
             const opciones = [];
 
-            // Solo agregamos opción "Sin extras" si el tamaño ya tenía un precio base > 0
             if (window.estadoPersonalizacion.precioBase > 0) {
                 opciones.push({ nombre: 'Sin Extras / Complementos', extra: 0 });
             }
@@ -320,71 +315,143 @@
 
             renderOpcionesFinales(opciones);
         } else {
-            // Si este tamaño no tiene complementos adicionales, agregamos directo al ticket
             finalizarTicket(window.estadoPersonalizacion.precioBase);
         }
     }
 
-    function mostrarSelectorPapasGenerico(costoFrancesa, costoGajo, callbackVolver = null) {
-        const prod = window.productoActivoParaComanda;
-        const tam = window.estadoPersonalizacion.tamanoSeleccionado;
-        document.getElementById('titulo-modal-variantes').textContent = tam ? `${prod.nombre} (${tam})` : prod.nombre;
-        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Agregar papas?';
-
-        const btnVolver = document.getElementById('btn-volver-tamano');
-        if (callbackVolver) {
-            btnVolver.classList.remove('hidden');
-            window.volverPasoAnterior = callbackVolver;
-        } else {
-            btnVolver.classList.add('hidden');
-        }
-
-        const opciones = [
-            { nombre: 'Sin Papas', extra: 0 },
-            { nombre: 'c/ Papas Francesa', extra: costoFrancesa },
-            { nombre: 'c/ Papas Gajo', extra: costoGajo }
-        ];
-
-        renderOpcionesFinales(opciones);
-    }
-
-    // --- BANDERILLAS ---
+    // --- BANDERILLAS: PASO 1 (SOLO CUBIERTAS / SABORES) ---
     function mostrarPasoCubiertasBanderilla() {
         const prod = window.productoActivoParaComanda;
         document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
-        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Elige la cubierta';
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Elige la cubierta / sabor';
         document.getElementById('btn-volver-tamano').classList.add('hidden');
 
         const cont = document.getElementById('lista-opciones-variantes');
         cont.innerHTML = '';
 
-        const cubiertas = [
-            { nombre: 'Flamin', extra: 0, tipo: 'Clásica' },
-            { nombre: 'Cheddar', extra: 0, tipo: 'Clásica' },
-            { nombre: 'Panko', extra: 0, tipo: 'Clásica' },
-            { nombre: 'Cubitos de Papas', extra: 8, tipo: 'Especial' },
-            { nombre: 'Boneless', extra: 8, tipo: 'Especial' },
-            { nombre: 'Ramen', extra: 8, tipo: 'Especial' }
-        ];
+        const todosMods = prod.modificadores || [];
 
-        cubiertas.forEach(c => {
+        // Filtro estricto: Las papas de acompañamiento empiezan con "c/n" o "con" o "gajo"
+        const esAcompanamiento = (nombre) => {
+            const n = (nombre || '').toLowerCase().trim();
+            return n.startsWith('c/n') || n.startsWith('con ') || n.includes('p.gajo') || n.includes('francesa');
+        };
+
+        // En el Paso 1 solo mostramos las CUBIERTAS (excluyendo acompañamientos c/n)
+        const cubiertas = todosMods.filter(m => !esAcompanamiento(m.nombre));
+
+        if (cubiertas.length === 0) {
+            cont.innerHTML = `
+                <div class="p-4 text-center text-slate-400 text-xs font-semibold">
+                    No hay cubiertas configuradas para este producto.
+                </div>
+            `;
+            return;
+        }
+
+        cubiertas.forEach(m => {
+            const precioExtra = parseFloat(m.precio || 0);
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-3.5 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+            
             btn.onclick = (e) => {
                 e.stopPropagation();
-                window.estadoPersonalizacion.detalles.push(c.nombre);
-                window.estadoPersonalizacion.extraAcumulado += c.extra;
+                window.estadoPersonalizacion.detalles = [m.nombre]; // Asigna la cubierta
+                window.estadoPersonalizacion.extraAcumulado = precioExtra;
+                
+                // Pasa al Paso 2 con los acompañamientos de papas
                 mostrarSelectorPapasGenerico(20, 35, () => mostrarPasoCubiertasBanderilla());
             };
 
             btn.innerHTML = `
                 <div>
-                    <span class="font-bold text-slate-800 text-sm block">${c.nombre}</span>
-                    <span class="text-[10px] uppercase font-bold ${c.extra > 0 ? 'text-amber-500' : 'text-slate-400'}">${c.tipo}</span>
+                    <span class="font-bold text-slate-800 text-sm block">${m.nombre}</span>
+                    <span class="text-[10px] uppercase font-bold ${precioExtra > 0 ? 'text-amber-500' : 'text-slate-400'}">
+                        ${precioExtra > 0 ? 'Especial' : 'Clásica'}
+                    </span>
                 </div>
-                <span class="font-black ${c.extra > 0 ? 'text-blue-600' : 'text-slate-400'} text-sm">
-                    ${c.extra > 0 ? '+$' + c.extra.toFixed(2) : 'Incluida'}
+                <span class="font-black ${precioExtra > 0 ? 'text-blue-600' : 'text-slate-400'} text-sm">
+                    ${precioExtra > 0 ? '+$' + precioExtra.toFixed(2) : 'Incluida'}
+                </span>
+            `;
+            cont.appendChild(btn);
+        });
+    }
+
+    // --- BANDERILLAS: PASO 2 (SOLO ACOMPAÑAMIENTOS DE PAPAS) ---
+    function mostrarSelectorPapasGenerico(extraFrancesa = 20, extraGajo = 35, callbackVolver = null) {
+        const prod = window.productoActivoParaComanda;
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Agregar Papas?';
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        if (btnVolver && callbackVolver) {
+            btnVolver.classList.remove('hidden');
+            btnVolver.onclick = (e) => {
+                e.stopPropagation();
+                window.volverPasoAnterior = callbackVolver;
+                callbackVolver();
+            };
+        }
+
+        const todosMods = prod.modificadores || [];
+
+        // Filtro estricto: Solo acompañamientos (que empiezan por c/n, con, p.gajo o francesa)
+        const esAcompanamiento = (nombre) => {
+            const n = (nombre || '').toLowerCase().trim();
+            return n.startsWith('c/n') || n.startsWith('con ') || n.includes('p.gajo') || n.includes('francesa');
+        };
+
+        const modsPapas = todosMods.filter(m => esAcompanamiento(m.nombre));
+
+        let opcionesPapas = [];
+
+        // 1. Opción base siempre presente
+        opcionesPapas.push({ nombre: 'Sin Papas', extra: 0, subtitulo: 'Sin costo extra' });
+
+        // 2. Si vienen dados de alta en BD (ej. "C/N PAPAS X-TRAS", "C/N P.GAJO")
+        if (modsPapas.length > 0) {
+            modsPapas.forEach(m => {
+                const precio = parseFloat(m.precio || 0);
+                opcionesPapas.push({
+                    nombre: m.nombre,
+                    extra: precio,
+                    subtitulo: precio > 0 ? `+$${precio.toFixed(2)}` : 'Sin costo extra'
+                });
+            });
+        } else {
+            // Valores por defecto si no están registrados
+            opcionesPapas.push({ nombre: 'c/ Papas Francesa', extra: Number(extraFrancesa), subtitulo: `+$${Number(extraFrancesa).toFixed(2)}` });
+            opcionesPapas.push({ nombre: 'c/ Papas Gajo', extra: Number(extraGajo), subtitulo: `+$${Number(extraGajo).toFixed(2)}` });
+        }
+
+        const precioBaseAcumulado = parseFloat(prod.precio || 0) + (window.estadoPersonalizacion.extraAcumulado || 0);
+
+        opcionesPapas.forEach(op => {
+            const totalFinalOpcion = precioBaseAcumulado + op.extra;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = "w-full flex justify-between items-center bg-white border border-slate-200 p-3.5 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer";
+            
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (op.nombre !== 'Sin Papas') {
+                    window.estadoPersonalizacion.detalles.push(op.nombre);
+                }
+                finalizarTicket(totalFinalOpcion);
+            };
+
+            btn.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800 text-sm block">${op.nombre}</span>
+                    <span class="text-[10px] font-bold text-slate-400">${op.subtitulo}</span>
+                </div>
+                <span class="font-black text-blue-600 text-sm">
+                    $${totalFinalOpcion.toFixed(2)}
                 </span>
             `;
             cont.appendChild(btn);
@@ -431,7 +498,6 @@
         const est = window.estadoPersonalizacion;
         const prod = window.productoActivoParaComanda;
 
-        // 1. Extraemos los detalles seleccionados
         let partes = [];
         if (est.tamanoSeleccionado) partes.push(est.tamanoSeleccionado);
         if (est.detalles && est.detalles.length > 0) partes.push(est.detalles.join(', '));
@@ -439,7 +505,6 @@
         const nombreFinal = partes.length > 0 ? `${est.nombreBase} (${partes.join(' - ')})` : est.nombreBase;
         const notasParaCocina = partes.length > 0 ? partes.join(' - ') : null;
 
-        // 2. Enviamos al ticket pasando las notas/extras seleccionados
         agregarAlTicket(
             prod.id, 
             nombreFinal, 
