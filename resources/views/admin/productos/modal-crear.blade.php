@@ -30,7 +30,7 @@
             </button>
         </div>
 
-        <form id="formulario-crear-producto" onsubmit="guardarProducto(event)" class="overflow-y-auto overscroll-contain flex-1 p-5 sm:p-8 pt-4 sm:pt-6 bg-[#F2F2F2] flex flex-col">
+<form id="formulario-crear-producto" onsubmit="guardarProducto(event)" novalidate class="flex flex-col flex-1 min-h-0 overflow-y-auto p-5 sm:p-8 pt-4">
             <div class="grid grid-cols-2 gap-4 sm:gap-6 flex-1">
 
                 {{-- Nombre --}}
@@ -207,25 +207,31 @@
         }
     };
 
-    window.closeModalCrear = function() {
-        if (typeof _cerrarModal === 'function') {
-            _cerrarModal('modal-crear-alimento', 'modal-crear-panel');
-        } else {
-            const modal = document.getElementById('modal-crear-alimento');
-            const panel = document.getElementById('modal-crear-panel');
-            if (modal && panel) {
-                modal.classList.add('opacity-0');
-                panel.classList.add('opacity-0', 'translate-y-8');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
-            }
+   window.closeModalCrear = function() {
+    if (typeof _cerrarModal === 'function') {
+        _cerrarModal('modal-crear-alimento', 'modal-crear-panel');
+    } else {
+        const modal = document.getElementById('modal-crear-alimento');
+        const panel = document.getElementById('modal-crear-panel');
+        if (modal && panel) {
+            modal.classList.add('opacity-0');
+            panel.classList.add('opacity-0', 'translate-y-8');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
-        desbloquearScrollFondo();
-        const form = document.getElementById('formulario-crear-producto');
-        if (form) form.reset();
-    };
+    }
+    desbloquearScrollFondo();
+    
+    const form = document.getElementById('formulario-crear-producto');
+    if (form) form.reset();
 
+    // Limpiar contenedores dinámicos
+    const contVar = document.getElementById('contenedor-variantes-crear');
+    if (contVar) contVar.innerHTML = '';
+    const contMod = document.getElementById('contenedor-modificadores-crear');
+    if (contMod) contMod.innerHTML = '';
+};
     window.toggleModoVentaPeso = function(tipo) {
         const checkbox  = document.getElementById(tipo === 'crear' ? 'se_vende_por_peso' : 'edit-se_vende_por_peso');
         const grupoFijo  = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
@@ -297,47 +303,53 @@
     };
 
     window.toggleVariantes = function(tipo) {
-        const checkVariantes = document.getElementById(tipo === 'crear' ? 'tiene_variantes' : 'edit-tiene_variantes');
-        const checkPeso = document.getElementById(tipo === 'crear' ? 'se_vende_por_peso' : 'edit-se_vende_por_peso');
-        
-        const seccionVariantes = document.getElementById(tipo === 'crear' ? 'seccion-variantes-crear' : 'seccion-variantes-editar');
-        const grupoFijo = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
-        const inputFijo = document.getElementById(tipo === 'crear' ? 'precio' : 'edit-precio');
-        const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
-        const bloqueModsGlobal = document.getElementById('bloque-toggle-modificadores-crear');
+    const checkVariantes = document.getElementById(tipo === 'crear' ? 'tiene_variantes' : 'edit-tiene_variantes');
+    const checkPeso = document.getElementById(tipo === 'crear' ? 'se_vende_por_peso' : 'edit-se_vende_por_peso');
+    
+    const seccionVariantes = document.getElementById(tipo === 'crear' ? 'seccion-variantes-crear' : 'seccion-variantes-editar');
+    const grupoFijo = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
+    const inputFijo = document.getElementById(tipo === 'crear' ? 'precio' : 'edit-precio');
+    const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
+    const bloqueModsGlobal = document.getElementById(tipo === 'crear' ? 'bloque-toggle-modificadores-crear' : 'bloque-toggle-modificadores-editar');
+    const checkMods = document.getElementById(tipo === 'crear' ? 'tiene_modificadores' : 'edit-tiene_modificadores');
+    const seccionModsGlobal = document.getElementById(tipo === 'crear' ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar');
+    const contenedorModsGlobal = document.getElementById(tipo === 'crear' ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar');
 
-        if (!checkVariantes || !seccionVariantes) return;
-        const tieneVariantes = checkVariantes.checked;
+    if (!checkVariantes || !seccionVariantes) return;
+    const tieneVariantes = checkVariantes.checked;
 
-        if (tieneVariantes) {
-            if (checkPeso && checkPeso.checked) {
-                checkPeso.checked = false;
-                window.toggleModoVentaPeso(tipo);
-            }
-            
-            if (grupoFijo) grupoFijo.classList.add('hidden');
-            if (bloqueModsGlobal) bloqueModsGlobal.classList.add('hidden');
-            
-            const seccionModsGlobal = document.getElementById('seccion-modificadores-crear');
-            if (seccionModsGlobal) seccionModsGlobal.classList.add('hidden');
-
-            if (inputFijo) {
-                inputFijo.required = false;
-                inputFijo.value = 0;
-            }
-            
-            seccionVariantes.classList.remove('hidden');
-
-            if (contenedor && contenedor.children.length === 0) {
-                window.agregarFilaVariante(tipo);
-            }
-        } else {
-            seccionVariantes.classList.add('hidden');
-            if (bloqueModsGlobal) bloqueModsGlobal.classList.remove('hidden');
-            if (grupoFijo) grupoFijo.classList.remove('hidden');
-            if (inputFijo) inputFijo.required = true;
+    if (tieneVariantes) {
+        if (checkPeso && checkPeso.checked) {
+            checkPeso.checked = false;
+            window.toggleModoVentaPeso(tipo);
         }
-    };
+        
+        if (grupoFijo) grupoFijo.classList.add('hidden');
+        if (bloqueModsGlobal) bloqueModsGlobal.classList.add('hidden');
+        
+        // Desactivar y limpiar modificadores globales para que no bloqueen con "required"
+        if (checkMods) checkMods.checked = false;
+        if (seccionModsGlobal) seccionModsGlobal.classList.add('hidden');
+        if (contenedorModsGlobal) contenedorModsGlobal.innerHTML = '';
+
+        if (inputFijo) {
+            inputFijo.required = false;
+            inputFijo.value = 0;
+        }
+        
+        seccionVariantes.classList.remove('hidden');
+
+        if (contenedor && contenedor.children.length === 0) {
+            window.agregarFilaVariante(tipo);
+        }
+    } else {
+        seccionVariantes.classList.add('hidden');
+        if (contenedor) contenedor.innerHTML = ''; // Limpiar variantes si se apaga el switch
+        if (bloqueModsGlobal) bloqueModsGlobal.classList.remove('hidden');
+        if (grupoFijo) grupoFijo.classList.remove('hidden');
+        if (inputFijo) inputFijo.required = true;
+    }
+};
 
     // ─── Variantes con Extras anidados ───────────────────────────────────────
     window.agregarFilaVariante = function(tipo) {
@@ -407,21 +419,22 @@
 };
 
     // ─── Modificadores / Extras para productos sin tamaños ───────────────────
-    window.toggleModificadores = function(tipo) {
-        const check = document.getElementById(tipo === 'crear' ? 'tiene_modificadores' : 'edit-tiene_modificadores');
-        const seccion = document.getElementById(tipo === 'crear' ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar');
-        const cont = document.getElementById(tipo === 'crear' ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar');
-        if (!check || !seccion) return;
+window.toggleModificadores = function(tipo) {
+    const check = document.getElementById(tipo === 'crear' ? 'tiene_modificadores' : 'edit-tiene_modificadores');
+    const seccion = document.getElementById(tipo === 'crear' ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar');
+    const cont = document.getElementById(tipo === 'crear' ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar');
+    if (!check || !seccion) return;
 
-        if (check.checked) {
-            seccion.classList.remove('hidden');
-            if (cont && cont.children.length === 0) {
-                window.agregarFilaModificador(tipo);
-            }
-        } else {
-            seccion.classList.add('hidden');
+    if (check.checked) {
+        seccion.classList.remove('hidden');
+        if (cont && cont.children.length === 0) {
+            window.agregarFilaModificador(tipo);
         }
-    };
+    } else {
+        seccion.classList.add('hidden');
+        if (cont) cont.innerHTML = ''; // <-- Limpia los inputs para que no queden campos required ocultos
+    }
+};
 
     window.agregarFilaModificador = function(tipo, datos = null) {
         const contId = (tipo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
@@ -478,11 +491,32 @@
         const formEl = document.getElementById('formulario-crear-producto');
         const formData = new FormData(formEl);
         formData.set('categoria_id', catId);
-        formData.set('se_vende_por_peso', document.getElementById('se_vende_por_peso').checked ? '1' : '0');
-        formData.set('tiene_variantes', document.getElementById('tiene_variantes').checked ? '1' : '0');
 
+        const tienePeso = document.getElementById('se_vende_por_peso').checked;
+        const tieneVars = document.getElementById('tiene_variantes').checked;
         const tieneModsCheck = document.getElementById('tiene_modificadores');
-        formData.set('tiene_modificadores', (tieneModsCheck && tieneModsCheck.checked) ? '1' : '0');
+        const tieneMods = (tieneModsCheck && tieneModsCheck.checked);
+
+        formData.set('se_vende_por_peso', tienePeso ? '1' : '0');
+        formData.set('tiene_variantes', tieneVars ? '1' : '0');
+        formData.set('tiene_modificadores', tieneMods ? '1' : '0');
+
+        // --- LIMPIEZA DE CAMPOS APAGADOS PARA EVITAR EL ERROR 422 ---
+        if (!tieneMods) {
+            for (const key of Array.from(formData.keys())) {
+                if (key.startsWith('modificadores[')) {
+                    formData.delete(key);
+                }
+            }
+        }
+
+        if (!tieneVars) {
+            for (const key of Array.from(formData.keys())) {
+                if (key.startsWith('variantes[')) {
+                    formData.delete(key);
+                }
+            }
+        }
 
         window.enviarFormularioConImagen(RUTA_STORE, formData, btn, original, window.closeModalCrear);
     };

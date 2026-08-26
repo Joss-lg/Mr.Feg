@@ -30,7 +30,7 @@
                 </button>
             </div>
 
-            <form id="formulario-editar-alimento" onsubmit="actualizarProducto(event)" class="p-6 sm:p-8 pt-4 bg-[#F2F2F2]">
+           <form id="formulario-editar-alimento" onsubmit="actualizarProducto(event)" novalidate class="p-6 sm:p-8 pt-4 bg-[#F2F2F2]">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     
                     {{-- Nombre --}}

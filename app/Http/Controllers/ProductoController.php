@@ -50,7 +50,7 @@ class ProductoController extends Controller
             'nombre' => trim($request->nombre)
         ]);
 
-        $request->validate([
+      $request->validate([
             'nombre'            => 'required|string|max:255',
             'descripcion'       => 'nullable|string',
             'categoria_id'      => 'required|exists:categorias,id',
@@ -58,17 +58,20 @@ class ProductoController extends Controller
             'se_vende_por_peso' => 'sometimes|boolean',
             'precio_por_100g'   => 'nullable|required_if:se_vende_por_peso,1|numeric|min:0',
             
-            // --- VALIDACIONES DE VARIANTES (Precio opcional / nullable) ---
-            'tiene_variantes'   => 'sometimes|boolean',
-            'variantes'         => 'required_if:tiene_variantes,1|array',
-            'variantes.*.nombre'=> 'required_with:variantes|string',
-            'variantes.*.precio'=> 'nullable|numeric|min:0',
+            // --- VALIDACIONES DE VARIANTES (Solo si tiene_variantes = 1) ---
+            'tiene_variantes'     => 'sometimes|boolean',
+            'variantes'           => 'nullable|required_if:tiene_variantes,1|array',
+            'variantes.*.nombre'  => 'required_if:tiene_variantes,1|string',
+            'variantes.*.precio'  => 'nullable|numeric|min:0',
+            'variantes.*.extras'  => 'nullable|array',
+            'variantes.*.extras.*.nombre' => 'nullable|string',
+            'variantes.*.extras.*.precio' => 'nullable|numeric|min:0',
 
-            // --- VALIDACIONES DE MODIFICADORES GLOBALES ---
-            'tiene_modificadores'   => 'sometimes|boolean',
-            'modificadores'         => 'nullable|array',
-            'modificadores.*.nombre'=> 'required_with:modificadores|string',
-            'modificadores.*.precio'=> 'nullable|numeric|min:0',
+            // --- VALIDACIONES DE MODIFICADORES GLOBALES (Solo si tiene_modificadores = 1) ---
+            'tiene_modificadores'    => 'sometimes|boolean',
+            'modificadores'          => 'nullable|array',
+            'modificadores.*.nombre' => 'required_if:tiene_modificadores,1|string',
+            'modificadores.*.precio' => 'nullable|numeric|min:0',
 
             'insumos'           => 'nullable|array',
             'insumos.*'         => 'exists:insumos,id',
@@ -185,7 +188,7 @@ class ProductoController extends Controller
             'nombre' => trim($request->nombre)
         ]);
 
-        $request->validate([
+      $request->validate([
             'nombre'            => 'required|string|max:255',
             'descripcion'       => 'nullable|string',
             'categoria_id'      => 'required|exists:categorias,id',
@@ -193,26 +196,30 @@ class ProductoController extends Controller
             'se_vende_por_peso' => 'sometimes|boolean',
             'precio_por_100g'   => 'nullable|required_if:se_vende_por_peso,1|numeric|min:0',
             
-            // --- VALIDACIONES DE VARIANTES PARA ACTUALIZAR ---
-            'tiene_variantes'   => 'sometimes|boolean',
-            'variantes'         => 'required_if:tiene_variantes,1|array',
-            'variantes.*.id'    => 'nullable',
-            'variantes.*.nombre'=> 'required_with:variantes|string',
-            'variantes.*.precio'=> 'nullable|numeric|min:0',
+            // --- VALIDACIONES DE VARIANTES (Solo si tiene_variantes = 1) ---
+            'tiene_variantes'     => 'sometimes|boolean',
+            'variantes'           => 'nullable|required_if:tiene_variantes,1|array',
+            'variantes.*.id'      => 'nullable',
+            'variantes.*.nombre'  => 'required_if:tiene_variantes,1|string',
+            'variantes.*.precio'  => 'nullable|numeric|min:0',
+            'variantes.*.extras'  => 'nullable|array',
+            'variantes.*.extras.*.id'     => 'nullable',
+            'variantes.*.extras.*.nombre' => 'nullable|string',
+            'variantes.*.extras.*.precio' => 'nullable|numeric|min:0',
 
-            // --- VALIDACIONES DE MODIFICADORES (EXTRAS) ---
-            'tiene_modificadores'   => 'sometimes|boolean',
-            'modificadores'         => 'nullable|array',
-            'modificadores.*.id'    => 'nullable',
-            'modificadores.*.nombre'=> 'required_with:modificadores|string',
-            'modificadores.*.precio'=> 'nullable|numeric|min:0',
+            // --- VALIDACIONES DE MODIFICADORES (Solo si tiene_modificadores = 1) ---
+            'tiene_modificadores'    => 'sometimes|boolean',
+            'modificadores'          => 'nullable|array',
+            'modificadores.*.id'     => 'nullable',
+            'modificadores.*.nombre' => 'required_if:tiene_modificadores,1|string',
+            'modificadores.*.precio' => 'nullable|numeric|min:0',
 
             'insumos'           => 'nullable|array',
             'insumos.*'         => 'exists:insumos,id',
             'cantidades'        => 'nullable|array',
             'cantidades.*'      => 'required_with:insumos|numeric|min:0.001',
         ]);
-
+        
         try {
             DB::beginTransaction();
 
