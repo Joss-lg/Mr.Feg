@@ -69,24 +69,24 @@
                     </label>
                 </div>
 
-                {{-- Sección Dinámica de Variantes --}}
+                {{-- Sección Dinámica de Variantes (Tamaños + Extras por tamaño) --}}
                 <div class="col-span-2 hidden" id="seccion-variantes-crear">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
                         <div>
                             <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1 block">Tamaños y Precios</label>
                             <p class="text-[9px] text-slate-400 font-bold mt-1 ml-1 tracking-wide uppercase">
-                                Ej: 6pz ($80), 10pz ($135)...
+                                Agrega tamaños y sus complementos específicos con precio individual
                             </p>
                         </div>
                         <button type="button" onclick="agregarFilaVariante('crear')" class="inline-flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
                             <i class="fas fa-plus"></i> AGREGAR TAMAÑO
                         </button>
                     </div>
-                    <div id="contenedor-variantes-crear" class="space-y-2"></div>
+                    <div id="contenedor-variantes-crear" class="space-y-3"></div>
                 </div>
 
-                {{-- Toggle: Tiene Modificadores / Extras --}}
-                <div class="col-span-2">
+                {{-- Toggle: Extras para producto simple (sin tamaños) --}}
+                <div class="col-span-2" id="bloque-toggle-modificadores-crear">
                     <label class="flex items-center justify-between gap-3 bg-purple-50/50 border border-purple-200/80 rounded-2xl p-3.5 sm:p-4 cursor-pointer select-none shadow-sm">
                         <span class="flex items-center gap-2.5">
                             <i class="fas fa-puzzle-piece text-purple-500 text-sm"></i>
@@ -100,13 +100,13 @@
                     </label>
                 </div>
 
-                {{-- Sección Dinámica de Modificadores --}}
+                {{-- Sección de Extras para producto simple --}}
                 <div class="col-span-2 hidden" id="seccion-modificadores-crear">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 mb-3">
                         <div>
-                            <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios</label>
+                            <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios Generales</label>
                             <p class="text-[9px] text-slate-400 font-bold mt-1 ml-1 tracking-wide uppercase">
-                                Ej: Papas Francesas ($20), Papas Gajo ($35)...
+                                Aplica a este platillo único
                             </p>
                         </div>
                         <button type="button" onclick="agregarFilaModificador('crear')" class="inline-flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
@@ -304,6 +304,7 @@
         const grupoFijo = document.getElementById(tipo === 'crear' ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar');
         const inputFijo = document.getElementById(tipo === 'crear' ? 'precio' : 'edit-precio');
         const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
+        const bloqueModsGlobal = document.getElementById('bloque-toggle-modificadores-crear');
 
         if (!checkVariantes || !seccionVariantes) return;
         const tieneVariantes = checkVariantes.checked;
@@ -315,6 +316,11 @@
             }
             
             if (grupoFijo) grupoFijo.classList.add('hidden');
+            if (bloqueModsGlobal) bloqueModsGlobal.classList.add('hidden');
+            
+            const seccionModsGlobal = document.getElementById('seccion-modificadores-crear');
+            if (seccionModsGlobal) seccionModsGlobal.classList.add('hidden');
+
             if (inputFijo) {
                 inputFijo.required = false;
                 inputFijo.value = 0;
@@ -327,44 +333,86 @@
             }
         } else {
             seccionVariantes.classList.add('hidden');
+            if (bloqueModsGlobal) bloqueModsGlobal.classList.remove('hidden');
             if (grupoFijo) grupoFijo.classList.remove('hidden');
             if (inputFijo) inputFijo.required = true;
         }
     };
 
+    // ─── Variantes con Extras anidados ───────────────────────────────────────
     window.agregarFilaVariante = function(tipo) {
         const contenedor = document.getElementById(tipo === 'crear' ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar');
         if (!contenedor) return;
-        const index = window.contadorVariantes++;
+        const varIndex = window.contadorVariantes++;
         
         const htmlFila = `
-            <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-variante" id="variante-${index}">
-                <input type="text" name="variantes[${index}][nombre]" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" placeholder="Ej: 6pz" required>
-                <div class="w-px h-6 bg-slate-200"></div>
-                <span class="pl-2 text-slate-400 font-bold">$</span>
-                <input type="number" step="0.01" name="variantes[${index}][precio]" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" placeholder="80.00" required>
-                <button type="button" onclick="document.getElementById('variante-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
-                    <i class="fas fa-trash text-xs"></i>
-                </button>
+            <div class="bg-white p-3.5 border border-slate-200 rounded-2xl shadow-sm space-y-3 fila-variante" id="variante-${varIndex}">
+                {{-- Encabezado del tamaño --}}
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shrink-0">
+                        <i class="fas fa-layer-group text-[10px]"></i>
+                    </span>
+                    <input type="text" name="variantes[${varIndex}][nombre]" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 6pz, 10pz..." required>
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2">
+                        <span class="text-slate-400 font-black text-xs">$</span>
+                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" class="w-20 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="80.00" required>
+                    </div>
+                    <button type="button" onclick="document.getElementById('variante-${varIndex}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors outline-none shrink-0" title="Eliminar tamaño">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </div>
+
+                {{-- Extras exclusivos de este tamaño --}}
+                <div class="pl-3 border-l-2 border-purple-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] font-black text-purple-600 uppercase tracking-widest">
+                            <i class="fas fa-puzzle-piece mr-1"></i> Complementos de este tamaño
+                        </span>
+                        <button type="button" onclick="agregarExtraAVariante(${varIndex})" class="text-[9px] font-black text-purple-700 bg-purple-100 hover:bg-purple-200 px-2 py-1 rounded-lg transition uppercase tracking-wider">
+                            + Extra
+                        </button>
+                    </div>
+                    <div id="contenedor-extras-var-${varIndex}" class="space-y-1.5"></div>
+                </div>
             </div>
         `;
         
         contenedor.insertAdjacentHTML('beforeend', htmlFila);
     };
 
-    // ─── Modificadores / Extras Globales ─────────────────────────────────────
-    window.toggleModificadores = function(tipo) {
-        const checkId = (tipo === 'crear') ? 'tiene_modificadores' : 'edit-tiene_modificadores';
-        const seccionId = (tipo === 'crear') ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar';
-        const contId = (tipo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
+    window.agregarExtraAVariante = function(varIndex, datos = null) {
+        const contenedor = document.getElementById(`contenedor-extras-var-${varIndex}`);
+        if (!contenedor) return;
+        const extraIndex = contenedor.children.length;
 
-        const check = document.getElementById(checkId);
-        const seccion = document.getElementById(seccionId);
+        const nombre = datos?.nombre ?? '';
+        const precio = datos?.precio ?? '';
+
+        const html = `
+            <div class="flex items-center gap-2 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl" id="extra-var-${varIndex}-${extraIndex}">
+                <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: C/N PAPAS" class="flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
+                <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-2">
+                    <span class="text-purple-400 font-black text-xs">+$</span>
+                    <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="19.00" class="w-16 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" required>
+                </div>
+                <button type="button" onclick="document.getElementById('extra-var-${varIndex}-${extraIndex}').remove()" class="w-6 h-6 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
+                    <i class="fas fa-times text-[10px]"></i>
+                </button>
+            </div>
+        `;
+
+        contenedor.insertAdjacentHTML('beforeend', html);
+    };
+
+    // ─── Modificadores / Extras para productos sin tamaños ───────────────────
+    window.toggleModificadores = function(tipo) {
+        const check = document.getElementById(tipo === 'crear' ? 'tiene_modificadores' : 'edit-tiene_modificadores');
+        const seccion = document.getElementById(tipo === 'crear' ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar');
+        const cont = document.getElementById(tipo === 'crear' ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar');
         if (!check || !seccion) return;
 
         if (check.checked) {
             seccion.classList.remove('hidden');
-            const cont = document.getElementById(contId);
             if (cont && cont.children.length === 0) {
                 window.agregarFilaModificador(tipo);
             }
@@ -390,7 +438,7 @@
                 <input type="hidden" name="modificadores[${index}][id]" value="${id}">
                 <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
                 <div class="w-px h-6 bg-slate-200"></div>
-                <span class="pl-2 text-slate-400 font-bold">$</span>
+                <span class="pl-2 text-slate-400 font-bold">+$</span>
                 <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
                 <button type="button" onclick="document.getElementById('modificador-${tipo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
                     <i class="fas fa-trash text-xs"></i>

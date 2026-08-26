@@ -69,21 +69,24 @@
                         </label>
                     </div>
 
-                    {{-- Sección Dinámica de Variantes Editar --}}
+                    {{-- Sección Dinámica de Variantes Editar (Tamaños + Extras por tamaño) --}}
                     <div class="col-span-1 sm:col-span-2 hidden" id="seccion-variantes-editar">
                         <div class="flex items-center justify-between mb-3">
                             <div>
                                 <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1 block">Tamaños y Precios</label>
+                                <p class="text-[9px] text-slate-400 font-bold mt-0.5 ml-1 tracking-wide uppercase">
+                                    Agrega o edita tamaños y sus extras específicos
+                                </p>
                             </div>
                             <button type="button" onclick="agregarFilaVariante('editar')" class="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
                                 <i class="fas fa-plus"></i> AGREGAR TAMAÑO
                             </button>
                         </div>
-                        <div id="contenedor-variantes-editar" class="space-y-2"></div>
+                        <div id="contenedor-variantes-editar" class="space-y-3"></div>
                     </div>
 
-                    {{-- Toggle: Tiene Modificadores/Extras Editar --}}
-                    <div class="col-span-1 sm:col-span-2">
+                    {{-- Toggle: Tiene Modificadores/Extras Globales Editar (solo si no tiene variantes) --}}
+                    <div class="col-span-1 sm:col-span-2" id="bloque-toggle-modificadores-editar">
                         <label class="flex items-center justify-between gap-3 bg-purple-50/50 border border-purple-200/80 rounded-2xl p-4 cursor-pointer select-none shadow-sm">
                             <span class="flex items-center gap-3">
                                 <i class="fas fa-puzzle-piece text-purple-500 text-sm"></i>
@@ -97,11 +100,11 @@
                         </label>
                     </div>
 
-                    {{-- Sección Dinámica de Modificadores Editar --}}
+                    {{-- Sección Dinámica de Modificadores Globales Editar --}}
                     <div class="col-span-1 sm:col-span-2 hidden" id="seccion-modificadores-editar">
                         <div class="flex items-center justify-between mb-3">
                             <div>
-                                <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios</label>
+                                <label class="text-[10px] font-black text-purple-600 uppercase tracking-widest ml-1 block">Extras y Precios Generales</label>
                             </div>
                             <button type="button" onclick="agregarFilaModificador('editar')" class="inline-flex items-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
                                 <i class="fas fa-plus"></i> AGREGAR EXTRA
@@ -165,6 +168,7 @@
 <script>
     // ─── Contadores de filas dinámicas ───────────────────────────────────────
     let contadorModificadores = 0;
+    let contadorVariantesEditar = 0;
 
     // ─── Bloqueo/desbloqueo de scroll del fondo ─────────────────────────
     window.bloquearScrollFondo = function () {
@@ -176,64 +180,54 @@
 
     // ─── Cerrar modal editar ─────────────────────────────────────────────────
     function closeModalEditar() {
-        _cerrarModal('modal-editar-alimento', 'modal-editar-panel');
+        if (typeof _cerrarModal === 'function') {
+            _cerrarModal('modal-editar-alimento', 'modal-editar-panel');
+        } else {
+            const modal = document.getElementById('modal-editar-alimento');
+            const panel = document.getElementById('modal-editar-panel');
+            if (modal && panel) {
+                modal.classList.add('opacity-0');
+                panel.classList.add('opacity-0', 'translate-y-8');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
         desbloquearScrollFondo();
         const form = document.getElementById('formulario-editar-alimento');
         if (form) form.reset();
     }
 
-    // ─── Envío multipart genérico ────────────────────────────────────────────
-    function enviarFormularioConImagen(url, formData, btn, textoOriginal, onSuccess) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    // ─── Control de Switches en Editar ───────────────────────────────────────
+    function toggleVariantes(modo) {
+        const checkId = (modo === 'crear') ? 'tiene_variantes' : 'edit-tiene_variantes';
+        const seccionId = (modo === 'crear') ? 'seccion-variantes-crear' : 'seccion-variantes-editar';
+        const grupoFijoId = (modo === 'crear') ? 'grupo-precio-fijo-crear' : 'grupo-precio-fijo-editar';
+        const inputFijoId = (modo === 'crear') ? 'precio' : 'edit-precio';
+        const bloqueModsId = (modo === 'crear') ? 'bloque-toggle-modificadores-crear' : 'bloque-toggle-modificadores-editar';
+        const seccionModsId = (modo === 'crear') ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar';
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-            },
-            body: formData,
-        })
-        .then(async (response) => {
-            const json = await response.json().catch(() => ({}));
+        const check = document.getElementById(checkId);
+        const seccion = document.getElementById(seccionId);
+        const grupoFijo = document.getElementById(grupoFijoId);
+        const inputFijo = document.getElementById(inputFijoId);
+        const bloqueMods = document.getElementById(bloqueModsId);
+        const seccionMods = document.getElementById(seccionModsId);
 
-            if (!response.ok) {
-                const mensaje = json.message || 'Ocurrió un error al guardar.';
-                if (typeof mostrarNotificacion === 'function') {
-                    mostrarNotificacion(mensaje, 'error');
-                } else {
-                    alert(mensaje);
-                }
-                btn.textContent = textoOriginal;
-                btn.disabled = false;
-                return;
-            }
+        if (!check || !seccion) return;
 
-            if (typeof mostrarNotificacion === 'function') {
-                mostrarNotificacion(json.message || 'Guardado correctamente.', 'success');
-            }
-
-            if (typeof onSuccess === 'function') onSuccess();
-
-            if (typeof cargarProductos === 'function')    cargarProductos();
-            if (typeof cargarEstadisticas === 'function')  cargarEstadisticas();
-
-            btn.textContent = textoOriginal;
-            btn.disabled = false;
-        })
-        .catch((err) => {
-            console.error(err);
-            if (typeof mostrarNotificacion === 'function') {
-                mostrarNotificacion('Error de conexión al guardar.', 'error');
-            } else {
-                alert('Error de conexión al guardar.');
-            }
-            btn.textContent = textoOriginal;
-            btn.disabled = false;
-        });
+        if (check.checked) {
+            seccion.classList.remove('hidden');
+            if (grupoFijo) grupoFijo.classList.add('hidden');
+            if (inputFijo) { inputFijo.required = false; inputFijo.value = 0; }
+            if (bloqueMods) bloqueMods.classList.add('hidden');
+            if (seccionMods) seccionMods.classList.add('hidden');
+        } else {
+            seccion.classList.add('hidden');
+            if (grupoFijo) grupoFijo.classList.remove('hidden');
+            if (inputFijo) inputFijo.required = true;
+            if (bloqueMods) bloqueMods.classList.remove('hidden');
+        }
     }
 
-// ─── Gestión Unificada de Modificadores / Extras ──────────────────────────
     function toggleModificadores(modo) {
         const idCheck = (modo === 'crear') ? 'tiene_modificadores' : 'edit-tiene_modificadores';
         const idSeccion = (modo === 'crear') ? 'seccion-modificadores-crear' : 'seccion-modificadores-editar';
@@ -254,6 +248,90 @@
         }
     }
 
+    // ─── Agregar Fila de Variante (Tamaño) con soporte de Extras Anidados ────
+    function agregarFilaVariante(modo, datos = null) {
+        const contId = (modo === 'crear') ? 'contenedor-variantes-crear' : 'contenedor-variantes-editar';
+        const contenedor = document.getElementById(contId);
+        if (!contenedor) return;
+
+        const varIndex = (modo === 'crear') ? window.contadorVariantes++ : contadorVariantesEditar++;
+        const id = datos?.id ?? '';
+        const nombre = datos?.nombre ?? '';
+        const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
+            ? parseFloat(datos.precio).toFixed(2) 
+            : '';
+
+        const htmlFila = `
+            <div class="bg-white p-3.5 border border-slate-200 rounded-2xl shadow-sm space-y-3 fila-variante" id="variante-${modo}-${varIndex}">
+                {{-- Encabezado del tamaño --}}
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shrink-0">
+                        <i class="fas fa-layer-group text-[10px]"></i>
+                    </span>
+                    <input type="hidden" name="variantes[${varIndex}][id]" value="${id}">
+                    <input type="text" name="variantes[${varIndex}][nombre]" value="${nombre}" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 6pz, 10pz..." required>
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2">
+                        <span class="text-slate-400 font-black text-xs">$</span>
+                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" value="${precio}" class="w-20 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="80.00" required>
+                    </div>
+                    <button type="button" onclick="document.getElementById('variante-${modo}-${varIndex}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors outline-none shrink-0" title="Eliminar tamaño">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </div>
+
+                {{-- Extras exclusivos de este tamaño --}}
+                <div class="pl-3 border-l-2 border-purple-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] font-black text-purple-600 uppercase tracking-widest">
+                            <i class="fas fa-puzzle-piece mr-1"></i> Complementos de este tamaño
+                        </span>
+                        <button type="button" onclick="agregarExtraAVarianteEditar(${varIndex})" class="text-[9px] font-black text-purple-700 bg-purple-100 hover:bg-purple-200 px-2 py-1 rounded-lg transition uppercase tracking-wider">
+                            + Extra
+                        </button>
+                    </div>
+                    <div id="contenedor-extras-var-edit-${varIndex}" class="space-y-1.5"></div>
+                </div>
+            </div>
+        `;
+        contenedor.insertAdjacentHTML('beforeend', htmlFila);
+
+        // Si trae extras asociados (modificadores), renderizarlos dentro de esta variante
+        const extras = datos?.modificadores || datos?.extras || [];
+        if (Array.isArray(extras) && extras.length > 0) {
+            extras.forEach(extra => {
+                agregarExtraAVarianteEditar(varIndex, extra);
+            });
+        }
+    }
+
+    function agregarExtraAVarianteEditar(varIndex, datos = null) {
+        const contenedor = document.getElementById(`contenedor-extras-var-edit-${varIndex}`);
+        if (!contenedor) return;
+        const extraIndex = contenedor.children.length;
+
+        const id = datos?.id ?? '';
+        const nombre = datos?.nombre ?? '';
+        const precio = (datos && datos.precio !== undefined && datos.precio !== null) 
+            ? parseFloat(datos.precio).toFixed(2) 
+            : '';
+
+        const html = `
+            <div class="flex items-center gap-2 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl" id="extra-var-edit-${varIndex}-${extraIndex}">
+                <input type="hidden" name="variantes[${varIndex}][extras][${extraIndex}][id]" value="${id}">
+                <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: C/N PAPAS" class="flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
+                <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-2">
+                    <span class="text-purple-400 font-black text-xs">+$</span>
+                    <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="19.00" class="w-16 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" required>
+                </div>
+                <button type="button" onclick="document.getElementById('extra-var-edit-${varIndex}-${extraIndex}').remove()" class="w-6 h-6 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
+                    <i class="fas fa-times text-[10px]"></i>
+                </button>
+            </div>
+        `;
+        contenedor.insertAdjacentHTML('beforeend', html);
+    }
+
+    // ─── Modificadores Globales (para platillos sin variantes) ────────────────
     function agregarFilaModificador(modo, datos = null) {
         const idCont = (modo === 'crear') ? 'contenedor-modificadores-crear' : 'contenedor-modificadores-editar';
         const contenedor = document.getElementById(idCont);
@@ -271,7 +349,7 @@
                 <input type="hidden" name="modificadores[${index}][id]" value="${id}">
                 <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
                 <div class="w-px h-6 bg-slate-200"></div>
-                <span class="pl-2 text-slate-400 font-bold">$</span>
+                <span class="pl-2 text-slate-400 font-bold">+$</span>
                 <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
                 <button type="button" onclick="document.getElementById('modificador-${modo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
                     <i class="fas fa-trash text-xs"></i>
@@ -281,47 +359,40 @@
         contenedor.insertAdjacentHTML('beforeend', html);
     }
 
+    // ─── Rellenar Variantes y Modificadores al Abrir Edición ─────────────────
+    function llenarVariantesEdicion(producto) {
+        const contenedor = document.getElementById('contenedor-variantes-editar');
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+        contadorVariantesEditar = 0;
+        
+        if (producto.tiene_variantes && Array.isArray(producto.variantes) && producto.variantes.length > 0) {
+            producto.variantes.forEach(variante => {
+                agregarFilaVariante('editar', variante);
+            });
+        }
+    }
+
     function llenarModificadoresEdicion(producto) {
         const contenedor = document.getElementById('contenedor-modificadores-editar');
         if (!contenedor) return;
         contenedor.innerHTML = '';
 
-        const tieneMods = Array.isArray(producto.modificadores) && producto.modificadores.length > 0;
+        // Solo cargamos modificadores globales (que no tengan variante_id)
+        const modsGlobales = Array.isArray(producto.modificadores) 
+            ? producto.modificadores.filter(m => !m.variante_id) 
+            : [];
+
+        const tieneMods = modsGlobales.length > 0;
         const check = document.getElementById('edit-tiene_modificadores');
         if (check) check.checked = tieneMods;
 
         if (tieneMods) {
-            producto.modificadores.forEach(mod => {
+            modsGlobales.forEach(mod => {
                 agregarFilaModificador('editar', mod);
             });
         }
         toggleModificadores('editar');
-    }
-
-    // ─── Función para rellenar las variantes al editar ────────────────────────
-    function llenarVariantesEdicion(producto) {
-        const contenedor = document.getElementById('contenedor-variantes-editar');
-        if (!contenedor) return;
-        contenedor.innerHTML = '';
-        
-        if (producto.tiene_variantes && producto.variantes && producto.variantes.length > 0) {
-            producto.variantes.forEach(variante => {
-                const index = contadorVariantes++;
-                const htmlFila = `
-                    <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-variante" id="variante-edit-${index}">
-                        <input type="hidden" name="variantes[${index}][id]" value="${variante.id}">
-                        <input type="text" name="variantes[${index}][nombre]" value="${variante.nombre}" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
-                        <div class="w-px h-6 bg-slate-200"></div>
-                        <span class="pl-2 text-slate-400 font-bold">$</span>
-                        <input type="number" step="0.01" name="variantes[${index}][precio]" value="${variante.precio}" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400" required>
-                        <button type="button" onclick="document.getElementById('variante-edit-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
-                            <i class="fas fa-trash text-xs"></i>
-                        </button>
-                    </div>
-                `;
-                contenedor.insertAdjacentHTML('beforeend', htmlFila);
-            });
-        }
     }
 
     // ─── Abrir modal con datos del producto ──────────────────────────────────
@@ -331,20 +402,20 @@
         if (!producto) return;
         
         estadoGlobal.editandoId = id;
-        document.getElementById('edit-nombre').value           = producto.nombre           ?? '';
-        document.getElementById('edit-precio').value           = producto.precio           ?? '';
-        document.getElementById('edit-precio_por_100g').value  = producto.precio_por_100g  ?? '';
+        document.getElementById('edit-nombre').value           = producto.nombre          ?? '';
+        document.getElementById('edit-precio').value           = producto.precio          ?? '';
+        document.getElementById('edit-precio_por_100g').value  = producto.precio_por_100g ?? '';
         document.getElementById('edit-se_vende_por_peso').checked = !!producto.se_vende_por_peso;
         document.getElementById('edit-descripcion').value      = producto.descripcion      ?? '';
         document.getElementById('edit-categoria_nombre').value = producto.categoria?.nombre ?? '';
         document.getElementById('edit-categoria_id').value     = producto.categoria?.id     ?? '';
 
-        // Variantes (Tamaños)
+        // Variantes (Tamaños) y Extras anidados
         document.getElementById('edit-tiene_variantes').checked = !!producto.tiene_variantes;
         llenarVariantesEdicion(producto);
         toggleVariantes('editar');
 
-        // Modificadores (Extras/Papas)
+        // Modificadores globales (si aplica)
         llenarModificadoresEdicion(producto);
 
         toggleModoVentaPeso('editar');
@@ -383,7 +454,6 @@
         formData.set('se_vende_por_peso', document.getElementById('edit-se_vende_por_peso').checked ? '1' : '0');
         formData.set('tiene_variantes', document.getElementById('edit-tiene_variantes').checked ? '1' : '0');
         
-        // Estado del switch de modificadores
         const tieneModsCheck = document.getElementById('edit-tiene_modificadores');
         formData.set('tiene_modificadores', (tieneModsCheck && tieneModsCheck.checked) ? '1' : '0');
         

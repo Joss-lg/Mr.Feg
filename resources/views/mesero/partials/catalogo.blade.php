@@ -171,11 +171,12 @@
             categoria: catLower,
             precioBase: parseFloat(prod.precio) || 0,
             tamanoSeleccionado: null,
+            varianteIdSeleccionada: null,
             detalles: [],
             extraAcumulado: 0
         };
 
-        // 1. Caso Bebidas con variantes (500ml / 1L / 12oz / 16oz)
+        // 1. Caso Bebidas con variantes
         if (catLower.includes('bebida') || catLower.includes('frapp') || catLower.includes('malteada') || catLower.includes('smoothie')) {
             if (prod.tiene_variantes && prod.variantes?.length > 0) {
                 mostrarSelectorTamanos(prod.variantes, 'tamano_bebida');
@@ -184,7 +185,7 @@
             }
         }
 
-        // 2. Caso Alitas y Boneless (Variantes de tamaño/peso)
+        // 2. Caso Alitas, Boneless y Platillos con Variantes/Tamaños
         if (prod.tiene_variantes && prod.variantes?.length > 0) {
             mostrarSelectorTamanos(prod.variantes, 'tamano_snack');
             abrirContenedorModal();
@@ -198,9 +199,9 @@
             return;
         }
 
-        // 4. Caso Snacks individuales (Dedos de queso, Salchipulpos, Dino-Nuggets, Aros de cebolla)
-        if (nombreLower.includes('dedos') || nombreLower.includes('salchipulpos') || nombreLower.includes('aros') || nombreLower.includes('dino') || nombreLower.includes('donas de queso')) {
-            mostrarSelectorPapasGenerico(20, 35);
+        // 4. Caso Snacks individuales sin variantes pero con complementos globales
+        if (prod.modificadores && prod.modificadores.length > 0) {
+            evaluarPapasPorTamano(null, null);
             abrirContenedorModal();
             return;
         }
@@ -230,7 +231,7 @@
         }
     }
 
-    // --- SELECTOR DE TAMAÑOS ---
+    // --- SELECTOR DE TAMAÑOS (PASO 1) ---
     function mostrarSelectorTamanos(variantes, tipoFlujo) {
         const prod = window.productoActivoParaComanda;
         document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
@@ -248,9 +249,10 @@
                 e.stopPropagation();
                 window.estadoPersonalizacion.precioBase = parseFloat(v.precio);
                 window.estadoPersonalizacion.tamanoSeleccionado = v.nombre;
+                window.estadoPersonalizacion.varianteIdSeleccionada = v.id;
                 
                 if (tipoFlujo === 'tamano_snack') {
-                    evaluarPapasPorTamano(v.nombre);
+                    evaluarPapasPorTamano(v.nombre, v);
                 } else if (tipoFlujo === 'tamano_bebida') {
                     mostrarExtrasBebida(v.nombre);
                 }
@@ -264,17 +266,33 @@
         });
     }
 
-   // ─── EVALUAR EXTRAS / COMPLEMENTOS DESDE BASE DE DATOS ───────────────────
-    function evaluarPapasPorTamano(nombreTamano) {
+    // ─── EVALUAR EXTRAS / COMPLEMENTOS FILTRADOS POR VARIANTE (PASO 2) ────────
+    function evaluarPapasPorTamano(nombreTamano, varianteObj = null) {
         const prod = window.productoActivoParaComanda;
-        
-        // Si el platillo tiene modificadores guardados en la BD, mostramos el Paso 2
-        if (prod && Array.isArray(prod.modificadores) && prod.modificadores.length > 0) {
+        const varId = window.estadoPersonalizacion.varianteIdSeleccionada;
+
+        // Buscamos los modificadores que correspondan a esta variante específica
+        let extrasDisponibles = [];
+
+        if (varianteObj && Array.isArray(varianteObj.modificadores) && varianteObj.modificadores.length > 0) {
+            extrasDisponibles = varianteObj.modificadores;
+        } else if (prod && Array.isArray(prod.modificadores)) {
+            if (varId) {
+                // Filtramos modificadores asignados a esta variante_id
+                extrasDisponibles = prod.modificadores.filter(m => Number(m.variante_id) === Number(varId));
+            } else {
+                // Modificadores generales (sin variante_id)
+                extrasDisponibles = prod.modificadores.filter(m => !m.variante_id);
+            }
+        }
+
+        // Si existen extras para este tamaño seleccionado, desplegamos el Paso 2
+        if (extrasDisponibles.length > 0) {
             const opciones = [
                 { nombre: 'Sin Extras / Complementos', extra: 0 }
             ];
 
-            prod.modificadores.forEach(mod => {
+            extrasDisponibles.forEach(mod => {
                 opciones.push({
                     nombre: mod.nombre,
                     extra: parseFloat(mod.precio) || 0
@@ -286,12 +304,16 @@
             document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Deseas agregar complementos?';
 
             const btnVolver = document.getElementById('btn-volver-tamano');
-            btnVolver.classList.remove('hidden');
-            window.volverPasoAnterior = () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack');
+            if (prod.tiene_variantes && prod.variantes?.length > 0) {
+                btnVolver.classList.remove('hidden');
+                window.volverPasoAnterior = () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack');
+            } else {
+                btnVolver.classList.add('hidden');
+            }
 
             renderOpcionesFinales(opciones);
         } else {
-            // Si no tiene extras asignados, enviamos directo al ticket con el precio base
+            // Si este tamaño no tiene complementos adicionales, agregamos directo al ticket
             finalizarTicket(window.estadoPersonalizacion.precioBase);
         }
     }
@@ -414,7 +436,7 @@
         });
     }
 
-function finalizarTicket(precioTotal) {
+    function finalizarTicket(precioTotal) {
         cerrarModalVariantes();
         const est = window.estadoPersonalizacion;
         const prod = window.productoActivoParaComanda;
@@ -433,12 +455,13 @@ function finalizarTicket(precioTotal) {
             nombreFinal, 
             precioTotal, 
             prod.categoria?.nombre || 'Menú', 
-            partes,             // <-- Pasamos los modificadores seleccionados reales
+            partes,
             false, 
             0,
-            notasParaCocina     // <-- Pasamos el texto de notas para la orden
+            notasParaCocina
         );
     }
+
     window.cerrarModalVariantes = function() {
         const modal = document.getElementById('modal-variantes-comanda');
         const panel = document.getElementById('panel-variantes-comanda');
