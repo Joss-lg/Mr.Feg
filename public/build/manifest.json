@@ -1,12 +1,9 @@
 {
   "resources/js/app.js": {
-    "file": "assets/app-YY6acxE_.js",
+    "file": "assets/app-Bd3S_KkQ.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true,
-    "css": [
-      "assets/app-B5wz7TZy.css"
-    ]
+    "isEntry": true
   },
   "resources/js/cobro.js": {
     "file": "assets/cobro-BZRUUAtk.js",

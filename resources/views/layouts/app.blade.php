@@ -338,11 +338,11 @@
             const overlay = document.createElement('div');
             overlay.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
             overlay.innerHTML = `
-                <div class="bg-[var(--card-color)] border border-[var(--border-color)] rounded-[2rem] shadow-2xl w-full max-w-sm p-6">
-                    <h2 class="text-lg font-black text-[var(--text-color)] tracking-tight mb-2">${titulo}</h2>
-                    <p class="text-sm text-[var(--text-muted)] font-medium mb-6">${mensaje}</p>
+                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-2xl w-full max-w-sm p-6">
+                    <h2 class="text-lg font-black text-slate-900 tracking-tight mb-2">${titulo}</h2>
+                    <p class="text-sm text-slate-500 font-medium mb-6">${mensaje}</p>
                     <div class="flex justify-end gap-3">
-                        <button id="confirmCancelarBtn" class="px-5 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-color)] hover:bg-white/5 transition outline-none">Cancelar</button>
+                        <button id="confirmCancelarBtn" class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition outline-none">Cancelar</button>
                         <button id="confirmAceptarBtn" class="px-5 py-2.5 rounded-xl ${colorBtn} text-white text-xs font-black uppercase tracking-widest transition outline-none shadow-sm">${textoConfirmar}</button>
                     </div>
                 </div>
@@ -359,8 +359,10 @@
     </script>
     @stack('scripts')
 
+    {{-- TECLADO VIRTUAL — comentado temporalmente. Descomentar para reactivar.
     <div id="teclado-virtual-contenedor" class="teclado-virtual-contenedor oculto">
         <div class="simple-keyboard"></div>
     </div>
+    --}}
 </body>
 </html>

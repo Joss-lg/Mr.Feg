@@ -36,9 +36,15 @@
                 const modsJSON = prod.modificadores ? JSON.stringify(prod.modificadores).replace(/'/g, "\\'") : '[]';
 
                 // Etiqueta de precio adaptada al nuevo diseño limpio
-                const etiquetaPrecio = sePorPeso
-                    ? `$${precioPor100g.toFixed(2)} <span class="text-[11px] font-semibold text-slate-500">/100g</span>`
-                    : `$${precioNum.toFixed(2)}`;
+                const tieneVariantes = prod.tiene_variantes && prod.variantes && prod.variantes.length > 0;
+                let etiquetaPrecio;
+                if (sePorPeso) {
+                    etiquetaPrecio = `<p class="text-[16px] sm:text-[18px] font-black text-slate-900 leading-none tracking-tight">$${precioPor100g.toFixed(2)} <span class="text-[11px] font-semibold text-slate-500">/100g</span></p>`;
+                } else if (precioNum === 0 && tieneVariantes) {
+                    etiquetaPrecio = `<span class="text-[11px] font-black text-blue-500 uppercase tracking-wider border border-blue-200 bg-blue-50 rounded-full px-2.5 py-1 leading-none">${prod.variantes.length} TAMAÑOS</span>`;
+                } else {
+                    etiquetaPrecio = `<p class="text-[16px] sm:text-[18px] font-black text-slate-900 leading-none tracking-tight">$${precioNum.toFixed(2)}</p>`;
+                }
 
               gridProd.innerHTML += `
                     <button type="button"
@@ -52,9 +58,7 @@
                         </h3>
 
                         <div class="mt-auto flex items-center justify-between gap-2 w-full">
-                            <p class="text-[16px] sm:text-[18px] font-black text-slate-900 leading-none tracking-tight">
-                                ${etiquetaPrecio}
-                            </p>
+                            ${etiquetaPrecio}
 
                             <span class="flex-shrink-0 w-9 h-9 rounded-full bg-[#3b82f6] text-white flex items-center justify-center text-sm font-bold shadow-sm group-hover:bg-blue-600 group-active:scale-90 transition-all duration-150">
                                 <i class="fas fa-plus"></i>

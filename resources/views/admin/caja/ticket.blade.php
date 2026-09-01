@@ -48,7 +48,7 @@
         .ticket-logo {
             width: 140px; 
             height: auto;
-            margin: 0 auto 8px auto;
+            margin: 0 auto 2px auto;
             display: block;
             filter: grayscale(100%) contrast(1.2); 
         }
@@ -64,10 +64,10 @@
     <!-- Encabezado (Estilo Pizzetos) -->
     <div class="text-center mb-1">
         
-        <!-- Logo de El Agostadero -->
-        <img src="{{ asset('images/agostadero.png') }}" alt="El Agostadero" class="ticket-logo">
+        <!-- Logo Mr. Feg -->
+        <img src="{{ asset('images/mrlogo.png') }}" alt="Mr. Feg" class="ticket-logo">
         
-        <div style="font-size: 12px; margin-top: 4px;">TICKET</div>
+        <div style="font-size: 12px; margin-top: 0;">TICKET</div>
 
         @if(!empty($folio))
             <div class="font-bold" style="font-size: 13px;">FOLIO: {{ $folio }}</div>
@@ -108,7 +108,12 @@
         <tbody>
             @foreach($items as $item)
                 <tr class="item-principal">
-                    <td style="padding-top: 8px; padding-left: 2px;">{{ $item['cantidad'] }}X {{ $item['nombre'] }}</td>
+                    <td style="padding-top: 8px; padding-left: 2px;">
+                        {{ $item['cantidad'] }}X {{ $item['nombre'] }}
+                        @if(!empty($item['notas']))
+                            <div class="sub-item" style="font-size: 11px; font-weight: normal; text-transform: uppercase; color: #444; margin-top: 1px;">{{ $item['notas'] }}</div>
+                        @endif
+                    </td>
                     <td class="text-right precio-text" style="padding-top: 8px;">${{ number_format($item['subtotal'], 2) }}</td>
                 </tr>
                 
@@ -218,12 +223,7 @@
         WWW.OLLINTEM.COM.MX
     </div>
 
-    <!-- Botón de respaldo (Se oculta al imprimir) -->
-    <div class="text-center no-print" style="margin-top: 20px;">
-        <button style="padding: 8px 16px; cursor: pointer; font-family: 'Helvetica Neue', sans-serif; font-weight: bold; background: #000; color: #fff; border: none; border-radius: 4px; font-size: 14px;" onclick="window.print()">
-            IMPRIMIR TICKET
-        </button>
-    </div>
+
 
     <script>
         // JS original de Agostadero mantenido intencionalmente

@@ -615,13 +615,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (res.ok && data.success) {
                             window.location.href = data.redirect;
                         } else {
-                            alert(data.message || `No se pudo abrir el pedido de ${nombre}.`);
+                            showToast(data.message || `No se pudo abrir el pedido de ${nombre}.`, 'error');
                             document.querySelectorAll('.btn-delivery').forEach(b => b.disabled = false);
                             btn.innerHTML = textoOriginal;
                         }
                     } catch (e) {
                         console.error('Error al crear pedido de delivery:', e);
-                        alert(`Error de conexión al abrir el pedido de ${nombre}.`);
+                        showToast(`Error de conexión al abrir el pedido de ${nombre}.`, 'error');
                         document.querySelectorAll('.btn-delivery').forEach(b => b.disabled = false);
                         btn.innerHTML = textoOriginal;
                     }
@@ -650,13 +650,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.success) {
                         window.location.href = data.redirect + '?tipo_pedido=' + tipo;
                     } else {
-                        alert(data.message || `No se pudo abrir el pedido de ${nombreAccion}.`);
+                        showToast(data.message || `No se pudo abrir el pedido de ${nombreAccion}.`, 'error');
                         restaurarBotonesRapidos(boton, textoOriginal);
                     }
                 })
                 .catch(e => {
                     console.error('Error al crear pedido rápido:', e);
-                    alert(`Error de conexión al abrir el pedido de ${nombreAccion}.`);
+                    showToast(`Error de conexión al abrir el pedido de ${nombreAccion}.`, 'error');
                     restaurarBotonesRapidos(boton, textoOriginal);
                 });
             }

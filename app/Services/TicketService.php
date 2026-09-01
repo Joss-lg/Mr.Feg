@@ -103,6 +103,7 @@ class TicketService
                 return [
                     'cantidad'         => $detalle->cantidad,
                     'nombre'           => $detalle->producto->nombre ?? 'Producto sin registro',
+                    'notas'            => $detalle->notas ?? null,
                     'subtotal'         => $subtotalLinea,
                     'descuento'        => $descuento,
                     'promocion_nombre' => $detalle->promocionAplicada?->promocion?->nombre,

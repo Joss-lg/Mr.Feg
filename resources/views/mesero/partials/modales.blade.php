@@ -99,10 +99,7 @@
         </div>
 
         <textarea id="notaTextarea" rows="4"
-            readonly
-            inputmode="none"
-            onclick="abrirTecladoNota()"
-            class="w-full rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-sm font-medium text-slate-800 outline-none resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 mb-4 cursor-pointer"
+            class="w-full rounded-xl border border-slate-200 bg-white shadow-sm p-4 text-sm font-medium text-slate-800 outline-none resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 mb-4"
             placeholder="Toca aquí para escribir...">
         </textarea>
 

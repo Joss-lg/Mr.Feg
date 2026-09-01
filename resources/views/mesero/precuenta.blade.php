@@ -123,7 +123,8 @@
             <div class="recibo">
 
                 <div class="centro">
-                    <div class="titulo">Agostadero</div>
+                    <img src="{{ asset('images/mrlogo.png') }}" alt="Mr. Feg"
+                         style="width:120px; height:auto; margin:0 auto 2px auto; display:block; filter:grayscale(100%) contrast(1.2);">
                     <div class="subtitulo">Pre-cuenta / cuenta informativa</div>
                     <div class="subtitulo">No es un comprobante fiscal</div>
                 </div>
@@ -162,9 +163,6 @@
                                         @endphp
                                         <div class="item-detalle">{{ $gramajeLimpio }}g</div>
                                     @endif
-                                    @if($detalle->tiempo)
-                                        <div class="item-detalle">TIEMPO - {{ strtoupper(str_replace('-', ' ', $detalle->tiempo)) }}</div>
-                                    @endif
                                     @if($detalle->notas)
                                         <div class="item-detalle">{{ strtoupper($detalle->notas) }}</div>
                                     @endif
@@ -179,18 +177,14 @@
                     Solicita tu ticket de pago en caja.
                 </div>
 
-                <button class="btn-imprimir" onclick="window.print()">Imprimir / Guardar como PDF</button>
+
 
             </div>
         </div>
     </div>
 
     <script>
-        // Se dispara automático para que el mesero solo tenga que elegir
-        // impresora o "Guardar como PDF" en el diálogo del navegador.
-        window.addEventListener('load', function () {
-            setTimeout(function () { window.print(); }, 300);
-        });
+        // La impresión se maneja desde el modal del sistema.
     </script>
 
 </body>

@@ -274,23 +274,24 @@
         function crearToastElemento(mensaje, tipo) {
             const id = 'toast-' + Date.now();
             const esExito = tipo !== 'error';
-            const colorGradiente = esExito ? 'from-[var(--coral-400)] to-[var(--coral-500)]' : 'from-rose-400 to-red-500';
+            const colorGradiente = esExito ? 'from-emerald-400 to-cyan-400' : 'from-rose-400 to-red-500';
+            const colorIcono = esExito ? 'emerald' : 'rose';
             const icono = esExito ? 'fa-check' : 'fa-exclamation';
             const titulo = esExito ? 'Operación Exitosa' : 'Atención';
 
             const div = document.createElement('div');
             div.id = id;
-            div.className = 'relative overflow-hidden bg-[var(--card-color)] border border-[var(--panel-border)] rounded-2xl shadow-lg p-4 flex gap-3.5 items-start w-[320px] transition-all duration-300 transform translate-x-0 opacity-100';
+            div.className = 'relative overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-lg p-4 flex gap-3.5 items-start w-[320px] transition-all duration-300 transform translate-x-0 opacity-100';
             div.innerHTML = `
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colorGradiente}"></div>
-                <div class="flex items-center justify-center w-8 h-8 rounded-full border border-[var(--coral-500)]/30 bg-[var(--coral-500)]/10 text-[var(--coral-500)] shadow-[0_0_15px_rgba(249,115,22,0.12)] flex-shrink-0 mt-1">
+                <div class="flex items-center justify-center w-8 h-8 rounded-full border border-${colorIcono}-500/30 bg-${colorIcono}-500/10 text-${colorIcono}-500 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex-shrink-0 mt-1">
                     <i class="fas ${icono} text-[11px]"></i>
                 </div>
                 <div class="flex-1 pr-3">
-                    <p class="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--coral-500)] mb-1">${titulo}</p>
-                    <p class="text-[13px] font-bold text-[var(--text-color)] leading-tight">${mensaje}</p>
+                    <p class="text-[9px] font-black uppercase tracking-[0.2em] text-${colorIcono}-600 mb-1">${titulo}</p>
+                    <p class="text-[13px] font-bold text-slate-800 leading-tight">${mensaje}</p>
                 </div>
-                <button onclick="cerrarToast('${id}')" class="absolute top-3.5 right-3.5 text-gray-400 hover:text-white transition-colors outline-none">
+                <button onclick="cerrarToast('${id}')" class="absolute top-3.5 right-3.5 text-gray-400 hover:text-gray-600 transition-colors outline-none">
                     <i class="fas fa-times text-[10px]"></i>
                 </button>
                 <div class="absolute bottom-0 left-0 h-1 bg-gradient-to-r ${colorGradiente} animate-shrink"></div>
@@ -317,11 +318,11 @@
             const overlay = document.createElement('div');
             overlay.className = 'fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
             overlay.innerHTML = `
-                <div class="bg-[var(--card-color)] border border-[var(--border-color)] rounded-[2rem] shadow-2xl w-full max-w-sm p-6">
-                    <h2 class="text-lg font-black text-[var(--text-color)] tracking-tight mb-2">${titulo}</h2>
-                    <p class="text-sm text-[var(--text-muted)] font-medium mb-6">${mensaje}</p>
+                <div class="bg-white border border-slate-200 rounded-[2rem] shadow-2xl w-full max-w-sm p-6">
+                    <h2 class="text-lg font-black text-slate-900 tracking-tight mb-2">${titulo}</h2>
+                    <p class="text-sm text-slate-500 font-medium mb-6">${mensaje}</p>
                     <div class="flex justify-end gap-3">
-                        <button id="confirmCancelarBtn" class="px-5 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-bold text-[var(--text-color)] hover:bg-white/5 transition outline-none">Cancelar</button>
+                        <button id="confirmCancelarBtn" class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition outline-none">Cancelar</button>
                         <button id="confirmAceptarBtn" class="px-5 py-2.5 rounded-xl ${colorBtn} text-white text-xs font-black uppercase tracking-widest transition outline-none shadow-sm">${textoConfirmar}</button>
                     </div>
                 </div>
@@ -338,8 +339,10 @@
     </script>
     @stack('scripts')
 
+    {{-- TECLADO VIRTUAL — comentado temporalmente. Descomentar para reactivar.
     <div id="teclado-virtual-contenedor" class="teclado-virtual-contenedor oculto">
         <div class="simple-keyboard"></div>
     </div>
+    --}}
 </body>
 </html>

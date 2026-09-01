@@ -165,16 +165,53 @@ class PlanoEspacialController extends Controller
     {
         try {
             $validated = $request->validate([
-                'numero'    => 'required|string|max:50|unique:mesas,numero',
+                'numero'    => 'required|string|max:50',
                 'capacidad' => 'required|integer|min:1|max:20',
                 'estado'    => 'required|in:disponible,reservada,limpieza',
             ]);
+
+            // Si existe una mesa con ese número pero fue eliminada (soft-delete),
+            // la restauramos y actualizamos en lugar de crear una nueva,
+            // así evitamos el conflicto del índice único en la BD.
+            $mesaEliminada = Mesa::withTrashed()
+                ->where('numero', $validated['numero'])
+                ->whereNotNull('deleted_at')
+                ->first();
+
+            if ($mesaEliminada) {
+                $mesaEliminada->restore();
+                $mesaEliminada->update([
+                    'capacidad'  => $validated['capacidad'],
+                    'estado'     => $validated['estado'],
+                    'tipo'       => Mesa::TIPO_LOCAL,
+                    'zona'       => 'salon',
+                    'forma'      => 'redonda',
+                    'posicion_x' => 20,
+                    'posicion_y' => 20,
+                    'ancho'      => 60,
+                    'alto'       => 60,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Mesa creada correctamente.',
+                    'data'    => $mesaEliminada->fresh()
+                ], 201);
+            }
+
+            // Verificar que no exista una mesa activa con el mismo número
+            if (Mesa::where('numero', $validated['numero'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya existe una mesa activa con ese número.',
+                ], 422);
+            }
 
             $mesa = Mesa::create([
                 'numero'     => $validated['numero'],
                 'capacidad'  => $validated['capacidad'],
                 'estado'     => $validated['estado'],
-                'tipo'       => Mesa::TIPO_LOCAL, // Asignación explícita para evitar su eliminación
+                'tipo'       => Mesa::TIPO_LOCAL,
                 'zona'       => 'salon',
                 'forma'      => 'redonda',
                 'posicion_x' => 20,

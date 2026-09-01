@@ -13,7 +13,7 @@
     }
 </style>
 
-<div id="editEmpleadoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 hidden opacity-0 transition-all duration-300">
+<div id="editEmpleadoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 hidden transition-all duration-300">
     
     {{-- Contenedor principal con estilo Soft Light --}}
     <div class="relative bg-[#F2F2F2] border border-slate-200 rounded-[2rem] w-full max-w-[480px] transform scale-95 opacity-0 transition-all duration-300 shadow-2xl flex flex-col max-h-[85vh] sm:max-h-[90vh] overflow-hidden" id="editModalContent">

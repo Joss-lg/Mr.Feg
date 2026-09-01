@@ -131,8 +131,43 @@
 
     window.imprimirPrecuenta = function () {
         const url = config.rutas && config.rutas.comandaPrecuenta;
-        if (!url) { mostrarError('No se encontró la ruta de la pre-cuenta. Revisa ComandaConfig.rutas.comandaPrecuenta.'); return; }
-        window.open(url, '_blank');
+        if (!url) { mostrarError('No se encontró la ruta de la pre-cuenta.'); return; }
+
+        // Eliminar modal previo si existe
+        const previo = document.getElementById('modal-precuenta-preview');
+        if (previo) previo.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'modal-precuenta-preview';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);padding:16px;';
+        overlay.innerHTML = `
+            <div style="background:#fff;border-radius:24px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.4);">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+                    <span style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#111;">
+                        <i class="fas fa-receipt" style="color:#3b82f6;margin-right:6px;"></i> Pre-Cuenta
+                    </span>
+                    <button id="btn-cerrar-precuenta" style="width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:14px;color:#6b7280;">✕</button>
+                </div>
+                <div style="flex:1;overflow-y:auto;padding:12px;background:#f3f4f6;">
+                    <iframe id="iframe-precuenta" src="${url}" style="width:100%;min-height:60vh;border:none;border-radius:12px;background:#fff;"></iframe>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;border-top:1px solid #e5e7eb;">
+                    <button id="btn-cerrar-precuenta2" style="padding:14px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:16px;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:2px;cursor:pointer;color:#111;">Cerrar</button>
+                    <button id="btn-imprimir-precuenta" style="padding:14px;background:linear-gradient(to right,#2563eb,#3b82f6);color:#fff;border:none;border-radius:16px;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:2px;cursor:pointer;">
+                        <i class="fas fa-print" style="margin-right:6px;"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        const cerrar = () => overlay.remove();
+        document.getElementById('btn-cerrar-precuenta').onclick  = cerrar;
+        document.getElementById('btn-cerrar-precuenta2').onclick = cerrar;
+        document.getElementById('btn-imprimir-precuenta').onclick = () => {
+            try { document.getElementById('iframe-precuenta').contentWindow.print(); } catch(e) { window.open(url, '_blank'); }
+        };
     };
 
     // ---------------------------------------------------------------

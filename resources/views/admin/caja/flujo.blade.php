@@ -199,12 +199,12 @@
                                                 <i class="fas fa-eye text-xs"></i>
                                             </button>
                                             @if($ordenIdReal)
-                                                <a href="{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}"
-                                                   target="_blank"
+                                                <button type="button"
+                                                   onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}')"
                                                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 border border-slate-200 text-slate-400 hover:bg-amber-50 hover:border-amber-100 hover:text-amber-600 transition-all outline-none active:scale-95"
                                                    title="Reimprimir ticket">
                                                     <i class="fas fa-print text-xs"></i>
-                                                </a>
+                                                </button>
                                             @endif
                                         </div>
                                     </td>
@@ -489,3 +489,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+{{-- Modal de ticket --}}
+@include('admin.cobrar.modals.ticket-preview')
+
+@push('scripts')
+<script>
+function abrirTicketModal(url) {
+    const modal   = document.getElementById('modal-ticket-preview');
+    const iframe  = document.getElementById('ticket-preview-iframe');
+    const btnCerrar  = document.getElementById('btn-cerrar-ticket-preview');
+    const btnCerrarX = document.getElementById('btn-cerrar-x-ticket-preview');
+    const btnImprimir = document.getElementById('btn-imprimir-ticket-preview');
+
+    if (!modal || !iframe) return;
+
+    iframe.src = url;
+    modal.classList.remove('hidden');
+
+    const cerrar = () => { modal.classList.add('hidden'); iframe.src = ''; };
+    btnCerrar.onclick  = cerrar;
+    btnCerrarX.onclick = cerrar;
+
+    btnImprimir.onclick = () => {
+        try { iframe.contentWindow.print(); } catch(e) { window.open(url, '_blank'); }
+    };
+}
+</script>
+@endpush

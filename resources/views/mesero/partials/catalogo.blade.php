@@ -80,9 +80,15 @@
 
             {{-- Precio y Botón Agregar --}}
             <div class="mt-auto flex items-center justify-between gap-2 w-full">
-                <p class="text-[16px] sm:text-[18px] font-black text-slate-900 leading-none tracking-tight">
-                    ${{ number_format($precioMostrar, 2) }}
-                </p>
+                @if($precioMostrar == 0 && $producto->tiene_variantes)
+                    <span class="text-[11px] font-black text-blue-500 uppercase tracking-wider border border-blue-200 bg-blue-50 rounded-full px-2.5 py-1 leading-none">
+                        {{ $producto->variantes->count() }} TAMAÑOS
+                    </span>
+                @else
+                    <p class="text-[16px] sm:text-[18px] font-black text-slate-900 leading-none tracking-tight">
+                        ${{ number_format($precioMostrar, 2) }}
+                    </p>
+                @endif
 
                 <span class="flex-shrink-0 w-9 h-9 rounded-full bg-[#3b82f6] text-white
                              flex items-center justify-center text-sm font-bold
