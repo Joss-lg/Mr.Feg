@@ -86,16 +86,65 @@
         <!-- Bloque central de Mesa/Delivery con bordes superior e inferior -->
         <div class="font-bold text-lg mt-1 mb-1 py-1" style="border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
             @if($mesa)
-                @if($esDelivery ?? false)
-                    {{ mb_strtoupper($plataformaNombre ?? 'DELIVERY') }} · {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
-                @else
-                    MESA {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
-                @endif
-            @else
-                PUNTO DE VENTA
-            @endif
+    @if($esDelivery ?? false)
+        {{ mb_strtoupper($plataformaNombre ?? 'DELIVERY') }} · {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
+    @elseif($esADomicilio ?? false)
+        DOMICILIO
+    @else
+        MESA {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
+    @endif
+@else
+    PUNTO DE VENTA
+@endif
         </div>
     </div>
+
+    @if($esADomicilio ?? false)
+    <div style="border-bottom: 1px dashed #000; padding: 5px 2px; margin-bottom: 5px; font-size: 12px; line-height: 1.6;">
+
+        @if(!empty($clienteNombre))
+            <div class="flex-between">
+                <span class="font-bold">CLIENTE:</span>
+                <span>{{ mb_strtoupper($clienteNombre) }}</span>
+            </div>
+        @endif
+
+        @if(!empty($clienteTelefono))
+            <div class="flex-between">
+                <span class="font-bold">TEL:</span>
+                <span>{{ $clienteTelefono }}</span>
+            </div>
+        @endif
+
+        @if(!empty($direccionCalle))
+            @php
+                $partes = array_filter([
+                    $direccionCalle,
+                    !empty($direccionManzana) ? 'MZA. ' . $direccionManzana : null,
+                    !empty($direccionLote)    ? 'LOTE ' . $direccionLote    : null,
+                ]);
+            @endphp
+            <div class="flex-between">
+                <span class="font-bold">CALLE:</span>
+                <span>{{ mb_strtoupper(implode(' ', $partes)) }}</span>
+            </div>
+        @endif
+
+        @if(!empty($direccionColonia))
+            <div class="flex-between">
+                <span class="font-bold">COLONIA:</span>
+                <span>{{ mb_strtoupper($direccionColonia) }}</span>
+            </div>
+        @endif
+
+        @if(!empty($direccionReferencia))
+            <div style="margin-top: 2px;">
+                <span class="font-bold">REF: </span>{{ mb_strtoupper($direccionReferencia) }}
+            </div>
+        @endif
+
+    </div>
+@endif
 
     <!-- Lista de Items -->
     <table class="mb-1">

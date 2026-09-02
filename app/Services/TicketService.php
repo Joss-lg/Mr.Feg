@@ -68,6 +68,8 @@ class TicketService
                 'mesero',
                 'detalles.producto',
                 'detalles.promocionAplicada.promocion',
+                'cliente',     
+                'direccion',
             ])
             ->get();
 
@@ -89,7 +91,7 @@ class TicketService
                 ? Orden::where('mesa_id', $mesa->id)
                     ->where('estado', Orden::ESTADO_PAGADA)
                     ->where('cerrada_el', $ultimaCerrada->cerrada_el)
-                    ->with(['mesero', 'detalles.producto', 'detalles.promocionAplicada.promocion'])
+                    ->with(['mesero', 'detalles.producto', 'detalles.promocionAplicada.promocion', 'cliente','direccion',])
                     ->get()
                 : collect();
         }
@@ -155,6 +157,14 @@ class TicketService
         // sumar todas es seguro y no depende de ese detalle interno.
         $propina = $ordenes->sum(fn ($orden) => $orden->propina ?? 0);
 
+
+        // --- Datos de domicilio ---
+        $esADomicilio = $mesa->esADomicilio();
+
+       $ordenConCliente = $ordenes->first(fn($o) => $o->cliente_id !== null) ?? $ordenes->first();
+        $cliente   = $ordenConCliente?->cliente;
+        $direccion = $ordenConCliente?->direccion;
+
         // --- NUEVO: comisión de plataforma de delivery (Rappi/Uber/DiDi) ---
         // Se lee el % "congelado" en la propia mesa (columna comision_porcentaje /
         // comision_iva_porcentaje) para que el ticket siempre coincida con lo que
@@ -193,6 +203,14 @@ class TicketService
             'ivaPorcentaje'  => $ivaPorcentaje,
             'ivaHabilitado'  => $ivaHabilitado,
             'propina'        => $propina,
+            'esADomicilio'        => $esADomicilio,
+            'clienteNombre'       => $cliente ? trim($cliente->nombre . ' ' . ($cliente->apellido ?? '')) : null,
+            'clienteTelefono'     => $cliente?->telefono,
+            'direccionCalle'      => $direccion?->calle,
+            'direccionManzana'    => $direccion?->manzana,
+            'direccionLote'       => $direccion?->lote,
+            'direccionColonia'    => $direccion?->colonia,
+            'direccionReferencia' => $direccion?->referencia,
             // --- NUEVO ---
             'esDelivery'            => $esDelivery,
             'plataformaNombre'      => $esDelivery ? optional($mesa->plataformaDelivery)->nombre : null,

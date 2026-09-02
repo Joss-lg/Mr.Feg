@@ -97,6 +97,13 @@
                         </span>
                     </div>
 
+                    {{-- Botón reimprimir ticket --}}
+                    <button type="button"
+                        onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $orden->id) }}')"
+                        class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
+                        <i class="fas fa-print"></i> Reimprimir Ticket
+                    </button>
+
                     {{-- Formulario para asignar repartidor --}}
                     <form action="{{ route('admin.repartidores.asignar', $orden->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-slate-100 form-async">
                         @csrf
@@ -188,6 +195,13 @@
                         <em class="text-slate-400 block">Ref: {{ $orden->direccion->referencia ?? 'Ninguna' }}</em>
                     </div>
 
+                    {{-- Botón reimprimir ticket --}}
+                    <button type="button"
+                        onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $orden->id) }}')"
+                        class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
+                        <i class="fas fa-print"></i> Reimprimir Ticket
+                    </button>
+
                     {{-- Botón Marcar como Entregado --}}
                     <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async pt-1">
                         @csrf @method('PATCH')
@@ -211,10 +225,28 @@
     </div>
 </div>
 
+@include('admin.cobrar.modals.ticket-preview')
+
 <!-- Script de SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+function abrirTicketModal(url) {
+    const modal  = document.getElementById('modal-ticket-preview');
+    const iframe = document.getElementById('ticket-preview-iframe');
+    if (!modal || !iframe) return;
+
+    iframe.src = url;
+    modal.classList.remove('hidden');
+
+    const cerrar = () => { modal.classList.add('hidden'); iframe.src = ''; };
+    document.getElementById('btn-cerrar-ticket-preview')?.addEventListener('click', cerrar, { once: true });
+    document.getElementById('btn-cerrar-x-ticket-preview')?.addEventListener('click', cerrar, { once: true });
+    document.getElementById('btn-imprimir-ticket-preview')?.addEventListener('click', () => {
+        iframe.contentWindow?.print();
+    }, { once: true });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     
     // --- LÓGICA DE DROPDOWNS ---
