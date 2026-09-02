@@ -95,7 +95,14 @@ var mesaDestinoSeleccionadaNumero = null;
         const btns = [document.getElementById('btn-tab-nueva-orden'), document.getElementById('btn-tab-enviados'), document.getElementById('btn-tab-comanda')];
         const txtTotalElement = document.getElementById('txtTotal');
 
-        btns.forEach(el => { if (el) { el.classList.remove('text-[var(--bg-base)]'); el.classList.add('text-[var(--text-muted)]'); } });
+        // Resetear todos los tabs a inactivo
+        btns.forEach(el => { 
+            if (el) { 
+                el.classList.remove('text-white'); 
+                el.classList.add('text-slate-500'); 
+                el.style.color = '';
+            } 
+        });
 
         ['vista-nueva-orden', 'vista-enviados', 'vista-comanda'].forEach(id => {
             const vista = document.getElementById(id);
@@ -107,31 +114,23 @@ var mesaDestinoSeleccionadaNumero = null;
 
         if (pestana === 'nueva-orden') {
             if (slider) slider.style.transform = 'translateX(0%)';
-            if (btns[0]) { btns[0].classList.add('text-[var(--bg-base)]'); btns[0].classList.remove('text-[var(--text-muted)]'); }
+            if (btns[0]) { btns[0].classList.add('text-white'); btns[0].classList.remove('text-slate-500'); btns[0].style.cssText = 'color:white!important;'; }
             const vNueva = document.getElementById('vista-nueva-orden');
             if (vNueva) { vNueva.classList.remove('hidden'); vNueva.classList.add('flex'); }
-            
-            // Verificación segura del elemento de precio total
             if (txtTotalElement) txtTotalElement.innerText = '$0.00';
 
         } else if (pestana === 'enviados') {
             if (slider) slider.style.transform = 'translateX(100%)';
-            if (btns[1]) { btns[1].classList.add('text-[var(--bg-base)]'); btns[1].classList.remove('text-[var(--text-muted)]'); }
+            if (btns[1]) { btns[1].classList.add('text-white'); btns[1].classList.remove('text-slate-500'); btns[1].style.cssText = 'color:white!important;'; }
             const vEnviados = document.getElementById('vista-enviados');
             if (vEnviados) { vEnviados.classList.remove('hidden'); vEnviados.classList.add('flex'); }
-            
-            // Verificación segura del elemento de precio total
             if (txtTotalElement) txtTotalElement.innerText = '$0.00';
 
         } else if (pestana === 'comanda') {
             if (slider) slider.style.transform = 'translateX(100%)';
-            if (btns[2]) { btns[2].classList.add('text-[var(--bg-base)]'); btns[2].classList.remove('text-[var(--text-muted)]'); }
+            if (btns[2]) { btns[2].classList.add('text-white'); btns[2].classList.remove('text-slate-500'); btns[2].style.cssText = 'color:white!important;'; }
             const vComanda = document.getElementById('vista-comanda');
             if (vComanda) { vComanda.classList.remove('hidden'); vComanda.classList.add('flex'); }
-            
-            // El total real (enviado + nuevo, con IVA) solo se calcula y se
-            // muestra aquí, en la pestaña "Total". En las otras dos pestañas
-            // se deja en $0.00 a propósito.
             actualizarVistaTotal();
         }
     };
