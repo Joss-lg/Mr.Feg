@@ -2,185 +2,120 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f4f6">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pre-cuenta — Mesa {{ $mesa->numero }}</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    html, body {
-        height: 100%;
-    }
+    @page { size: 80mm auto; margin: 0; }
 
     body {
-        font-family: 'Courier New', Courier, monospace;
-        color: #111;
-        font-size: 16px;
-        background: #e5e7eb;
-        /* soporte para el "notch"/barras del sistema en móviles */
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        width: 72mm;
+        margin: 4mm auto;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 13px;
+        color: #000;
+        text-transform: uppercase;
     }
 
-    /* ===== Contenedor de pantalla: centra el ticket como una tarjeta ===== */
-    .pagina {
-        min-height: 100%;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: clamp(12px, 4vw, 32px) clamp(10px, 3vw, 20px) calc(env(safe-area-inset-bottom) + 24px);
-    }
+    .text-center { text-align: center; }
+    .font-bold { font-weight: bold; }
+    .text-xl { font-size: 22px; letter-spacing: 1px; }
+    .text-lg { font-size: 16px; }
+    .mt-1 { margin-top: 5px; }
+    .mb-1 { margin-bottom: 5px; }
+    .py-1 { padding: 5px 0; }
 
-    .recibo-envoltura {
-        width: 100%;
-        max-width: 460px;
-    }
+    .dashed-line { border-top: 1px dashed #000; margin: 5px 0; }
 
-    .recibo {
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px -8px rgba(0,0,0,0.18), 0 2px 8px -2px rgba(0,0,0,0.06);
-        padding: clamp(22px, 6vw, 32px) clamp(18px, 5.5vw, 28px) clamp(28px, 7vw, 36px);
-        width: 100%;
-    }
+    table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+    th, td { text-align: left; vertical-align: top; padding: 3px 0; }
+    th { border-bottom: 1px dashed #000; font-weight: bold; padding-bottom: 3px; font-size: 13px; }
 
-    .centro { text-align: center; }
-    .negrita { font-weight: bold; }
-    .titulo { font-size: clamp(20px, 5.5vw, 24px); font-weight: bold; letter-spacing: 1.5px; }
-    .subtitulo { font-size: clamp(13px, 3.4vw, 14px); color: #555; margin-top: 4px; line-height: 1.4; }
+    .item-principal { font-size: 15px; font-weight: 900; line-height: 1.2; }
+    .sub-item { font-size: 12px; font-weight: normal; color: #444; line-height: 1.2; }
 
-    hr {
-        border: none;
-        border-top: 1px dashed #bbb;
-        margin: 18px 0;
-    }
-
-    table { width: 100%; border-collapse: collapse; font-size: clamp(15px, 4vw, 17px); }
-    td { padding: 7px 0; vertical-align: top; word-break: break-word; }
-    .col-cant { width: 42px; white-space: nowrap; }
-    .col-monto { width: 90px; text-align: right; white-space: nowrap; }
-    .item-nombre { font-weight: bold; }
-    .item-detalle { font-size: clamp(12px, 3.2vw, 13px); color: #555; padding-left: 2px; padding-top: 2px; }
-
-    .footer {
-        margin-top: 26px;
-        font-size: clamp(12px, 3.2vw, 13px);
-        text-align: center;
-        color: #555;
-        line-height: 1.5;
-    }
-
-    .btn-imprimir {
+    .ticket-logo {
+        width: 140px;
+        height: auto;
+        margin: 0 auto 2px auto;
         display: block;
-        width: 100%;
-        margin-top: 26px;
-        padding: 17px;
-        background: #111;
-        color: #fff;
-        border: none;
-        border-radius: 12px;
-        font-family: Arial, sans-serif;
-        font-size: 17px;
-        font-weight: bold;
-        letter-spacing: 0.2px;
-        cursor: pointer;
-        min-height: 52px; /* área táctil cómoda */
-        -webkit-user-select: none;
-        user-select: none;
-        transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-    .btn-imprimir:active {
-        transform: scale(0.97);
-        opacity: 0.9;
+        filter: grayscale(100%) contrast(1.2);
     }
 
-    /* ===== Ajuste fino para pantallas muy angostas (≤340px) ===== */
-    @media (max-width: 340px) {
-        .col-monto { width: 70px; }
-        .recibo { padding: 18px 14px 24px; }
-    }
-
-    /* ===== Impresión: vuelve al formato de ticket térmico clásico ===== */
     @media print {
-        body { background: #fff; padding: 0; font-size: 15px; }
-        .pagina { padding: 0; display: block; }
-        .recibo-envoltura { max-width: none; }
-        .recibo {
-            box-shadow: none;
-            border-radius: 0;
-            width: 340px;
-            margin: 0 auto;
-            padding: 18px 14px 36px;
-        }
-        .btn-imprimir { display: none; }
+        .no-print { display: none !important; }
+        body { margin: 0 auto; }
     }
 </style>
 </head>
 <body>
 
-    <div class="pagina">
-        <div class="recibo-envoltura">
-            <div class="recibo">
+    {{-- Encabezado --}}
+    <div class="text-center mb-1">
+        <img src="{{ asset('images/mrlogo.png') }}" alt="Mr. Feg" class="ticket-logo">
+        <div style="font-size: 12px; margin-top: 2px;">PRE-CUENTA</div>
+        <div style="font-size: 11px;">NO ES UN COMPROBANTE FISCAL</div>
+        <div style="font-size: 12px; margin-top: 2px;">{{ $fecha->format('d/m/Y H:i') }}</div>
+        @if($orden->mesero ?? false)
+            <div style="font-size: 12px;">ATENDIÓ: {{ strtoupper($orden->mesero->nombre) }}</div>
+        @endif
 
-                <div class="centro">
-                    <img src="{{ asset('images/mrlogo.png') }}" alt="Mr. Feg"
-                         style="width:120px; height:auto; margin:0 auto 2px auto; display:block; filter:grayscale(100%) contrast(1.2);">
-                    <div class="subtitulo">Pre-cuenta / cuenta informativa</div>
-                    <div class="subtitulo">No es un comprobante fiscal</div>
-                </div>
-
-                <hr>
-
-                <table>
-                    <tr>
-                        <td>Mesa:</td>
-                        <td class="col-monto negrita">{{ $mesa->numero }}</td>
-                    </tr>
-                    <tr>
-                        <td>Mesero:</td>
-                        <td class="col-monto">{{ $orden->mesero->nombre ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Fecha:</td>
-                        <td class="col-monto">{{ $fecha->format('d/m/Y') }}</td>
-                    </tr>
-                </table>
-
-                <hr>
-
-                @if($detalles->isEmpty())
-                    <p class="centro">Esta mesa aún no tiene productos enviados a cocina.</p>
-                @else
-                    <table>
-                        @foreach($detalles as $detalle)
-                            <tr>
-                                <td class="col-cant">{{ $detalle->cantidad }}x</td>
-                                <td class="item-nombre">
-                                    {{ $detalle->producto->nombre ?? 'Producto eliminado' }}
-                                    @if($detalle->gramaje)
-                                        @php
-                                            $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.');
-                                        @endphp
-                                        <div class="item-detalle">{{ $gramajeLimpio }}g</div>
-                                    @endif
-                                    @if($detalle->notas)
-                                        <div class="item-detalle">{{ strtoupper($detalle->notas) }}</div>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </table>
-                @endif
-
-                <div class="footer">
-                    Esta pre-cuenta es solo informativa.<br>
-                    Solicita tu ticket de pago en caja.
-                </div>
-
-
-
-            </div>
+        <div class="font-bold text-lg mt-1 mb-1 py-1" style="border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
+            MESA {{ strtoupper($mesa->numero) }}
         </div>
+    </div>
+
+    {{-- Productos --}}
+    @if($detalles->isEmpty())
+        <div class="text-center" style="font-size: 12px; margin: 8px 0;">SIN PRODUCTOS ENVIADOS A COCINA</div>
+    @else
+        <table class="mb-1">
+            <thead>
+                <tr>
+                    <th style="width: 75%; padding-left: 2px;">DESCRIPCIÓN</th>
+                    <th style="width: 25%; text-align: right;">IMPORTE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($detalles as $detalle)
+                    @php
+                        $precioLinea = ($detalle->precio_unitario ?? 0) * $detalle->cantidad;
+                    @endphp
+                    <tr class="item-principal">
+                        <td style="padding-top: 6px; padding-left: 2px;">
+                            {{ $detalle->cantidad }}X {{ strtoupper($detalle->producto->nombre ?? 'PRODUCTO') }}
+                            @if($detalle->gramaje)
+                                @php $gramajeLimpio = rtrim(rtrim(number_format((float) $detalle->gramaje, 2, '.', ''), '0'), '.'); @endphp
+                                <div class="sub-item">{{ $gramajeLimpio }}G</div>
+                            @endif
+                            @if($detalle->notas)
+                                <div class="sub-item">{{ strtoupper($detalle->notas) }}</div>
+                            @endif
+                        </td>
+                        <td style="text-align: right; padding-top: 6px; font-size: 14px; font-weight: bold;">
+                            ${{ number_format($precioLinea, 2) }}
+                        </td>
+                    </tr>
+                    <tr><td colspan="2" style="height: 4px;"></td></tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+
+    <div class="dashed-line"></div>
+
+    {{-- Total --}}
+    @php
+        $totalPrecuenta = $detalles->sum(fn($d) => ($d->precio_unitario ?? 0) * $d->cantidad);
+    @endphp
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 18px; font-weight: bold; border-bottom: 1px dashed #000;">
+        <span>TOTAL:</span>
+        <span>${{ number_format($totalPrecuenta, 2) }}</span>
+    </div>
+
+    {{-- Footer --}}
+    <div class="text-center mt-1" style="margin-top: 12px; font-size: 11px; line-height: 1.5;">
+        ESTA PRE-CUENTA ES SOLO INFORMATIVA.<br>
+        SOLICITA TU TICKET DE PAGO EN CAJA.
     </div>
 
     <script>
