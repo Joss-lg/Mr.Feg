@@ -198,8 +198,8 @@
             return;
         }
 
-        // 3. Caso Banderillas Coreanas (Cubiertas + Papas)
-        if (nombreLower.includes('banderilla') || catLower.includes('banderilla')) {
+        // 3. Caso Banderillas Coreanas (Cubiertas + Papas) — solo si tiene modificadores
+        if ((nombreLower.includes('banderilla') || catLower.includes('banderilla')) && prod.modificadores && prod.modificadores.length > 0) {
             mostrarPasoCubiertasBanderilla();
             abrirContenedorModal();
             return;
