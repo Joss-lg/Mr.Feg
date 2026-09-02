@@ -115,7 +115,7 @@
     {{-- Footer --}}
     <div class="text-center mt-1" style="margin-top: 12px; font-size: 11px; line-height: 1.5;">
         ESTA PRE-CUENTA ES SOLO INFORMATIVA.<br>
-        SOLICITA TU TICKET DE PAGO EN CAJA.
+        SOLICITA TU TICKET DE PAGO.
     </div>
 
     <script>
