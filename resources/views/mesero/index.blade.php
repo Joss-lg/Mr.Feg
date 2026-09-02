@@ -74,7 +74,7 @@
 </head>
 <body class="h-screen w-full flex selection:bg-[#3b82f6]/30">
 
-    <script>if (localStorage.getItem('tema-ollintem') === 'crema') document.body.classList.add('modo-crema');</script>
+   <script>if (localStorage.getItem('tema-ollintem') !== 'negro') document.body.classList.add('modo-crema');</script>
     <div id="toastContainer" class="toast-wrapper" aria-live="polite" aria-atomic="true"></div>
 
     @include('mesero.partials.ticket-sidebar')
