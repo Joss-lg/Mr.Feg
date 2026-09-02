@@ -84,9 +84,8 @@
                         <label for="edit_codigo_empleado" class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 ml-1 block">PIN de Seguridad (4 dígitos)</label>
                         <div class="relative group">
                             <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
-                            <input type="text" id="edit_codigo_empleado" name="codigo_empleado" data-teclado="numerico" maxlength="4" 
-                                class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 font-black tracking-[0.8em] text-base text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all placeholder:text-slate-300">
-                        </div>
+                            <input type="text" id="edit_codigo_empleado" name="codigo_empleado" data-teclado="numerico" maxlength="4" inputmode="numeric"
+    class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 font-black tracking-[0.8em] text-base text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all placeholder:text-slate-300">
                     </div>
 
                     {{-- Rol (Dropdown Global con sufijo Menu) --}}

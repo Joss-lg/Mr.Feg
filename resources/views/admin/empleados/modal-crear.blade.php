@@ -96,7 +96,7 @@
                             <i class="fas fa-lock text-slate-400 group-focus-within:text-blue-500 transition-colors text-sm"></i>
                         </div>
                         <input type="password" name="codigo_empleado" id="crear_codigo" maxlength="4" pattern="[0-9]*" placeholder="••••" autocomplete="new-password"
-                            data-teclado="numerico" data-teclado-max="4" inputmode="none"
+                            data-teclado="numerico" data-teclado-max="4" inputmode="numeric"
                             class="w-full h-12 bg-white border border-slate-200 rounded-xl pl-11 pr-4 text-lg tracking-[0.4em] font-black text-slate-800 placeholder-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all shadow-sm">
                     </div>
                 </div>
