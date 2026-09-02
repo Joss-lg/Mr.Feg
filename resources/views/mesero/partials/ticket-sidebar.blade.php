@@ -283,10 +283,10 @@
 
         <div class="relative flex w-full bg-white p-1 rounded-xl border border-slate-200 shadow-inner">
             <div class="absolute inset-y-1 left-1 right-1 pointer-events-none">
-<div id="tab-slider" class="h-full w-1/2 rounded-lg bg-blue-600 shadow-md transition-transform duration-300 ease-out"></div>
+                <div id="tab-slider" class="h-full w-1/2 rounded-lg bg-slate-800 shadow-md transition-transform duration-300 ease-out"></div>
             </div>
-            <button type="button" onclick="cambiarTab('nueva-orden', this)" id="btn-tab-nueva-orden" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold text-slate-50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">Orden</button>
-            <button type="button" onclick="cambiarTab('comanda', this)" id="btn-tab-comanda" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">Total</button>
+            <button type="button" onclick="cambiarTab('nueva-orden', this)" id="btn-tab-nueva-orden" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg" style="color:white!important;">Orden</button>
+            <button type="button" onclick="cambiarTab('comanda', this)" id="btn-tab-comanda" class="relative z-10 flex-1 py-2.5 md:py-1.5 text-[11px] md:text-[10px] font-bold text-slate-500 hover:text-slate-700 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">Total</button>
         </div>
     </div>
 
