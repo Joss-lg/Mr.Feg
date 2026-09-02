@@ -17,7 +17,7 @@
         menuCat.innerHTML = `<button type="button" onclick="filtrarCategoria('Todos', this)" class="cat-btn px-6 py-2.5 rounded-full bg-blue-600 text-white text-[11px] font-bold tracking-wide shadow-sm transition-all outline-none border border-transparent">Todos</button>`;
         if (categoriasDB.length > 0) {
             categoriasDB.forEach(cat => {
-                menuCat.innerHTML += `<button type="button" onclick="filtrarCategoria('${cat.nombre}', this)" class="cat-btn px-6 py-2.5 rounded-full bg-[var(--bg-panel)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-highlight)] text-[11px] font-semibold tracking-wide shadow-sm transition-all outline-none">${cat.nombre}</button>`;
+                menuCat.innerHTML += `<button type="button" onclick="filtrarCategoria('${cat.nombre}', this)" class="cat-btn px-6 py-2.5 rounded-full text-[11px] font-semibold tracking-wide shadow-sm transition-all outline-none" style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">${cat.nombre}</button>`;
             });
         }
 
@@ -77,17 +77,9 @@
 
     document.addEventListener('DOMContentLoaded', renderizarMenu);
 
-    // Categoria activa y texto buscado. Se guardan aparte porque los DOS
-    // filtros se aplican juntos: si el mesero busca "coca" dentro de Bebidas,
-    // debe seguir viendo solo bebidas.
     let categoriaActiva = 'Todos';
     let textoBuscado = '';
 
-    /**
-     * Quita acentos y pasa a minusculas.
-     * Sin esto, buscar "cafe" no encontraria "Café", que es justo lo que
-     * escribe el mesero con prisa.
-     */
     function normalizar(texto) {
         return (texto || '')
             .toString()
@@ -108,13 +100,10 @@
             const coincideTexto = buscado === '' || nombre.includes(buscado);
 
             const mostrar = coincideCategoria && coincideTexto;
-            // Se cambia a 'flex' para respetar la estructura del botón
             card.style.display = mostrar ? 'flex' : 'none';
             if (mostrar) visibles++;
         });
 
-        // Aviso de "sin resultados": sin esto, una busqueda sin coincidencias
-        // deja la pantalla en blanco y parece que el sistema se trabo.
         const aviso = document.getElementById('catalogoSinResultados');
         if (aviso) aviso.classList.toggle('hidden', visibles > 0);
     }
@@ -122,8 +111,12 @@
     window.filtrarCategoria = function (nombreCat, btn) {
         if (!btn) return;
 
-        document.querySelectorAll('.cat-btn').forEach(el => el.className = "cat-btn px-6 py-2.5 rounded-full bg-[var(--bg-panel)] border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-main)] hover:border-[var(--border-highlight)] text-[11px] font-semibold tracking-wide shadow-sm transition-all outline-none");
+        document.querySelectorAll('.cat-btn').forEach(el => {
+            el.className = "cat-btn px-6 py-2.5 rounded-full text-[11px] font-semibold tracking-wide shadow-sm transition-all outline-none";
+            el.style = "background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;";
+        });
         btn.className = "cat-btn px-6 py-2.5 rounded-full bg-blue-600 text-white text-[11px] font-bold tracking-wide shadow-sm transition-all outline-none border border-transparent";
+        btn.style = "";
 
         categoriaActiva = nombreCat;
         aplicarFiltrosCatalogo();
@@ -143,8 +136,6 @@
 
         buscador.addEventListener('input', buscar);
 
-        // El teclado tactil escribe con .value y no siempre dispara 'input',
-        // asi que tambien se revisa mientras el campo tiene el foco.
         let vigilante = null;
         buscador.addEventListener('focus', () => {
             let previo = buscador.value;
