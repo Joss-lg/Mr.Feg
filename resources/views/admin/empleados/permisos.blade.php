@@ -82,7 +82,8 @@
                                 'caja'               => 'fa-cash-register',
                                 'finanzas'           => 'fa-chart-line',
                                 'roles'              => 'fa-id-badge',
-                                'historial de cajas' => 'fa-history'
+                                'historial de cajas' => 'fa-history',
+                                'repartidores'       => 'fa-motorcycle'
                             ];
                         @endphp
 
