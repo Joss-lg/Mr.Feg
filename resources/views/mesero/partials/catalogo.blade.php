@@ -114,17 +114,17 @@
 
     {{-- MINI-BARRA DE ORDEN ACTIVA (solo móvil) --}}
     <button type="button" id="miniCartBar" onclick="toggleOrdenMobile()"
-        class="hidden md:hidden fixed left-3 right-3 z-40 items-center justify-between gap-3
+        class="flex md:hidden fixed left-3 right-3 z-40 items-center justify-between gap-3
                rounded-2xl bg-slate-900 text-white
                px-4 py-3 shadow-[0_10px_30px_-8px_rgba(0,0,0,0.4)]
                active:scale-[0.98] transition-transform duration-150"
         style="bottom: calc(68px + env(safe-area-inset-bottom));">
         <span class="flex items-center gap-2 min-w-0">
-            <span id="miniCartCount" class="shrink-0 w-6 h-6 rounded-full bg-white text-slate-900 text-[11px] font-black flex items-center justify-center">0</span>
+            <span id="barra-mobile-count" class="shrink-0 w-6 h-6 rounded-full bg-white text-slate-900 text-[11px] font-black flex items-center justify-center">0</span>
             <span class="text-[12px] font-bold truncate">Ver orden</span>
         </span>
         <span class="flex items-center gap-2 shrink-0">
-            <span id="miniCartTotal" class="text-[13px] font-black">$0.00</span>
+            <span id="barra-mobile-total" class="text-[13px] font-black">$0.00</span>
             <i class="fas fa-chevron-up text-[11px] opacity-70"></i>
         </span>
     </button>
