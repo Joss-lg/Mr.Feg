@@ -383,11 +383,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     + '</div></div>';
 
                 // Cobro
-                html += '<div class="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 flex items-center justify-between">'
-                    + '<div><p class="text-[10px] font-black uppercase tracking-wider text-emerald-600">'
-                    + d.metodo + (d.referencia ? ' \u00b7 ref ' + d.referencia : '') + '</p>'
-                    + '<p class="text-[11px] text-slate-500">' + d.concepto + '</p></div>'
-                    + '<span class="text-xl font-black text-emerald-600">' + dinero(d.monto) + '</span></div>';
+                if (d.pagos && d.pagos.length > 1) {
+                    // Multipago: mostrar todos los métodos
+                    html += '<div class="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">'
+                        + '<p class="text-[10px] font-black uppercase tracking-wider text-emerald-600 mb-2">Pago Mixto</p>';
+                    d.pagos.forEach(p => {
+                        if (p.monto > 0) {
+                            html += '<div class="flex items-center justify-between py-1">'
+                                + '<span class="text-[11px] font-bold text-slate-600 uppercase">' + p.metodo
+                                + (p.referencia ? ' <span class="text-slate-400 font-normal normal-case">· ref ' + p.referencia + '</span>' : '')
+                                + '</span>'
+                                + '<span class="text-sm font-black text-emerald-600">' + dinero(p.monto) + '</span>'
+                                + '</div>';
+                        }
+                    });
+                    html += '<div class="flex items-center justify-between border-t border-emerald-200 mt-1 pt-2">'
+                        + '<span class="text-[11px] font-black uppercase text-slate-600">Total cobrado</span>'
+                        + '<span class="text-xl font-black text-emerald-600">' + dinero(d.pagos.reduce((s, p) => s + p.monto, 0)) + '</span>'
+                        + '</div></div>';
+                } else {
+                    // Pago único
+                    html += '<div class="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 flex items-center justify-between">'
+                        + '<div><p class="text-[10px] font-black uppercase tracking-wider text-emerald-600">'
+                        + d.metodo + (d.referencia ? ' \u00b7 ref ' + d.referencia : '') + '</p>'
+                        + '<p class="text-[11px] text-slate-500">' + d.concepto + '</p></div>'
+                        + '<span class="text-xl font-black text-emerald-600">' + dinero(d.monto) + '</span></div>';
+                }
 
                 // Consumo
                 if (d.productos.length) {

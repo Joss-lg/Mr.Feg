@@ -180,21 +180,34 @@ class CajaController extends Controller
             });
         }
 
+        // Buscar todos los pagos de la misma orden para mostrar multipago completo
+        $todosPagos = FlujoCaja::where('flujoable_id', $venta->flujoable_id)
+            ->where('flujoable_type', $venta->flujoable_type)
+            ->where('tipo', 'ingreso')
+            ->where('categoria', $venta->categoria)
+            ->get()
+            ->map(fn($p) => [
+                'metodo'     => $p->metodo_pago,
+                'monto'      => round((float) $p->monto, 2),
+                'referencia' => $p->referencia,
+            ]);
+
         return response()->json([
-            'success'  => true,
-            'concepto' => $venta->concepto,
-            'monto'    => round((float) $venta->monto, 2),
-            'metodo'   => $venta->metodo_pago,
+            'success'    => true,
+            'concepto'   => $venta->concepto,
+            'monto'      => round((float) $venta->monto, 2),
+            'metodo'     => $venta->metodo_pago,
             'referencia' => $venta->referencia,
-            'hora'     => optional($venta->fecha)->format('d/m/Y H:i'),
-            'mesa'     => optional(optional($orden)->mesa)->numero,
-            'orden'    => optional($orden)->numero_orden,
-            'personas' => optional($orden)->personas,
-            'mesero'   => optional(optional($orden)->mesero)->nombre ?? 'Sin asignar',
-            'cajero'   => $cajeroExacto->nombre ?? $cajeroTurno->nombre ?? 'Sin registrar',
+            'pagos'      => $todosPagos->values(),
+            'hora'       => optional($venta->fecha)->format('d/m/Y H:i'),
+            'mesa'       => optional(optional($orden)->mesa)->numero,
+            'orden'      => optional($orden)->numero_orden,
+            'personas'   => optional($orden)->personas,
+            'mesero'     => optional(optional($orden)->mesero)->nombre ?? 'Sin asignar',
+            'cajero'     => $cajeroExacto->nombre ?? $cajeroTurno->nombre ?? 'Sin registrar',
             'cajero_aproximado' => $cajeroExacto === null,
-            'productos' => $productos->values(),
-            'consumo'   => round($productos->sum('importe'), 2),
+            'productos'  => $productos->values(),
+            'consumo'    => round($productos->sum('importe'), 2),
         ]);
     }
 
