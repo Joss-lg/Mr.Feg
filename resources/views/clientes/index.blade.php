@@ -89,7 +89,48 @@
                 @endif
             </div>
         @else
-            <div class="overflow-x-auto">
+            {{-- VISTA MÓVIL --}}
+            <div class="md:hidden space-y-3 mt-4">
+                @foreach ($clientes as $cliente)
+                    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-sm text-slate-800 nombre-cliente">{{ $cliente->nombre }} {{ $cliente->apellido }}</span>
+                            @if($cliente->status == 1)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Activo
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest bg-rose-50 text-rose-600 border border-rose-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> Inactivo
+                                </span>
+                            @endif
+                        </div>
+                        <div class="text-xs font-semibold text-slate-600 telefono-cliente">{{ $cliente->telefono ?? 'N/A' }}</div>
+                        <div class="text-xs text-slate-500">
+                            @if($cliente->direcciones->count() > 0)
+                                {{ $cliente->direcciones->first()->calle }}@if($cliente->direcciones->first()->colonia), {{ $cliente->direcciones->first()->colonia }}@endif
+                            @else
+                                <span class="italic">Sin dirección</span>
+                            @endif
+                        </div>
+                        <div class="flex gap-2 pt-2 border-t border-slate-100">
+                            @if(auth()->user()->tienePermiso(14, 'editar'))
+                                <button type="button" onclick="window.editCliente({{ $cliente->id }})" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 text-[11px] font-bold transition-all active:scale-95">
+                                    <i class="fas fa-pen text-xs"></i> Editar
+                                </button>
+                            @endif
+                            @if(auth()->user()->tienePermiso(14, 'eliminar'))
+                                <button type="button" onclick="window.openDeleteModalCliente({{ $cliente->id }}, '{{ addslashes($cliente->nombre.' '.$cliente->apellido) }}')" class="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-500 text-[11px] font-bold transition-all active:scale-95">
+                                    <i class="fas fa-trash-alt text-xs"></i> Eliminar
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- VISTA ESCRITORIO --}}
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200">
