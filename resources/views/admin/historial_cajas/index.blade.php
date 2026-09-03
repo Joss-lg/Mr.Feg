@@ -81,6 +81,9 @@
                     <span>${{ number_format($turno->monto_inicial, 2) }}</span>
                     <span>${{ number_format($turno->monto_final_real ?? 0, 2) }}</span>
                 </div>
+                <a href="{{ route('historial.show', $turno->id) }}" class="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all text-[11px] font-bold uppercase tracking-wider">
+                    <i class="fas fa-eye text-xs"></i> Ver detalle
+                </a>
             </div>
         @empty
             <div class="text-center py-10 text-slate-400 font-bold bg-white rounded-2xl border border-slate-200">Sin registros</div>
