@@ -103,14 +103,7 @@
             placeholder="Toca aquí para escribir...">
         </textarea>
 
-        <div class="flex items-center gap-2 mb-4 overflow-x-auto hide-scroll pb-1">
-            @foreach(['Sin cebolla', 'Salsa aparte', 'Bien cocido', 'Término medio', 'Para llevar', 'Sin picante'] as $notaRapida)
-                <button type="button" onclick="agregarTextoRapidoNota('{{ $notaRapida }}')"
-                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-500 hover:text-white active:scale-90 select-none text-[11px] font-bold shadow-sm transition-all duration-150">
-                    {{ $notaRapida }}
-                </button>
-            @endforeach
-        </div>
+
 
         <div class="mt-2 flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3">
             <button type="button" onclick="limpiarNota()" class="w-full sm:w-auto min-h-[44px] px-6 rounded-xl bg-white border border-slate-200 text-slate-500 hover:bg-slate-100 active:scale-95 select-none text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all duration-150">Limpiar</button>
@@ -393,15 +386,7 @@
             </button>
         </div>
 
-        {{-- Notas rápidas --}}
-        <div class="flex gap-2 px-3 pt-2.5 overflow-x-auto hide-scroll pb-1">
-            @foreach(['Sin cebolla','Salsa aparte','Bien cocido','Término medio','Para llevar','Sin picante'] as $nota)
-                <button type="button" onclick="tnRapida('{{ $nota }}')"
-                    class="shrink-0 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-[11px] font-bold active:scale-90 transition-all">
-                    {{ $nota }}
-                </button>
-            @endforeach
-        </div>
+
 
         {{-- QWERTY --}}
         <div class="px-2 py-2 space-y-1.5 select-none">

@@ -59,68 +59,68 @@ class CocinaController extends Controller
     }
 
     /**
- * Actualiza el estado de UNA tarjeta específica (orden + lote + área).
- */
-public function actualizarEstado(Request $request, $id)
-{
-    $request->validate([
-        'estado' => 'required|in:pendiente,en proceso,servida',
-        'lote'   => 'required|string',
-        'area'   => 'required|in:cocina,barra',
-    ]);
-
-    $areaObjetivo = $request->area === 'barra' ? 'Barra' : 'Cocina';
-
-    $orden = Orden::with('detalles.producto.categoria')->findOrFail($id);
-
-    // 1. Buscamos y actualizamos solo los detalles del lote y área seleccionada
-    $idsAActualizar = $orden->detalles
-        ->filter(function ($detalle) use ($request) {
-            $lote = $detalle->lote_envio ?? 'sin-lote';
-            return $lote === $request->lote;
-        })
-        ->filter(function ($detalle) use ($areaObjetivo) {
-            return $this->resolverAreaDetalle($detalle) === $areaObjetivo;
-        })
-        ->pluck('id');
-
-    if ($idsAActualizar->isNotEmpty()) {
-        DetalleOrden::whereIn('id', $idsAActualizar)->update([
-            'estado_preparacion' => $request->estado,
+     * Actualiza el estado de UNA tarjeta específica (orden + lote + área).
+     */
+    public function actualizarEstado(Request $request, $id)
+    {
+        $request->validate([
+            'estado' => 'required|in:pendiente,en proceso,servida',
+            'lote'   => 'required|string',
+            'area'   => 'required|in:cocina,barra',
         ]);
-    }
 
-    // 2. Sincronizamos el estado global de la Orden
-    $orden->refresh();
+        $areaObjetivo = $request->area === 'barra' ? 'Barra' : 'Cocina';
 
-    // NUEVO: Excluimos los productos cancelados de la verificación
-    $detallesRelevantes = $orden->detalles->where('estado', '!=', 'cancelado');
+        $orden = Orden::with('detalles.producto.categoria')->findOrFail($id);
 
-    $todosServidos = $detallesRelevantes->isNotEmpty()
-        && $detallesRelevantes->every(fn ($d) => $d->estado_preparacion === 'servida');
+        // 1. Buscamos y actualizamos solo los detalles del lote y área seleccionada
+        $idsAActualizar = $orden->detalles
+            ->filter(function ($detalle) use ($request) {
+                $lote = $detalle->lote_envio ?? 'sin-lote';
+                return $lote === $request->lote;
+            })
+            ->filter(function ($detalle) use ($areaObjetivo) {
+                return $this->resolverAreaDetalle($detalle) === $areaObjetivo;
+            })
+            ->pluck('id');
 
-    if ($todosServidos) {
-        if ($orden->estado !== 'servida') {
-            $orden->update(['estado' => 'servida']);
+        if ($idsAActualizar->isNotEmpty()) {
+            DetalleOrden::whereIn('id', $idsAActualizar)->update([
+                'estado_preparacion' => $request->estado,
+            ]);
         }
-    } else {
-        // NUEVO: Si no están todos servidos pero ya entró a cocina, pasa a 'en proceso'
-        if ($orden->estado === 'pendiente') {
-            $orden->update(['estado' => 'en proceso']);
+
+        // 2. Sincronizamos el estado global de la Orden
+        $orden->refresh();
+
+        // NUEVO: Excluimos los productos cancelados de la verificación
+        $detallesRelevantes = $orden->detalles->where('estado', '!=', 'cancelado');
+
+        $todosServidos = $detallesRelevantes->isNotEmpty()
+            && $detallesRelevantes->every(fn ($d) => $d->estado_preparacion === 'servida');
+
+        if ($todosServidos) {
+            if ($orden->estado !== 'servida') {
+                $orden->update(['estado' => 'servida']);
+            }
+        } else {
+            // NUEVO: Si no están todos servidos pero ya entró a cocina, pasa a 'en proceso'
+            if ($orden->estado === 'pendiente') {
+                $orden->update(['estado' => 'en proceso']);
+            }
         }
-    }
 
-    if ($request->wantsJson() || $request->ajax()) {
-        return response()->json([
-            'success' => true,
-            'message' => 'Estado actualizado correctamente.',
-            'estado'  => $request->estado,
-        ]);
-    }
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente.',
+                'estado'  => $request->estado,
+            ]);
+        }
 
-    return redirect()->route('admin.cocina.index', ['area' => $request->area])
-                     ->with('success', 'Estado actualizado correctamente.');
-}
+        return redirect()->route('admin.cocina.index', ['area' => $request->area])
+                         ->with('success', 'Estado actualizado correctamente.');
+    }
 
     /**
      * Lee el área seleccionada desde el query param ?area=, con 'cocina'
@@ -142,7 +142,6 @@ public function actualizarEstado(Request $request, $id)
         return $area !== 'Barra' ? 'Cocina' : 'Barra';
     }
 
-        
     private function construirComandas(string $areaSeleccionada): array
     {
         $ordenes = Orden::with(['mesa:id,id,numero,tipo,plataforma_delivery_id', 'mesa.plataformaDelivery:id,nombre', 'mesero:id,nombre', 'detalles.producto.categoria'])
@@ -279,13 +278,6 @@ public function actualizarEstado(Request $request, $id)
     {
         $area = $this->resolverAreaSeleccionada($request);
 
-        // Se buscan los print_jobs del TURNO activo. Si la caja esta cerrada
-        // se muestran los del ultimo turno cerrado, para que cocina pueda
-        // seguir consultando el historial del dia aunque ya se haya hecho el
-        // corte de caja.
-        $cajaMovimiento = \App\Models\CajaMovimiento::where('estado', 'abierta')->first()
-            ?? \App\Models\CajaMovimiento::where('estado', 'cerrada')->latest('updated_at')->first();
-
         $query = \App\Models\PrintJob::with('orden.mesero')
             ->orderByDesc('created_at');
 
@@ -298,12 +290,8 @@ public function actualizarEstado(Request $request, $id)
             });
         }
 
-        // Solo los del turno activo / ultimo turno del dia
-        if ($cajaMovimiento) {
-            $query->whereDate('created_at', $cajaMovimiento->created_at->toDateString());
-        } else {
-            $query->whereDate('created_at', now()->toDateString());
-        }
+        // Solo los del dia actual
+        $query->whereDate('created_at', now()->toDateString());
 
         $jobs = $query->get()->groupBy('lote_envio');
 
