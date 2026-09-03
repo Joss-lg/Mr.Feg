@@ -134,7 +134,7 @@
             ['route' => 'admin.cocina.index', 'icon' => 'fas fa-fire-burner', 'label' => 'Cocina', 'modulo_id' => 9],
             ['route' => 'admin.mesas.index', 'icon' => 'fas fa-chair', 'label' => 'Mesas', 'modulo_id' => 7],
             ['route' => 'admin.delivery.index', 'icon' => 'fas fa-motorcycle', 'label' => 'Delivery', 'modulo_id' => 1],
-            ['route' => 'admin.repartidores.index', 'icon' => 'fas fa-biking', 'label' => 'Repartidores', 'modulo_id' => 16],
+            ['route' => 'admin.repartidores.index', 'icon' => 'fas fa-biking', 'label' => 'Repartidores', 'modulo_id' => 14],
             ['route' => 'clientes.index', 'icon' => 'fas fa-address-book', 'label' => 'Clientes', 'modulo_id' => 15],
         ],
         'Caja' => [
