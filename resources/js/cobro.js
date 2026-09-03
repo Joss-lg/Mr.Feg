@@ -730,6 +730,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (data.success) {
+                // Cerrar el modal de método de pago/combinado si está abierto
+                if (modalMetodo) modalMetodo.classList.add('hidden');
+
                 if (data.mesa_liberada) {
                     // AJUSTE: ya no navegamos de inmediato. El ticket se
                     // queda abierto (estático, con botones Imprimir/Cerrar)
