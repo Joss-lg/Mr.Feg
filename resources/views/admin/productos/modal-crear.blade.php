@@ -14,8 +14,8 @@
 </style>
 
 {{-- MODAL CREAR ALIMENTO --}}
-<div id="modal-crear-alimento" class="fixed inset-y-0 right-0 left-[74px] sm:left-0 sm:inset-0 z-[9999] hidden opacity-0 transition-all duration-300 flex items-center justify-center p-3 sm:p-4">
-    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm -ml-[74px] sm:ml-0" onclick="closeModalCrear()"></div>
+<div id="modal-crear-alimento" class="fixed inset-0 z-[9999] hidden opacity-0 transition-all duration-300 flex items-center justify-center p-3 sm:p-4">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModalCrear()"></div>
 
     {{-- Contenedor principal en fondo #F2F2F2 --}}
     <div class="relative bg-[#F2F2F2] border border-slate-300/70 w-full max-w-xl sm:max-w-2xl max-h-[92vh] flex flex-col rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl transform opacity-0 translate-y-8 transition-all duration-300 overflow-hidden" id="modal-crear-panel">
@@ -78,9 +78,14 @@
                                 Agrega tamaños y sus complementos específicos con precio individual
                             </p>
                         </div>
-                        <button type="button" onclick="agregarFilaVariante('crear')" class="inline-flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
-                            <i class="fas fa-plus"></i> AGREGAR TAMAÑO
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="agregarFilaVariante('crear')" class="inline-flex items-center justify-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-plus"></i> AGREGAR TAMAÑO
+                            </button>
+                            <button type="button" onclick="document.getElementById('contenedor-variantes-crear').innerHTML=''" class="inline-flex items-center justify-center gap-2 bg-rose-100 hover:bg-rose-200 text-rose-600 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-trash"></i> LIMPIAR
+                            </button>
+                        </div>
                     </div>
                     <div id="contenedor-variantes-crear" class="space-y-3"></div>
                 </div>
@@ -109,9 +114,14 @@
                                 Aplica a este platillo único
                             </p>
                         </div>
-                        <button type="button" onclick="agregarFilaModificador('crear')" class="inline-flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
-                            <i class="fas fa-plus"></i> AGREGAR EXTRA
-                        </button>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="agregarFilaModificador('crear')" class="inline-flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-plus"></i> AGREGAR EXTRA
+                            </button>
+                            <button type="button" onclick="document.getElementById('contenedor-modificadores-crear').innerHTML=''" class="inline-flex items-center justify-center gap-2 bg-rose-100 hover:bg-rose-200 text-rose-600 px-3 py-2 rounded-xl font-bold transition text-[10px] uppercase tracking-widest outline-none">
+                                <i class="fas fa-trash"></i> LIMPIAR
+                            </button>
+                        </div>
                     </div>
                     <div id="contenedor-modificadores-crear" class="space-y-2"></div>
                 </div>
@@ -360,14 +370,14 @@
         const htmlFila = `
             <div class="bg-white p-3.5 border border-slate-200 rounded-2xl shadow-sm space-y-3 fila-variante" id="variante-${varIndex}">
                 {{-- Encabezado del tamaño --}}
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shrink-0">
                         <i class="fas fa-layer-group text-[10px]"></i>
                     </span>
-                    <input type="text" name="variantes[${varIndex}][nombre]" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 500ML, 1L, 6pz..." required>
-                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2">
+                    <input type="text" name="variantes[${varIndex}][nombre]" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl p-2 text-sm font-bold text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-400" placeholder="Ej: 500ML, 1L, 6pz..." required>
+                    <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 shrink-0">
                         <span class="text-slate-400 font-black text-xs">$</span>
-                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" class="w-28 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="0.00 (Opcional)">
+                        <input type="number" step="0.01" name="variantes[${varIndex}][precio]" class="w-20 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 text-right" placeholder="0.00">
                     </div>
                     <button type="button" onclick="document.getElementById('variante-${varIndex}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors outline-none shrink-0" title="Eliminar tamaño">
                         <i class="fas fa-trash text-xs"></i>
@@ -403,11 +413,11 @@
         : '';
 
     const html = `
-        <div class="flex items-center gap-2 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl fila-extra-variante" id="extra-var-${varIndex}-${extraIndex}">
-            <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: AGUA, LECHE..." class="flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
-            <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-2">
+        <div class="flex items-center gap-1.5 bg-purple-50/40 p-1.5 border border-purple-100 rounded-xl fila-extra-variante" id="extra-var-${varIndex}-${extraIndex}">
+            <input type="text" name="variantes[${varIndex}][extras][${extraIndex}][nombre]" value="${nombre}" placeholder="Ej: AGUA, LECHE..." class="min-w-0 flex-1 bg-white border border-purple-200/60 rounded-lg p-1.5 text-xs font-bold text-slate-800 outline-none placeholder:text-slate-400" required>
+            <div class="flex items-center bg-white border border-purple-200/60 rounded-lg px-1.5 shrink-0">
                 <span class="text-purple-400 font-black text-xs">+$</span>
-                <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="0.00" class="w-16 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right">
+                <input type="number" step="0.01" name="variantes[${varIndex}][extras][${extraIndex}][precio]" value="${precio}" placeholder="0.00" class="w-14 bg-transparent p-1.5 text-xs font-black text-slate-800 outline-none placeholder:text-slate-400 text-right">
             </div>
             <button type="button" onclick="this.closest('.fila-extra-variante').remove()" class="w-6 h-6 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
                 <i class="fas fa-times text-[10px]"></i>
@@ -451,11 +461,11 @@ window.toggleModificadores = function(tipo) {
         const html = `
             <div class="flex items-center gap-2 bg-white p-2 border border-slate-200 rounded-xl shadow-sm fila-modificador" id="modificador-${tipo}-${index}">
                 <input type="hidden" name="modificadores[${index}][id]" value="${id}">
-                <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
-                <div class="w-px h-6 bg-slate-200"></div>
-                <span class="pl-2 text-slate-400 font-bold">+$</span>
-                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-24 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400">
-                <button type="button" onclick="document.getElementById('modificador-${tipo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none">
+                <input type="text" name="modificadores[${index}][nombre]" value="${nombre}" placeholder="Nombre del extra (ej. Papas Francesa)" class="min-w-0 flex-1 bg-transparent p-2 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400" required>
+                <div class="w-px h-6 bg-slate-200 shrink-0"></div>
+                <span class="pl-2 text-slate-400 font-bold shrink-0">+$</span>
+                <input type="number" step="0.01" name="modificadores[${index}][precio]" value="${precio}" placeholder="0.00" class="w-16 bg-transparent p-2 text-sm font-black text-slate-800 outline-none placeholder:text-slate-400 shrink-0">
+                <button type="button" onclick="document.getElementById('modificador-${tipo}-${index}').remove()" class="w-8 h-8 flex items-center justify-center text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors outline-none shrink-0">
                     <i class="fas fa-trash text-xs"></i>
                 </button>
             </div>
