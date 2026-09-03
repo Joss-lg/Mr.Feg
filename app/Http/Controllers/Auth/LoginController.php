@@ -153,6 +153,11 @@ class LoginController extends Controller
             return redirect()->route('admin.mesas.index');
         }
 
+        // ¿Tiene acceso al módulo de Repartidores?
+        if ($user->tienePermiso('Repartidores', 'mostrar')) {
+            return redirect()->route('admin.repartidores.index');
+        }
+
         // 4. Sin ningún módulo asignado no hay a dónde mandarlo: se cierra la
         //    sesión para no dejarlo autenticado dando vueltas en el login.
         Auth::logout();
