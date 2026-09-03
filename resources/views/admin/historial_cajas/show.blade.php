@@ -271,12 +271,12 @@
                                 </td>
                                 <td class="py-4 px-4">
                                     @if($ordenIdReal)
-                                        <a href="{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}"
-                                           target="_blank"
+                                        <button type="button"
+                                           onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}')"
                                            class="w-9 h-9 rounded-xl border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all flex items-center justify-center mx-auto shadow-sm"
                                            title="Reimprimir ticket">
                                             <i class="fas fa-print text-xs"></i>
-                                        </a>
+                                        </button>
                                     @endif
                                 </td>
                             </tr>
@@ -339,4 +339,32 @@
     </div>
 
 </div>
+
+@include('admin.cobrar.modals.ticket-preview')
+
+@push('scripts')
+<script>
+function abrirTicketModal(url) {
+    const modal      = document.getElementById('modal-ticket-preview');
+    const iframe     = document.getElementById('ticket-preview-iframe');
+    const btnCerrar  = document.getElementById('btn-cerrar-ticket-preview');
+    const btnCerrarX = document.getElementById('btn-cerrar-x-ticket-preview');
+    const btnImprimir = document.getElementById('btn-imprimir-ticket-preview');
+
+    if (!modal || !iframe) return;
+
+    iframe.src = url;
+    modal.classList.remove('hidden');
+
+    const cerrar = () => { modal.classList.add('hidden'); iframe.src = ''; };
+    btnCerrar.onclick  = cerrar;
+    btnCerrarX.onclick = cerrar;
+
+    btnImprimir.onclick = () => {
+        try { iframe.contentWindow.print(); } catch(e) { window.open(url, '_blank'); }
+    };
+}
+</script>
+@endpush
+
 @endsection
