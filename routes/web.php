@@ -290,6 +290,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->prefix('admin/repartidores')->name('admin.repartidores.')->group(function () {
         Route::get('/', [App\Http\Controllers\RepartidorController::class, 'index'])->name('index')->middleware('permiso:Repartidores,mostrar');
         Route::post('/{id}/asignar', [App\Http\Controllers\RepartidorController::class, 'asignarRepartidor'])->name('asignar')->middleware('permiso:Repartidores,gestionar');
+        Route::get('/ticket/orden/{ordenId}', [App\Http\Controllers\CajaController::class, 'imprimirTicketPorOrden'])->name('ticket.orden')->middleware('permiso:Repartidores,mostrar');
         Route::patch('/{id}/entregado', [App\Http\Controllers\RepartidorController::class, 'marcarEntregado'])->name('entregado')->middleware('permiso:Repartidores,gestionar');
     });
 

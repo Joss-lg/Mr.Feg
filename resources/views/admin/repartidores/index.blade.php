@@ -98,11 +98,13 @@
                     </div>
 
                     {{-- Botón reimprimir ticket --}}
+                    @if(auth()->user()->tienePermiso('Repartidores', 'gestionar'))
                     <button type="button"
-                        onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $orden->id) }}')"
+                        onclick="abrirTicketModal('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
                         class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
                         <i class="fas fa-print"></i> Reimprimir Ticket
                     </button>
+                    @endif
 
                     {{-- Formulario para asignar repartidor --}}
                     <form action="{{ route('admin.repartidores.asignar', $orden->id) }}" method="POST" class="flex flex-col sm:flex-row gap-2.5 pt-3 border-t border-slate-100 form-async">
@@ -196,11 +198,13 @@
                     </div>
 
                     {{-- Botón reimprimir ticket --}}
+                    @if(auth()->user()->tienePermiso('Repartidores', 'gestionar'))
                     <button type="button"
-                        onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $orden->id) }}')"
+                        onclick="abrirTicketModal('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
                         class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
                         <i class="fas fa-print"></i> Reimprimir Ticket
                     </button>
+                    @endif
 
                     {{-- Botón Marcar como Entregado --}}
                     <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async pt-1">

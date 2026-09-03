@@ -14,10 +14,9 @@ class RepartidorController extends Controller
     {
         // 1. Pedidos pendientes: Busca por tipo_pedido o si la mesa asociada es virtual de domicilio/llevar
         $ordenesPendientes = Orden::where(function($query) {
-                $query->whereIn('tipo_pedido', ['domicilio', 'delivery', 'llevar'])
+                $query->whereIn('tipo_pedido', ['domicilio', 'delivery'])
                       ->orWhereHas('mesa', function($m) {
-                          $m->where('numero', 'like', 'DOM-%')
-                            ->orWhere('numero', 'like', 'LLEVAR-%');
+                          $m->where('numero', 'like', 'DOM-%');
                       });
             })
             ->whereNull('repartidor_id')
