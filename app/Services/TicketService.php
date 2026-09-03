@@ -204,6 +204,7 @@ class TicketService
             'ivaHabilitado'  => $ivaHabilitado,
             'propina'        => $propina,
             'esADomicilio'        => $esADomicilio,
+            'esParaLlevar'        => $mesa->esParaLlevar(),
             'clienteNombre'       => $cliente ? trim($cliente->nombre . ' ' . ($cliente->apellido ?? '')) : null,
             'clienteTelefono'     => $cliente?->telefono,
             'direccionCalle'      => $direccion?->calle,

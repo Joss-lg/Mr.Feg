@@ -88,6 +88,8 @@
             @if($mesa)
     @if($esDelivery ?? false)
         {{ mb_strtoupper($plataformaNombre ?? 'DELIVERY') }} · {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
+    @elseif($esParaLlevar ?? false)
+        LLEVAR{{ !empty($clienteNombre) ? ' · ' . mb_strtoupper($clienteNombre) : '' }}
     @elseif($esADomicilio ?? false)
         DOMICILIO
     @else
