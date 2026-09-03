@@ -128,7 +128,7 @@
             ['route' => 'admin.inventario.index', 'icon' => 'fas fa-cube', 'label' => 'Inventario', 'modulo_id' => 3],
             ['route' => 'admin.categorias.index', 'icon' => 'fas fa-layer-group', 'label' => 'Categorías', 'modulo_id' => 6],
             ['route' => 'admin.promociones.index', 'icon' => 'fas fa-tags', 'label' => 'Promociones', 'modulo_id' => 8],
-            ['route' => 'admin.fidelidad.index', 'icon' => 'fas fa-award', 'label' => 'Fidelidad', 'modulo_id' => 14],
+            ['route' => 'admin.fidelidad.index', 'icon' => 'fas fa-award', 'label' => 'Fidelidad', 'modulo_id' => 15],
         ],
         'Operaciones' => [
             ['route' => 'admin.cocina.index', 'icon' => 'fas fa-fire-burner', 'label' => 'Cocina', 'modulo_id' => 9],

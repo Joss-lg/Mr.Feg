@@ -83,7 +83,8 @@
                                 'finanzas'           => 'fa-chart-line',
                                 'roles'              => 'fa-id-badge',
                                 'historial de cajas' => 'fa-history',
-                                'repartidores'       => 'fa-motorcycle'
+                                'repartidores'       => 'fa-motorcycle',
+                                'fidelidad'          => 'fa-award'
                             ];
                         @endphp
 
