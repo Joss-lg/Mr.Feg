@@ -179,7 +179,12 @@
             tamanoSeleccionado: null,
             varianteIdSeleccionada: null,
             detalles: [],
-            extraAcumulado: 0
+            extraAcumulado: 0,
+            // Salsas (alitas / boneless)
+            salsasElegidas: [],
+            salsasGourmetExtras: [],
+            extraSalsas: 0,
+            totalSalsas: 0,
         };
 
         // 1. Caso Bebidas con variantes
@@ -262,8 +267,23 @@
                 window.estadoPersonalizacion.precioBase = precioNum;
                 window.estadoPersonalizacion.tamanoSeleccionado = v.nombre;
                 window.estadoPersonalizacion.varianteIdSeleccionada = v.id;
-                
-                evaluarPapasPorTamano(v.nombre, v);
+
+                // ─── PASO INTERMEDIO: Selector de salsas para Alitas y Boneless ───
+                const prod = window.productoActivoParaComanda;
+                const nombreP = (prod?.nombre || '').toLowerCase();
+                const catP    = (prod?.categoria?.nombre || '').toLowerCase();
+                const esAlitaOBoneless =
+                    nombreP.includes('alita') || nombreP.includes('boneless') ||
+                    catP.includes('alita')    || catP.includes('boneless');
+
+                if (esAlitaOBoneless) {
+                    const numSalsas = calcularNumeroSalsas(v.nombre);
+                    mostrarSelectorSalsas(numSalsas, () => {
+                        mostrarSelectorTamanos(prod.variantes, tipoFlujo);
+                    });
+                } else {
+                    evaluarPapasPorTamano(v.nombre, v);
+                }
             };
 
             btn.innerHTML = `
@@ -291,6 +311,23 @@
             }
         }
 
+        // Para alitas/boneless siempre mostramos el paso de papas
+        // sin importar si tienen modificadores de papas en BD.
+        const nombreP2 = (prod?.nombre || '').toLowerCase();
+        const catP2    = (prod?.categoria?.nombre || '').toLowerCase();
+        const esAlitaOBoneless2 =
+            nombreP2.includes('alita') || nombreP2.includes('boneless') ||
+            catP2.includes('alita')    || catP2.includes('boneless');
+
+        if (esAlitaOBoneless2) {
+            const cbVolverSalsas = () => {
+                const ns = calcularNumeroSalsas(window.estadoPersonalizacion.tamanoSeleccionado);
+                mostrarSelectorSalsas(ns, () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack'));
+            };
+            mostrarSelectorPapasGenerico(20, 35, cbVolverSalsas);
+            return;
+        }
+
         if (extrasDisponibles.length > 0) {
             const opciones = [];
 
@@ -307,8 +344,8 @@
 
             const tam = window.estadoPersonalizacion.tamanoSeleccionado;
             document.getElementById('titulo-modal-variantes').textContent = tam ? `${prod.nombre} (${tam})` : prod.nombre;
-            document.getElementById('subtitulo-modal-variantes').textContent = window.estadoPersonalizacion.precioBase === 0 
-                ? 'Paso 2: Selecciona la base o sabor' 
+            document.getElementById('subtitulo-modal-variantes').textContent = window.estadoPersonalizacion.precioBase === 0
+                ? 'Paso 2: Selecciona la base o sabor'
                 : 'Paso 2: ¿Deseas agregar complementos?';
 
             const btnVolver = document.getElementById('btn-volver-tamano');
@@ -388,8 +425,11 @@
     // --- BANDERILLAS: PASO 2 (SOLO ACOMPAÑAMIENTOS DE PAPAS) ---
     function mostrarSelectorPapasGenerico(extraFrancesa = 20, extraGajo = 35, callbackVolver = null) {
         const prod = window.productoActivoParaComanda;
+        const tuveSalsas = Array.isArray(window.estadoPersonalizacion?.salsasElegidas) &&
+                           window.estadoPersonalizacion.salsasElegidas.length > 0;
+        const pasoPapas = tuveSalsas ? 3 : 2;
         document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
-        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 2: ¿Agregar Papas?';
+        document.getElementById('subtitulo-modal-variantes').textContent = `Paso ${pasoPapas}: ¿Agregar Papas?`;
 
         const cont = document.getElementById('lista-opciones-variantes');
         cont.innerHTML = '';
@@ -435,7 +475,10 @@
             opcionesPapas.push({ nombre: 'c/ Papas Gajo', extra: Number(extraGajo), subtitulo: `+$${Number(extraGajo).toFixed(2)}` });
         }
 
-        const precioBaseAcumulado = parseFloat(prod.precio || 0) + (window.estadoPersonalizacion.extraAcumulado || 0);
+        // Usar precioBase del estado (ya incluye precio de variante + extras de salsas)
+        const precioBaseAcumulado = window.estadoPersonalizacion.precioBase > 0
+            ? window.estadoPersonalizacion.precioBase
+            : parseFloat(prod.precio || 0) + (window.estadoPersonalizacion.extraAcumulado || 0);
 
         opcionesPapas.forEach(op => {
             const totalFinalOpcion = precioBaseAcumulado + op.extra;
@@ -462,6 +505,255 @@
             `;
             cont.appendChild(btn);
         });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SELECTOR DE SALSAS — Un solo modal, selección múltiple simultánea
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // Reglas de cuántas salsas lleva cada tamaño.
+    // Alitas: 6pz→1, 10pz→2 | Boneless: 250g→1, 1/2→2, 1k→4
+    function calcularNumeroSalsas(nombreVariante) {
+        const n = (nombreVariante || '').toLowerCase();
+        if (n.includes('1k') || n.includes('1 k') || n.includes('1kg'))   return 4;
+        if (n.includes('1/2') || n.includes('medio'))                      return 2;
+        if (n.includes('250'))                                              return 1;
+        if (n.includes('10') || n.includes('12') || n.includes('15'))      return 2;
+        if (n.includes('6')  || n.includes('8'))                           return 1;
+        return 1;
+    }
+
+    const SALSAS_INCLUIDAS = [
+        'Mango Habanero', 'Fresa Hot', 'Maracuyá Habanero', 'Búfalo',
+        'Tamarindo Chipotle', 'Pelón Pelo Rico', 'Frutos Rojos Chipotle',
+        'Pimienta Limón', 'BBQ', 'Tradicional'
+    ];
+    const SALSAS_GOURMET = [
+        { nombre: 'Naranja Mezcal', extra: 8 },
+        { nombre: 'Ajo Parmesano',  extra: 10 },
+    ];
+
+    // ─── Estado local del selector de salsas ───────────────────────────────
+    // Guarda qué salsas están marcadas y sus extras mientras el modal está abierto.
+    let _salsasMarcadas = [];   // [{ nombre, extra }]
+    let _salsasTotal    = 1;
+
+    function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
+        _salsasMarcadas = [];
+        _salsasTotal    = totalSalsas;
+
+        const prod = window.productoActivoParaComanda;
+        const tam  = window.estadoPersonalizacion.tamanoSeleccionado;
+
+        // ── Encabezado del modal ─────────────────────────────────────────────
+        document.getElementById('titulo-modal-variantes').textContent =
+            tam ? `${prod.nombre} (${tam})` : prod.nombre;
+
+        const labelSalsas = totalSalsas === 1 ? '1 salsa' : `${totalSalsas} salsas`;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso 2: Elige ${labelSalsas} — 0 / ${totalSalsas} seleccionadas`;
+
+        // ── Botón Volver ─────────────────────────────────────────────────────
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        btnVolver.classList.remove('hidden');
+        btnVolver.onclick = (e) => { e.stopPropagation(); callbackVolver(); };
+
+        // ── Contenedor principal ─────────────────────────────────────────────
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        // Barra de progreso + contador
+        const barraWrap = document.createElement('div');
+        barraWrap.className = 'mb-3';
+        barraWrap.innerHTML = `
+            <div class="flex justify-between items-center mb-1.5">
+                <span id="lbl-salsa-contador"
+                      class="text-xs font-black text-slate-500">
+                    0 / ${totalSalsas} seleccionada${totalSalsas > 1 ? 's' : ''}
+                </span>
+                <span id="lbl-salsa-extra"
+                      class="text-xs font-black text-amber-500 hidden">
+                    +$0.00 extra
+                </span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="barra-salsa-progreso"
+                     class="h-full bg-blue-500 rounded-full transition-all duration-300"
+                     style="width:0%"></div>
+            </div>
+        `;
+        cont.appendChild(barraWrap);
+
+        // Botón Confirmar (al fondo, fuera del scroll de la lista)
+        // Lo insertamos dentro del panel pero fuera del cont scrolleable.
+        // Usamos el elemento padre del cont para añadirlo después.
+        const panel = document.getElementById('panel-variantes-comanda');
+
+        // Elimina confirmar previo si existía
+        const prevBtn = panel.querySelector('#btn-confirmar-salsas');
+        if (prevBtn) prevBtn.remove();
+
+        const btnConfirmar = document.createElement('button');
+        btnConfirmar.id        = 'btn-confirmar-salsas';
+        btnConfirmar.type      = 'button';
+        btnConfirmar.disabled  = true;
+        btnConfirmar.className = 'w-full mt-4 min-h-[46px] rounded-2xl bg-blue-500 text-white text-sm font-black uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95';
+        btnConfirmar.textContent = totalSalsas === 1 ? 'Confirmar salsa' : `Confirmar ${totalSalsas} salsas`;
+        btnConfirmar.onclick = _confirmarSalsas;
+        panel.appendChild(btnConfirmar);
+
+        // ── Sección Incluidas ────────────────────────────────────────────────
+        const hIncluidas = document.createElement('p');
+        hIncluidas.className = 'text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 mb-2 mt-1';
+        hIncluidas.textContent = 'Salsas Incluidas';
+        cont.appendChild(hIncluidas);
+
+        SALSAS_INCLUIDAS.forEach(nombre =>
+            cont.appendChild(_crearChipSalsa(nombre, 0))
+        );
+
+        // ── Sección Gourmet ──────────────────────────────────────────────────
+        const hGourmet = document.createElement('p');
+        hGourmet.className = 'text-[10px] font-black text-amber-500 uppercase tracking-widest px-1 mb-2 mt-4';
+        hGourmet.innerHTML = '✦ Gourmet';
+        cont.appendChild(hGourmet);
+
+        SALSAS_GOURMET.forEach(({ nombre, extra }) =>
+            cont.appendChild(_crearChipSalsa(nombre, extra))
+        );
+    }
+
+    // Crea un chip de salsa (toggle: seleccionar / deseleccionar)
+    function _crearChipSalsa(nombre, extra) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.dataset.nombre = nombre;
+        chip.dataset.extra  = extra;
+        chip.className = [
+            'w-full flex justify-between items-center',
+            'bg-white border border-slate-200',
+            'p-3 rounded-2xl transition-all text-left shadow-sm',
+            'active:scale-95 outline-none cursor-pointer',
+            'mb-2'
+        ].join(' ');
+
+        chip.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="chip-check w-5 h-5 rounded-full border-2 border-slate-300
+                             flex items-center justify-center shrink-0 transition-all">
+                </span>
+                <span class="font-bold text-slate-800 text-sm">${nombre}</span>
+            </div>
+            <span class="font-black text-sm ${extra > 0 ? 'text-amber-500' : 'text-slate-400'}">
+                ${extra > 0 ? '+$' + Number(extra).toFixed(2) : 'Incluida'}
+            </span>
+        `;
+
+        chip.onclick = (e) => {
+            e.stopPropagation();
+            const yaEsta = _salsasMarcadas.findIndex(s => s.nombre === nombre);
+
+            if (yaEsta >= 0) {
+                // Deseleccionar
+                _salsasMarcadas.splice(yaEsta, 1);
+                chip.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                chip.classList.add('border-slate-200', 'bg-white');
+                chip.querySelector('.chip-check').innerHTML = '';
+                chip.querySelector('.chip-check').classList.remove('bg-blue-500', 'border-blue-500');
+                chip.querySelector('.chip-check').classList.add('border-slate-300');
+            } else if (_salsasMarcadas.length < _salsasTotal) {
+                // Seleccionar (mientras no se haya llenado el cupo)
+                _salsasMarcadas.push({ nombre, extra: Number(extra) });
+                chip.classList.add('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                chip.classList.remove('border-slate-200', 'bg-white');
+                chip.querySelector('.chip-check').innerHTML =
+                    '<i class="fas fa-check text-[9px] text-white"></i>';
+                chip.querySelector('.chip-check').classList.add('bg-blue-500', 'border-blue-500');
+                chip.querySelector('.chip-check').classList.remove('border-slate-300');
+            } else {
+                // Cupo lleno — agitar el chip para indicar que no puede
+                chip.classList.add('animate-[wiggle_0.3s_ease-in-out]');
+                setTimeout(() => chip.classList.remove('animate-[wiggle_0.3s_ease-in-out]'), 300);
+                return;
+            }
+
+            _actualizarEstadoSalsas();
+        };
+
+        return chip;
+    }
+
+    // Actualiza contador, barra de progreso, extra total y estado del botón Confirmar
+    function _actualizarEstadoSalsas() {
+        const sel   = _salsasMarcadas.length;
+        const total = _salsasTotal;
+        const extra = _salsasMarcadas.reduce((s, x) => s + x.extra, 0);
+
+        // Subtítulo del modal
+        const prod = window.productoActivoParaComanda;
+        const tam  = window.estadoPersonalizacion.tamanoSeleccionado;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso 2: Elige ${total === 1 ? '1 salsa' : total + ' salsas'} — ${sel} / ${total} seleccionadas`;
+
+        // Contador pequeño
+        const lblCont = document.getElementById('lbl-salsa-contador');
+        if (lblCont) {
+            lblCont.textContent = `${sel} / ${total} seleccionada${total > 1 ? 's' : ''}`;
+            lblCont.className = sel === total
+                ? 'text-xs font-black text-blue-600'
+                : 'text-xs font-black text-slate-500';
+        }
+
+        // Extra gourmet
+        const lblExtra = document.getElementById('lbl-salsa-extra');
+        if (lblExtra) {
+            if (extra > 0) {
+                lblExtra.textContent = `+$${extra.toFixed(2)} extra`;
+                lblExtra.classList.remove('hidden');
+            } else {
+                lblExtra.classList.add('hidden');
+            }
+        }
+
+        // Barra progreso
+        const barra = document.getElementById('barra-salsa-progreso');
+        if (barra) {
+            const pct = total > 0 ? (sel / total) * 100 : 0;
+            barra.style.width = pct + '%';
+            barra.className = `h-full rounded-full transition-all duration-300 ${
+                sel === total ? 'bg-blue-500' : 'bg-blue-300'
+            }`;
+        }
+
+        // Botón Confirmar
+        const btnConf = document.getElementById('btn-confirmar-salsas');
+        if (btnConf) {
+            btnConf.disabled = sel !== total;
+            if (sel === total) {
+                const label = sel === 1
+                    ? `Confirmar: ${_salsasMarcadas[0].nombre}`
+                    : `Confirmar ${sel} salsas`;
+                btnConf.textContent = label;
+            } else {
+                btnConf.textContent = total === 1 ? 'Confirmar salsa' : `Elige ${total - sel} más`;
+            }
+        }
+    }
+
+    // Se llama al presionar Confirmar
+    function _confirmarSalsas() {
+        const extra = _salsasMarcadas.reduce((s, x) => s + x.extra, 0);
+
+        window.estadoPersonalizacion.salsasElegidas  = _salsasMarcadas.map(s => s.nombre);
+        window.estadoPersonalizacion.extraSalsas     = extra;
+        window.estadoPersonalizacion.detalles.push(...window.estadoPersonalizacion.salsasElegidas);
+        window.estadoPersonalizacion.precioBase     += extra;
+
+        // Eliminar el botón Confirmar que se añadió al panel
+        const btnConf = document.getElementById('btn-confirmar-salsas');
+        if (btnConf) btnConf.remove();
+
+        evaluarPapasPorTamano(window.estadoPersonalizacion.tamanoSeleccionado, null);
     }
 
     // --- FINALIZACIÓN AL TICKET ---
@@ -528,6 +820,10 @@
         const panel = document.getElementById('panel-variantes-comanda');
         if (panel) panel.classList.add('opacity-0', 'translate-y-8');
         if (modal) modal.classList.add('opacity-0');
+        // Limpiar el botón Confirmar de salsas si quedó montado
+        const btnConf = document.getElementById('btn-confirmar-salsas');
+        if (btnConf) btnConf.remove();
+        _salsasMarcadas = [];
         setTimeout(() => {
             if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
             window.productoActivoParaComanda = null;
