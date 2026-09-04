@@ -1,0 +1,29 @@
+{
+  "resources/js/app.js": {
+    "file": "assets/app-BH6iyCoC.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/cobro.js": {
+    "file": "assets/cobro-6DCIe63u.js",
+    "name": "cobro",
+    "src": "resources/js/cobro.js",
+    "isEntry": true
+  },
+  "resources/js/mesas.js": {
+    "file": "assets/mesas-8_gPrwNP.js",
+    "name": "mesas",
+    "src": "resources/js/mesas.js",
+    "isEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-B9B5n69p.css",
+    "src": "resources/sass/app.scss",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  }
+}
