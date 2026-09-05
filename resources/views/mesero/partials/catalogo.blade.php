@@ -249,6 +249,11 @@
         document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: Selecciona la presentación';
         document.getElementById('btn-volver-tamano').classList.add('hidden');
 
+        // Limpiar botón de confirmar salsas si quedó de un paso anterior
+        const btnConfPrev = document.getElementById('btn-confirmar-salsas');
+        if (btnConfPrev) btnConfPrev.remove();
+        _salsasMarcadas = [];
+
         const cont = document.getElementById('lista-opciones-variantes');
         cont.innerHTML = '';
 
@@ -475,10 +480,10 @@
             opcionesPapas.push({ nombre: 'c/ Papas Gajo', extra: Number(extraGajo), subtitulo: `+$${Number(extraGajo).toFixed(2)}` });
         }
 
-        // Usar precioBase del estado (ya incluye precio de variante + extras de salsas)
-        const precioBaseAcumulado = window.estadoPersonalizacion.precioBase > 0
-            ? window.estadoPersonalizacion.precioBase
-            : parseFloat(prod.precio || 0) + (window.estadoPersonalizacion.extraAcumulado || 0);
+        // precioBase ya incluye precio de variante + extras de salsas.
+        // extraAcumulado cubre cubiertas de banderilla u otros extras de paso anterior.
+        const precioBaseAcumulado = (window.estadoPersonalizacion.precioBase || parseFloat(prod.precio || 0))
+            + (window.estadoPersonalizacion.extraAcumulado || 0);
 
         opcionesPapas.forEach(op => {
             const totalFinalOpcion = precioBaseAcumulado + op.extra;
