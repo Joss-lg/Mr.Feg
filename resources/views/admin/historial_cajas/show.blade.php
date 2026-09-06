@@ -271,8 +271,9 @@
                                 </td>
                                 <td class="py-4 px-4">
                                     @if($ordenIdReal)
+                                        {{-- SE CAMBIÓ LA FUNCIÓN AQUÍ A imprimirTicketDirecto() --}}
                                         <button type="button"
-                                           onclick="abrirTicketModal('{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}')"
+                                           onclick="imprimirTicketDirecto('{{ route('admin.caja.ticket.imprimir.orden', $ordenIdReal) }}')"
                                            class="w-9 h-9 rounded-xl border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all flex items-center justify-center mx-auto shadow-sm"
                                            title="Reimprimir ticket">
                                             <i class="fas fa-print text-xs"></i>
@@ -340,30 +341,31 @@
 
 </div>
 
-@include('admin.cobrar.modals.ticket-preview')
+{{-- MODAL COMENTADO PARA EVITAR QUE SE ABRA --}}
+{{-- @include('admin.cobrar.modals.ticket-preview') --}}
 
 @push('scripts')
 <script>
-function abrirTicketModal(url) {
-    const modal      = document.getElementById('modal-ticket-preview');
-    const iframe     = document.getElementById('ticket-preview-iframe');
-    const btnCerrar  = document.getElementById('btn-cerrar-ticket-preview');
-    const btnCerrarX = document.getElementById('btn-cerrar-x-ticket-preview');
-    const btnImprimir = document.getElementById('btn-imprimir-ticket-preview');
-
-    if (!modal || !iframe) return;
-
-    iframe.src = url;
-    modal.classList.remove('hidden');
-
-    const cerrar = () => { modal.classList.add('hidden'); iframe.src = ''; };
-    btnCerrar.onclick  = cerrar;
-    btnCerrarX.onclick = cerrar;
-
-    btnImprimir.onclick = () => {
-        try { iframe.contentWindow.print(); } catch(e) { window.open(url, '_blank'); }
+    // --- NUEVA FUNCIÓN PARA IMPRIMIR DIRECTO CON URL RECIBIDA COMO PARÁMETRO ---
+    window.imprimirTicketDirecto = function(url) {
+        // Creamos un iframe invisible para cargar el ticket en segundo plano
+        let printFrame = document.getElementById('frame-impresion-ticket');
+        if (!printFrame) {
+            printFrame = document.createElement('iframe');
+            printFrame.id = 'frame-impresion-ticket';
+            printFrame.style.display = 'none';
+            document.body.appendChild(printFrame);
+        }
+        
+        // Le asignamos la URL del ticket que recibimos
+        printFrame.src = url;
+        
+        // Cuando termine de cargar el ticket internamente, disparamos la impresión
+        printFrame.onload = function() {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+        };
     };
-}
 </script>
 @endpush
 

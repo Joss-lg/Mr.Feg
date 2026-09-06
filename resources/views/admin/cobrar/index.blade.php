@@ -80,7 +80,7 @@
 @include('admin.cobrar.modals.metodo-pago')
 @include('admin.cobrar.modals.exito')
 @include('admin.cobrar.modals.error')
-@include('admin.cobrar.modals.ticket-preview')
+{{-- @include('admin.cobrar.modals.ticket-preview') <-- MODAL COMENTADO PARA EVITAR QUE SE ABRA --}}
 @if(auth()->user()->tienePermiso('Caja', 'eliminar'))
     @include('admin.cobrar.modals.cancelar-cuenta')
 @endif
@@ -89,6 +89,29 @@
 @push('scripts')
 @vite(['resources/js/cobro.js'])
 <script>
+    // --- NUEVA FUNCIÓN PARA IMPRIMIR DIRECTO ---
+    window.imprimirTicketDirecto = function() {
+        const url = window.COBRO_CONFIG.urlTicket;
+        
+        // Creamos un iframe invisible para cargar el ticket sin salir de la caja
+        let printFrame = document.getElementById('frame-impresion-ticket');
+        if (!printFrame) {
+            printFrame = document.createElement('iframe');
+            printFrame.id = 'frame-impresion-ticket';
+            printFrame.style.display = 'none';
+            document.body.appendChild(printFrame);
+        }
+        
+        // Le asignamos la URL del ticket
+        printFrame.src = url;
+        
+        // Cuando termine de cargar el ticket internamente, disparamos la impresión
+        printFrame.onload = function() {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+        };
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         window.COBRO_CONFIG = {
             mesaId: {{ $mesa->id }},

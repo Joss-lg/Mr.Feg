@@ -144,7 +144,9 @@
 
             {{-- 6. Botones Finales --}}
             <div class="grid grid-cols-2 gap-4 pb-12">
-                <button id="btn-ticket" class="bg-slate-50 hover:bg-slate-100 text-slate-800 font-black py-5 rounded-2xl border border-slate-200 transition-all shadow-sm active:scale-95">TICKET</button>
+                {{-- AQUÍ SE REALIZÓ EL CAMBIO PARA QUE IMPRIMA DIRECTAMENTE --}}
+                <button type="button" onclick="imprimirTicketDirecto()" class="bg-slate-50 hover:bg-slate-100 text-slate-800 font-black py-5 rounded-2xl border border-slate-200 transition-all shadow-sm active:scale-95">TICKET</button>
+                
                 {{-- ID btn-procesar-pago para JS --}}
                 <button id="btn-procesar-pago" data-dividido="{{ !empty($division) ? '1' : '0' }}" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-5 rounded-2xl transition-all shadow-md shadow-emerald-500/20 active:scale-95">FINALIZAR</button>
             </div>
