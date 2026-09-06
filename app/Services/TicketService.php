@@ -186,6 +186,20 @@ class TicketService
         // la orden): se fijan la primera vez que se pide este ticket.
         $ticketImpreso = $this->obtenerOFolio($primeraOrden, $mesa);
 
+        // --- Método de pago pre-indicado por el mesero (solo se usa cuando
+        //     el ticket se imprime ANTES de cobrar, p.ej. para enviarlo con
+        //     el repartidor). Una vez que hay pagos confirmados en $pagos,
+        //     este campo es meramente informativo y no se muestra en el ticket.
+        $metodoPagoPendiente    = null;
+        $referenciaPagoPendiente = null;
+        if ($pagos->isEmpty()) {
+            $ordenConMetodo = $ordenes->first(fn($o) => !empty($o->metodo_pago));
+            if ($ordenConMetodo) {
+                $metodoPagoPendiente     = $ordenConMetodo->metodo_pago;
+                $referenciaPagoPendiente = $ordenConMetodo->referencia_pago;
+            }
+        }
+
         return [
             'folio'          => $ticketImpreso->folio_formateado, // "001", "002"...
             'fecha'          => $ticketImpreso->impreso_en->format('d/m/Y'),
@@ -196,7 +210,7 @@ class TicketService
             'items'          => $items->values(),
             'subtotal'       => $subtotalBruto,
             'descuentoTotal' => $descuentoTotal,
-            // --- NUEVO: descuento aplicado en Caja (si lo hubo) ---
+            // --- descuento aplicado en Caja (si lo hubo) ---
             'descuentoCajaPorcentaje' => $descuentoCajaPorcentaje,
             'descuentoCajaMonto'      => $descuentoCajaMonto,
             'iva'            => $iva,
@@ -212,7 +226,6 @@ class TicketService
             'direccionLote'       => $direccion?->lote,
             'direccionColonia'    => $direccion?->colonia,
             'direccionReferencia' => $direccion?->referencia,
-            // --- NUEVO ---
             'esDelivery'            => $esDelivery,
             'plataformaNombre'      => $esDelivery ? optional($mesa->plataformaDelivery)->nombre : null,
             'comisionPorcentaje'    => $comisionPorcentaje,
@@ -222,6 +235,9 @@ class TicketService
             'comisionTotal'         => $comisionTotal,
             'total'          => round($totalCalculado, 2),
             'pagos'          => $pagos,
+            // Pago pre-indicado (visible en ticket antes de confirmar cobro)
+            'metodoPagoPendiente'     => $metodoPagoPendiente,
+            'referenciaPagoPendiente' => $referenciaPagoPendiente,
             'negocio'        => ['nombre' => 'Agostadero'],
         ];
     }

@@ -325,15 +325,18 @@ public function transferirProductos(Request $request)
         $total = $subtotalConDescuento + $iva + $propina;
 
         return view('mesero.precuenta', [
-            'mesa'      => $mesa,
-            'orden'     => $orden,
-            'detalles'  => $detalles,
-            'subtotal'  => $subtotal,
-            'descuento' => $descuento,
-            'iva'       => $iva,
-            'propina'   => $propina, // <-- Pasamos la propina a la vista
-            'total'     => $total,
-            'fecha'     => now(),
+            'mesa'           => $mesa,
+            'orden'          => $orden,
+            'detalles'       => $detalles,
+            'subtotal'       => $subtotal,
+            'descuento'      => $descuento,
+            'iva'            => $iva,
+            'propina'        => $propina,
+            'total'          => $total,
+            'fecha'          => now(),
+            // Método de pago pre-indicado por el mesero (delivery)
+            'metodoPago'     => $orden->metodo_pago ?? null,
+            'referenciaPago' => $orden->referencia_pago ?? null,
         ]);
     }
 

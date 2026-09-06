@@ -241,11 +241,10 @@
         </div>
     </div>
 
-    <!-- Pagos -->
+    <!-- Pagos confirmados -->
     @if(isset($pagos) && collect($pagos)->isNotEmpty())
         <div class="dashed-line"></div>
         <div class="font-bold" style="font-size: 13px; margin-bottom: 5px;">FORMA DE PAGO:</div>
-        
         @foreach($pagos as $pago)
             <div style="margin-bottom: 5px;">
                 <div class="flex-between font-bold" style="font-size: 14px;">
@@ -257,6 +256,23 @@
                 @endif
             </div>
         @endforeach
+
+    {{-- Método pre-indicado (ticket impreso ANTES de cobrar, p.ej. para el repartidor) --}}
+    @elseif(!empty($metodoPagoPendiente))
+        <div class="dashed-line"></div>
+        <div class="font-bold" style="font-size: 13px; margin-bottom: 4px;">FORMA DE PAGO INDICADA:</div>
+        <div style="border: 1px dashed #000; padding: 5px 4px; margin-bottom: 4px;">
+            <div class="flex-between font-bold" style="font-size: 15px;">
+                <span>{{ mb_strtoupper($metodoPagoPendiente) }}</span>
+                <span>${{ number_format($total, 2) }}</span>
+            </div>
+            @if(!empty($referenciaPagoPendiente))
+                <div style="font-size: 12px; color: #333;">REF: {{ mb_strtoupper($referenciaPagoPendiente) }}</div>
+            @endif
+            <div style="font-size: 10px; margin-top: 4px; text-align: center;">
+                PENDIENTE DE CONFIRMAR EN CAJA
+            </div>
+        </div>
     @endif
 
     <div class="dashed-line"></div>

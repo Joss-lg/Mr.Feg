@@ -112,6 +112,34 @@
         <span>${{ number_format($totalPrecuenta, 2) }}</span>
     </div>
 
+    {{-- Método de pago pre-indicado (solo delivery) --}}
+    @if($mesa->esDelivery() && !empty($metodoPago))
+        @php
+            $iconoPago = match($metodoPago) {
+                'efectivo'       => '💵',
+                'tarjeta'        => '💳',
+                'transferencia'  => '🏦',
+                default          => '💰',
+            };
+            $nombrePago = match($metodoPago) {
+                'efectivo'      => 'EFECTIVO',
+                'tarjeta'       => 'TARJETA',
+                'transferencia' => 'TRANSFERENCIA',
+                default         => strtoupper($metodoPago),
+            };
+        @endphp
+        <div style="margin-top: 8px; padding: 6px 4px; border: 1px dashed #000; text-align: center; font-size: 12px;">
+            <div style="font-weight: bold; font-size: 13px;">{{ $iconoPago }} MÉTODO DE PAGO INDICADO</div>
+            <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">{{ $nombrePago }}</div>
+            @if(!empty($referenciaPago))
+                <div style="font-size: 11px; margin-top: 2px;">REF: {{ strtoupper($referenciaPago) }}</div>
+            @endif
+            <div style="font-size: 10px; margin-top: 4px; color: #555;">
+                SUJETO A CAMBIO AL CONFIRMAR EN CAJA
+            </div>
+        </div>
+    @endif
+
     {{-- Footer --}}
     <div class="text-center mt-1" style="margin-top: 12px; font-size: 11px; line-height: 1.5;">
         ESTA PRE-CUENTA ES SOLO INFORMATIVA.<br>
