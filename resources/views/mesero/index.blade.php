@@ -136,6 +136,9 @@
                 comandaPrecuenta: @json(route('mesero.comanda.precuenta', ['mesa' => $mesaId])),
                 comandaCancelarDetalle: @json(route('mesero.comanda.detalle.cancelar', ['detalle' => 0])),
                 meserosActivos: @json(route('mesero.meseros.activos')),
+                deliveryPagar: @json(route('mesero.delivery.pagar')),
+                deliveryIndicarPago: @json(route('mesero.delivery.indicar-pago')),
+                ticketOrden: @json(route('admin.caja.ticket.imprimir.orden', ['ordenId' => '__ORDEN_ID__'])),
             }
         };
     </script>

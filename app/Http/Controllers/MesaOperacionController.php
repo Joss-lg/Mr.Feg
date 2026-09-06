@@ -329,6 +329,147 @@ class MesaOperacionController extends Controller
     // ==========================================================================
 
     /**
+     * Registra el MÉTODO de pago indicado por el mesero en la comanda de
+     * domicilio. NO cobra ni libera la mesa — solo guarda metodo_pago y
+     * referencia_pago en la orden para que Caja la vea como "pago pendiente"
+     * y pueda confirmar el cobro con el método pre-seleccionado.
+     */
+    public function indicarPagoDelivery(Request $request): JsonResponse
+    {
+        $request->validate([
+            'mesa_id'    => 'required|integer|exists:mesas,id',
+            'orden_id'   => 'nullable|integer|exists:ordenes,id',
+            'metodo'     => 'required|string|in:efectivo,tarjeta,transferencia',
+            'referencia' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $mesa = Mesa::findOrFail($request->mesa_id);
+
+            $orden = $request->filled('orden_id')
+                ? Orden::where('id', $request->orden_id)->where('mesa_id', $mesa->id)->first()
+                : $mesa->ordenesActivas()->latest()->first();
+
+            if (!$orden) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró la orden activa para esta mesa.',
+                ], 422);
+            }
+
+            $orden->update([
+                'metodo_pago'     => $request->metodo,
+                'referencia_pago' => $request->referencia ?: null,
+            ]);
+
+            return response()->json(['success' => true]);
+
+        } catch (\Exception $e) {
+            Log::error('indicarPagoDelivery: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Procesa el pago de un pedido a domicilio directamente desde la comanda
+     * del mesero. Registra en caja y libera la mesa sin pasar por el módulo
+     * de Caja. Funciona para domicilio normal y mesas de plataforma delivery.
+     */
+    public function procesarPagoDelivery(Request $request): JsonResponse
+    {
+        $request->validate([
+            'mesa_id'  => 'required|integer|exists:mesas,id',
+            'orden_id' => 'nullable|integer|exists:ordenes,id',
+            'pagos'    => 'required|array|min:1',
+            'pagos.*.metodo'     => 'required|string|in:efectivo,tarjeta,transferencia',
+            'pagos.*.monto'      => 'required|numeric|min:0.01',
+            'pagos.*.referencia' => 'nullable|string|max:255',
+        ]);
+
+        // Requiere caja abierta para registrar el cobro en el historial
+        $cajaActiva = CajaMovimiento::where('estado', 'abierta')->first();
+        if (!$cajaActiva) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay ningún turno de caja abierto. Pide al cajero que abra un turno antes de cobrar.',
+            ], 422);
+        }
+
+        try {
+            $resultado = DB::transaction(function () use ($request, $cajaActiva) {
+                $mesa  = Mesa::findOrFail($request->mesa_id);
+
+                // Buscar la orden: por orden_id si viene, si no la más reciente activa
+                if ($request->filled('orden_id')) {
+                    $orden = Orden::where('id', $request->orden_id)
+                        ->where('mesa_id', $mesa->id)
+                        ->first();
+                } else {
+                    $orden = $mesa->ordenesActivas()->latest()->first();
+                }
+
+                if (!$orden) {
+                    throw new \Exception('No se encontró una orden activa para esta mesa.');
+                }
+
+                // Registrar cada pago en flujo de caja
+                foreach ($request->pagos as $pago) {
+                    $monto  = floatval($pago['monto']);
+                    $metodo = strtolower($pago['metodo']);
+
+                    if ($monto <= 0) continue;
+
+                    FlujoCaja::create([
+                        'caja_movimiento_id' => $cajaActiva->id,
+                        'tipo'               => 'ingreso',
+                        'categoria'          => 'Ventas',
+                        'concepto'           => 'Pago Domicilio — ' . ($orden->nombre_cliente ?? $orden->nombre_temporal ?? "Mesa #{$mesa->numero}"),
+                        'monto'              => $monto,
+                        'metodo_pago'        => $metodo,
+                        'referencia'         => !empty($pago['referencia']) ? trim($pago['referencia']) : null,
+                        'fecha'              => now(),
+                        'registrado_por'     => auth()->id(),
+                        'flujoable_id'       => $orden->id,
+                        'flujoable_type'     => get_class($orden),
+                    ]);
+                }
+
+                // Programa de lealtad
+                if ($orden->cliente_id) {
+                    $total = collect($request->pagos)->sum(fn($p) => floatval($p['monto']));
+                    if ($total >= 150) {
+                        FidelidadCliente::firstOrCreate(
+                            ['cliente_id' => $orden->cliente_id],
+                            ['compras_acumuladas' => 0, 'total_canjes_realizados' => 0]
+                        )->increment('compras_acumuladas');
+                    }
+                }
+
+                // Liberar la mesa (marca órdenes como pagadas, resetea mesa)
+                $this->cajaService->liberarMesa($mesa);
+
+                return $orden->id;
+            });
+
+            return response()->json([
+                'success'  => true,
+                'orden_id' => $resultado,
+                'message'  => 'Pago registrado correctamente.',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('procesarPagoDelivery: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
      * Inicia la división de la cuenta de una mesa: 'equitativa' (partes
      * iguales) o 'por_producto' (cada quien paga lo que consumió).
      */

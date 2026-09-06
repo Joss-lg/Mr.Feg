@@ -667,6 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     
     if (numeroMesa.startsWith('DOM') || urlParams.get('tipo_pedido') === 'domicilio') {
+        window.tipoPedidoActual = 'domicilio'; // <-- asegurar que la variable global quede seteada
         const lblBoton = document.getElementById('lbl-tipo-pedido-actual');
         const lblTitulo = document.getElementById('lbl-titulo-tarjeta');
         if (lblTitulo) lblTitulo.textContent = 'A Domicilio';
@@ -1360,4 +1361,324 @@ window.canjearPremioLealtad = function(descripcionPremio, clienteId = null) {
         alert('Error de red al procesar el canje.');
     });
 };
+</script>
+
+{{-- ==========================================
+     MODAL DE PAGO DELIVERY
+     Se abre automáticamente al enviar una orden de delivery.
+     Permite cobrar en efectivo, tarjeta, transferencia o mixto
+     sin que el pedido pase por caja.
+     ========================================== --}}
+<div id="modalPagoDelivery" class="modal-overlay hidden fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="modal-sheet w-full sm:max-w-md max-h-[95vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-white border border-slate-200 shadow-2xl">
+
+        {{-- Handle bar móvil --}}
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mt-4 mb-2"></div>
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-6 pt-4 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-md shadow-emerald-500/20">
+                    <i class="fas fa-motorcycle text-white text-sm"></i>
+                </span>
+                <div>
+                    <h2 class="text-base font-black text-slate-800 tracking-tight">Cobrar Delivery</h2>
+                    <p class="text-[11px] text-slate-500">Selecciona el método de pago</p>
+                </div>
+            </div>
+            <button type="button" onclick="cerrarModalPagoDelivery()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4">
+
+            {{-- Resumen del total --}}
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Total a cobrar</p>
+                <p id="delivery-total-display" class="text-3xl font-black text-slate-800">$0.00</p>
+            </div>
+
+            {{-- Botones de método simple --}}
+            <div id="delivery-seccion-simple" class="space-y-2">
+                <button type="button" class="delivery-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="efectivo">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <i class="fas fa-money-bill-wave text-emerald-600 text-sm"></i>
+                    </span>
+                    Efectivo
+                </button>
+                <button type="button" class="delivery-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-violet-400 hover:bg-violet-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="tarjeta">
+                    <span class="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
+                        <i class="fas fa-credit-card text-violet-600 text-sm"></i>
+                    </span>
+                    Tarjeta
+                </button>
+                <button type="button" class="delivery-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-sky-400 hover:bg-sky-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="transferencia">
+                    <span class="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center">
+                        <i class="fas fa-building-columns text-sky-600 text-sm"></i>
+                    </span>
+                    Transferencia
+                </button>
+
+                {{-- Divisor --}}
+                <div class="relative py-1">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+                    <div class="relative flex justify-center">
+                        <span class="bg-white px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Pago Mixto</span>
+                    </div>
+                </div>
+
+                <button type="button" id="delivery-btn-mixto" class="w-full text-left px-4 py-3.5 rounded-2xl border-2 border-dashed border-slate-300 bg-white hover:border-amber-400 hover:bg-amber-50 transition-all font-black text-amber-600 flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <i class="fas fa-layer-group text-amber-600 text-sm"></i>
+                    </span>
+                    Combinar Métodos
+                </button>
+            </div>
+
+            {{-- Sección pago mixto --}}
+            <div id="delivery-seccion-mixto" class="hidden space-y-3">
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase font-black tracking-wider">Total</p>
+                        <p id="delivery-comb-total" class="text-lg font-black text-slate-800">$0.00</p>
+                    </div>
+                    <div>
+                        <p id="delivery-comb-label-restante" class="text-[10px] text-slate-400 uppercase font-black tracking-wider">Restante</p>
+                        <p id="delivery-comb-restante" class="text-lg font-black text-rose-500">$0.00</p>
+                    </div>
+                </div>
+
+                {{-- Efectivo mixto --}}
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-money-bill-wave text-emerald-600 text-xs w-4"></i>
+                        <label class="text-xs font-black uppercase text-emerald-600 min-w-[80px]">Efectivo</label>
+                        <input type="number" id="delivery-mix-efectivo" step="0.01" min="0" placeholder="0.00"
+                            class="flex-1 text-right bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-mono font-bold text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 transition-all">
+                    </div>
+                </div>
+
+                {{-- Tarjeta mixta --}}
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-credit-card text-violet-600 text-xs w-4"></i>
+                        <label class="text-xs font-black uppercase text-violet-600 min-w-[80px]">Tarjeta</label>
+                        <input type="number" id="delivery-mix-tarjeta" step="0.01" min="0" placeholder="0.00"
+                            class="flex-1 text-right bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-mono font-bold text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all">
+                    </div>
+                    <input type="text" id="delivery-mix-ref-tarjeta" placeholder="N° Referencia / Voucher"
+                        class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20 transition-all">
+                </div>
+
+                {{-- Transferencia mixta --}}
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-building-columns text-sky-600 text-xs w-4"></i>
+                        <label class="text-xs font-black uppercase text-sky-600 min-w-[80px]">Transf.</label>
+                        <input type="number" id="delivery-mix-transferencia" step="0.01" min="0" placeholder="0.00"
+                            class="flex-1 text-right bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-800 font-mono font-bold text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-all">
+                    </div>
+                    <input type="text" id="delivery-mix-ref-transferencia" placeholder="Código de Autorización"
+                        class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-all">
+                </div>
+
+                <button type="button" id="delivery-btn-confirmar-mixto"
+                    class="w-full h-12 bg-slate-100 text-slate-400 font-black text-sm uppercase tracking-wider rounded-2xl border border-slate-200 cursor-not-allowed transition-all"
+                    disabled>
+                    Confirmar Pago Mixto
+                </button>
+
+                <button type="button" onclick="document.getElementById('delivery-seccion-simple').classList.remove('hidden'); document.getElementById('delivery-seccion-mixto').classList.add('hidden');"
+                    class="w-full h-10 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                    ← Volver a métodos simples
+                </button>
+            </div>
+
+        </div>
+
+        {{-- Footer --}}
+        <div class="px-6 pb-6 pt-2">
+            <button type="button" onclick="cerrarModalPagoDelivery()"
+                class="w-full h-11 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black text-xs uppercase tracking-widest rounded-2xl border border-slate-200 transition-all">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Modal de ticket delivery --}}
+<div id="modalTicketDelivery" class="hidden fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-[24px] w-full max-w-sm shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <span class="text-xs font-black uppercase tracking-widest text-slate-800">
+                <i class="fas fa-receipt text-emerald-500 mr-2"></i> Ticket de Pago
+            </span>
+            <button id="btn-cerrar-ticket-delivery" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs transition-all">✕</button>
+        </div>
+        <div class="p-3 bg-slate-100 max-h-[60vh] overflow-y-auto">
+            <iframe id="iframe-ticket-delivery" src="" class="w-full min-h-[50vh] border-none rounded-xl bg-white"></iframe>
+        </div>
+        <div class="grid grid-cols-2 gap-3 p-4 border-t border-slate-100">
+            <button id="btn-cerrar-ticket-delivery2" class="h-11 bg-slate-50 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-100 transition-all">Cerrar</button>
+            <button id="btn-imprimir-ticket-delivery" class="h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 hover:opacity-90 transition-all">
+                <i class="fas fa-print mr-2"></i> Imprimir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// =====================================================
+// LÓGICA MODAL PAGO DELIVERY
+// =====================================================
+(function () {
+    let _deliveryMesaId   = null;
+    let _deliveryOrdenId  = null;
+    let _deliveryTotal    = 0;
+
+    // Exponer para que comanda-envio.js lo llame
+    window.abrirModalPagoDelivery = function (total, mesaId, ordenId) {
+        _deliveryTotal   = parseFloat(total) || 0;
+        _deliveryMesaId  = mesaId;
+        _deliveryOrdenId = ordenId;
+
+        // Reset UI
+        document.getElementById('delivery-total-display').innerText = '$' + _deliveryTotal.toFixed(2);
+        document.getElementById('delivery-comb-total').innerText    = '$' + _deliveryTotal.toFixed(2);
+        document.getElementById('delivery-comb-restante').innerText = '$' + _deliveryTotal.toFixed(2);
+        document.getElementById('delivery-seccion-simple').classList.remove('hidden');
+        document.getElementById('delivery-seccion-mixto').classList.add('hidden');
+        ['delivery-mix-efectivo','delivery-mix-tarjeta','delivery-mix-transferencia',
+         'delivery-mix-ref-tarjeta','delivery-mix-ref-transferencia'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const btnMixto = document.getElementById('delivery-btn-confirmar-mixto');
+        if (btnMixto) { btnMixto.disabled = true; btnMixto.className = btnMixto.className.replace('emerald','slate').replace('cursor-pointer','cursor-not-allowed'); }
+
+        document.getElementById('modalPagoDelivery').classList.remove('hidden');
+    };
+
+    window.cerrarModalPagoDelivery = function () {
+        document.getElementById('modalPagoDelivery').classList.add('hidden');
+    };
+
+    // Pago simple (un solo método)
+    document.querySelectorAll('.delivery-metodo-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const metodo = this.dataset.metodo;
+            procesarPagoDelivery([{ metodo, monto: _deliveryTotal, referencia: null }]);
+        });
+    });
+
+    // Activar sección mixta
+    document.getElementById('delivery-btn-mixto').addEventListener('click', function () {
+        document.getElementById('delivery-seccion-simple').classList.add('hidden');
+        document.getElementById('delivery-seccion-mixto').classList.remove('hidden');
+    });
+
+    // Recalcular restante en pago mixto
+    ['delivery-mix-efectivo','delivery-mix-tarjeta','delivery-mix-transferencia'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', actualizarRestanteDelivery);
+    });
+
+    function actualizarRestanteDelivery() {
+        const ef = parseFloat(document.getElementById('delivery-mix-efectivo').value)      || 0;
+        const ta = parseFloat(document.getElementById('delivery-mix-tarjeta').value)       || 0;
+        const tr = parseFloat(document.getElementById('delivery-mix-transferencia').value) || 0;
+        const suma = ef + ta + tr;
+        const restante = Math.max(0, _deliveryTotal - suma);
+
+        document.getElementById('delivery-comb-restante').innerText = '$' + restante.toFixed(2);
+
+        const btn = document.getElementById('delivery-btn-confirmar-mixto');
+        if (suma >= _deliveryTotal - 0.01 && suma > 0) {
+            btn.disabled = false;
+            btn.className = 'w-full h-12 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase tracking-wider rounded-2xl border border-emerald-500 cursor-pointer transition-all';
+        } else {
+            btn.disabled = true;
+            btn.className = 'w-full h-12 bg-slate-100 text-slate-400 font-black text-sm uppercase tracking-wider rounded-2xl border border-slate-200 cursor-not-allowed transition-all';
+        }
+    }
+
+    // Confirmar pago mixto
+    document.getElementById('delivery-btn-confirmar-mixto').addEventListener('click', function () {
+        const pagos = [];
+        const ef = parseFloat(document.getElementById('delivery-mix-efectivo').value) || 0;
+        const ta = parseFloat(document.getElementById('delivery-mix-tarjeta').value)  || 0;
+        const tr = parseFloat(document.getElementById('delivery-mix-transferencia').value) || 0;
+
+        if (ef > 0) pagos.push({ metodo: 'efectivo', monto: ef, referencia: null });
+        if (ta > 0) pagos.push({ metodo: 'tarjeta',  monto: ta, referencia: document.getElementById('delivery-mix-ref-tarjeta').value || null });
+        if (tr > 0) pagos.push({ metodo: 'transferencia', monto: tr, referencia: document.getElementById('delivery-mix-ref-transferencia').value || null });
+
+        if (pagos.length === 0) return;
+        procesarPagoDelivery(pagos);
+    });
+
+    function procesarPagoDelivery(pagos) {
+        const config   = window.ComandaConfig || {};
+        const url      = config.rutas && config.rutas.deliveryPagar;
+        const csrf     = config.csrfToken;
+
+        if (!url || !_deliveryMesaId) {
+            mostrarError('Error de configuración. Recarga la página.');
+            return;
+        }
+
+        // Deshabilitar botones mientras procesa
+        document.querySelectorAll('#modalPagoDelivery button').forEach(b => b.disabled = true);
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ mesa_id: _deliveryMesaId, pagos })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                cerrarModalPagoDelivery();
+                mostrarTicketDelivery(data.orden_id || _deliveryOrdenId);
+            } else {
+                mostrarError(data.message || 'Error al procesar el pago.');
+                document.querySelectorAll('#modalPagoDelivery button').forEach(b => b.disabled = false);
+            }
+        })
+        .catch(() => {
+            mostrarError('Error de red. Intenta de nuevo.');
+            document.querySelectorAll('#modalPagoDelivery button').forEach(b => b.disabled = false);
+        });
+    }
+
+    function mostrarTicketDelivery(ordenId) {
+        const config    = window.ComandaConfig || {};
+        const urlBase   = config.rutas && config.rutas.ticketOrden;
+        if (!urlBase || !ordenId) {
+            // Sin URL de ticket, ir al dashboard directo
+            setTimeout(() => window.location.href = (config.rutas && config.rutas.dashboard) || '/', 800);
+            return;
+        }
+
+        const urlTicket = urlBase.replace('__ORDEN_ID__', ordenId);
+        const modal     = document.getElementById('modalTicketDelivery');
+        const iframe    = document.getElementById('iframe-ticket-delivery');
+
+        iframe.src = urlTicket;
+        modal.classList.remove('hidden');
+
+        const cerrar = () => {
+            modal.classList.add('hidden');
+            window.location.href = (config.rutas && config.rutas.dashboard) || '/';
+        };
+
+        document.getElementById('btn-cerrar-ticket-delivery').onclick  = cerrar;
+        document.getElementById('btn-cerrar-ticket-delivery2').onclick = cerrar;
+        document.getElementById('btn-imprimir-ticket-delivery').onclick = () => {
+            try { iframe.contentWindow.print(); } catch(e) { window.open(urlTicket, '_blank'); }
+        };
+    }
+})();
 </script>

@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/delivery/crear', [DeliveryController::class, 'crear'])->name('delivery.crear');
             Route::delete('/delivery/{mesa}/cancelar-vacio', [DeliveryController::class, 'cancelarVacio'])->name('delivery.cancelar-vacio');
             Route::match(['get', 'post'], '/pedido-rapido', [ComandaController::class, 'crearPedidoRapido'])->name('pedido.rapido');
+            // Cobro inmediato para pedidos de delivery (mesero cobra en el momento de enviar)
+            Route::post('/delivery/pagar', [MesaOperacionController::class, 'procesarPagoDelivery'])->name('delivery.pagar');
+            Route::post('/delivery/indicar-pago', [MesaOperacionController::class, 'indicarPagoDelivery'])->name('delivery.indicar-pago');
         });
 
         Route::patch('/comanda/detalle/{detalle}/cancelar', [MesaController::class, 'cancelarProducto'])->name('comanda.detalle.cancelar');

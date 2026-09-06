@@ -128,8 +128,34 @@
             urlDivisionIniciar: "{{ route('admin.caja.division.iniciar') }}",
             urlDivisionAsignar: "{{ route('admin.caja.division.asignar') }}",
             urlDivisionCancelar: "{{ route('admin.caja.division.cancelar') }}",
-            division: @json($division ?? null)
+            division: @json($division ?? null),
+            // Pre-selección de método indicado por el mesero (domicilio)
+            metodoPago: @json($orden->metodo_pago ?? null),
+            referenciaPago: @json($orden->referencia_pago ?? null),
         };
+
+        // Si el mesero ya indicó el método de pago, pre-seleccionarlo
+        const metodoPre = window.COBRO_CONFIG.metodoPago;
+        if (metodoPre) {
+            // Esperar a que cobro.js inicialice los listeners
+            document.addEventListener('cobro:ready', () => _preseleccionarMetodo(metodoPre), { once: true });
+            // Fallback por si el evento no se dispara
+            setTimeout(() => _preseleccionarMetodo(metodoPre), 800);
+        }
+
+        function _preseleccionarMetodo(metodo) {
+            // Buscar el botón de método correspondiente y simularlo
+            const btn = document.querySelector(`.metodo-btn[data-metodo="${metodo}"]`);
+            if (btn) {
+                btn.click();
+                // Si hay referencia guardada, rellenar el campo
+                const refPago = window.COBRO_CONFIG.referenciaPago;
+                if (refPago) {
+                    const inputRef = document.getElementById('referencia');
+                    if (inputRef) inputRef.value = refPago;
+                }
+            }
+        }
 
         // --- DESCUENTO DE LA CUENTA (movido desde el módulo de Mesas) ---
         const btnDescuento = document.getElementById('btn-aplicar-descuento-caja');

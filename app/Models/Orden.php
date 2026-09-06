@@ -45,6 +45,7 @@ class Orden extends Model
         'total',
         'propina',
         'metodo_pago',
+        'referencia_pago',
         'abierta_el',
         'cerrada_el',
         'cuenta_dividida',

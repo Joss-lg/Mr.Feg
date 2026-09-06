@@ -58,6 +58,24 @@
                             <span class="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-[#f59e0b]/15 text-[#d97706] border border-[#f59e0b]/30 mb-2 shadow-xs">
                                 <i class="fas fa-motorcycle text-[9px]"></i> A Domicilio
                             </span>
+                            @php $metodoPago = $cuenta->metodo_pago ?? null; @endphp
+                            @if($metodoPago)
+                                @php
+                                    $metodoBadge = match($metodoPago) {
+                                        'efectivo'      => ['icon'=>'fa-money-bill-wave','color'=>'bg-emerald-50 text-emerald-700 border-emerald-200','label'=>'Efectivo'],
+                                        'tarjeta'       => ['icon'=>'fa-credit-card',    'color'=>'bg-blue-50 text-blue-700 border-blue-200',    'label'=>'Tarjeta'],
+                                        'transferencia' => ['icon'=>'fa-exchange-alt',   'color'=>'bg-violet-50 text-violet-700 border-violet-200','label'=>'Transferencia'],
+                                        default         => ['icon'=>'fa-circle-question','color'=>'bg-slate-50 text-slate-600 border-slate-200',  'label'=>ucfirst($metodoPago)],
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg border mb-2 shadow-xs {{ $metodoBadge['color'] }}">
+                                    <i class="fas {{ $metodoBadge['icon'] }} text-[9px]"></i> {{ $metodoBadge['label'] }}
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 border border-orange-200 mb-2 shadow-xs">
+                                    <i class="fas fa-clock text-[9px]"></i> Pago pendiente
+                                </span>
+                            @endif
                         @endif
 
                         {{-- Nombre completo del cliente o mesa --}}
