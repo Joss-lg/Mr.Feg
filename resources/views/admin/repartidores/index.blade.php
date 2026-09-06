@@ -100,7 +100,7 @@
                     {{-- Botón reimprimir ticket --}}
                     @if(auth()->user()->tienePermiso('Repartidores', 'gestionar'))
                     <button type="button"
-                        onclick="abrirTicketModal('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
+                        onclick="imprimirTicketDirecto('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
                         class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
                         <i class="fas fa-print"></i> Reimprimir Ticket
                     </button>
@@ -200,7 +200,7 @@
                     {{-- Botón reimprimir ticket --}}
                     @if(auth()->user()->tienePermiso('Repartidores', 'gestionar'))
                     <button type="button"
-                        onclick="abrirTicketModal('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
+                        onclick="imprimirTicketDirecto('{{ route('admin.repartidores.ticket.orden', $orden->id) }}')"
                         class="w-full h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-[10px] uppercase tracking-widest border border-slate-200 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
                         <i class="fas fa-print"></i> Reimprimir Ticket
                     </button>
@@ -229,27 +229,33 @@
     </div>
 </div>
 
-@include('admin.cobrar.modals.ticket-preview')
+{{-- MODAL DE TICKET COMENTADO PARA EVITAR QUE SE ABRA --}}
+{{-- @include('admin.cobrar.modals.ticket-preview') --}}
 
 <!-- Script de SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-function abrirTicketModal(url) {
-    const modal  = document.getElementById('modal-ticket-preview');
-    const iframe = document.getElementById('ticket-preview-iframe');
-    if (!modal || !iframe) return;
-
-    iframe.src = url;
-    modal.classList.remove('hidden');
-
-    const cerrar = () => { modal.classList.add('hidden'); iframe.src = ''; };
-    document.getElementById('btn-cerrar-ticket-preview')?.addEventListener('click', cerrar, { once: true });
-    document.getElementById('btn-cerrar-x-ticket-preview')?.addEventListener('click', cerrar, { once: true });
-    document.getElementById('btn-imprimir-ticket-preview')?.addEventListener('click', () => {
-        iframe.contentWindow?.print();
-    }, { once: true });
-}
+// --- NUEVA FUNCIÓN PARA IMPRIMIR DIRECTO CON URL RECIBIDA COMO PARÁMETRO ---
+window.imprimirTicketDirecto = function(url) {
+    // Creamos un iframe invisible para cargar el ticket en segundo plano
+    let printFrame = document.getElementById('frame-impresion-ticket');
+    if (!printFrame) {
+        printFrame = document.createElement('iframe');
+        printFrame.id = 'frame-impresion-ticket';
+        printFrame.style.display = 'none';
+        document.body.appendChild(printFrame);
+    }
+    
+    // Le asignamos la URL del ticket que recibimos
+    printFrame.src = url;
+    
+    // Cuando termine de cargar el ticket internamente, disparamos la impresión
+    printFrame.onload = function() {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+    };
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     
