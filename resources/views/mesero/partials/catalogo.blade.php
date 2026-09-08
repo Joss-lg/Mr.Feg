@@ -554,7 +554,6 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
         document.getElementById('titulo-modal-variantes').textContent =
             tam ? `${prod.nombre} (${tam})` : prod.nombre;
 
-        // CAMBIO: Modificamos el texto para decir "hasta X salsas"
         const labelSalsas = totalSalsas === 1 ? '1 salsa' : `hasta ${totalSalsas} salsas`;
         document.getElementById('subtitulo-modal-variantes').textContent =
             `Paso 2: Elige ${labelSalsas} — 0 / ${totalSalsas} seleccionadas`;
@@ -598,11 +597,12 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
         const btnConfirmar = document.createElement('button');
         btnConfirmar.id        = 'btn-confirmar-salsas';
         btnConfirmar.type      = 'button';
-        btnConfirmar.disabled  = true; // Sigue deshabilitado hasta que elija 1
+        // AHORA SIEMPRE ESTÁ HABILITADO
+        btnConfirmar.disabled  = false; 
         btnConfirmar.className = 'w-full mt-4 min-h-[46px] rounded-2xl bg-blue-500 text-white text-sm font-black uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95';
         
-        // CAMBIO: Texto por defecto del botón
-        btnConfirmar.textContent = totalSalsas === 1 ? 'Elige 1 salsa' : `Elige hasta ${totalSalsas} salsas`;
+        // TEXTO INICIAL
+        btnConfirmar.textContent = 'Continuar sin salsa';
         
         btnConfirmar.onclick = _confirmarSalsas;
         panel.appendChild(btnConfirmar);
@@ -689,7 +689,8 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
     }
 
     // Actualiza contador, barra de progreso, extra total y estado del botón Confirmar
-function _actualizarEstadoSalsas() {
+// Actualiza contador, barra de progreso, extra total y estado del botón Confirmar
+    function _actualizarEstadoSalsas() {
         const sel   = _salsasMarcadas.length;
         const total = _salsasTotal;
         const extra = _salsasMarcadas.reduce((s, x) => s + x.extra, 0);
@@ -698,7 +699,6 @@ function _actualizarEstadoSalsas() {
         const prod = window.productoActivoParaComanda;
         const tam  = window.estadoPersonalizacion.tamanoSeleccionado;
         
-        // CAMBIO: Texto dinámico amigable que indica el límite máximo
         const labelLimite = total === 1 ? '1 salsa' : `hasta ${total} salsas`;
         document.getElementById('subtitulo-modal-variantes').textContent =
             `Paso 2: Elige ${labelLimite} — ${sel} / ${total} seleccionadas`;
@@ -707,7 +707,6 @@ function _actualizarEstadoSalsas() {
         const lblCont = document.getElementById('lbl-salsa-contador');
         if (lblCont) {
             lblCont.textContent = `${sel} / ${total} seleccionada${total > 1 ? 's' : ''}`;
-            // CAMBIO: Si ya eligió al menos 1, lo mostramos en azul
             lblCont.className = sel > 0
                 ? 'text-xs font-black text-blue-600'
                 : 'text-xs font-black text-slate-500';
@@ -729,7 +728,6 @@ function _actualizarEstadoSalsas() {
         if (barra) {
             const pct = total > 0 ? (sel / total) * 100 : 0;
             barra.style.width = pct + '%';
-            // CAMBIO: La barra se pinta azul si hay al menos 1 seleccionada
             barra.className = `h-full rounded-full transition-all duration-300 ${
                 sel > 0 ? 'bg-blue-500' : 'bg-blue-300'
             }`;
@@ -738,8 +736,8 @@ function _actualizarEstadoSalsas() {
         // Botón Confirmar
         const btnConf = document.getElementById('btn-confirmar-salsas');
         if (btnConf) {
-            // CAMBIO PRINCIPAL: Se habilita si seleccionó 1 o más salsas (no obligamos a llegar al total)
-            btnConf.disabled = (sel === 0); 
+            // NUNCA SE DESHABILITA
+            btnConf.disabled = false; 
             
             if (sel > 0) {
                 const label = sel === 1
@@ -747,18 +745,27 @@ function _actualizarEstadoSalsas() {
                     : `Confirmar ${sel} salsas`;
                 btnConf.textContent = label;
             } else {
-                btnConf.textContent = total === 1 ? 'Elige 1 salsa' : `Elige hasta ${total} salsas`;
+                // SI REGRESAN A 0 SALSAS
+                btnConf.textContent = 'Continuar sin salsa';
             }
         }
     }
 
-    // Se llama al presionar Confirmar
+
+// Se llama al presionar Confirmar
     function _confirmarSalsas() {
         const extra = _salsasMarcadas.reduce((s, x) => s + x.extra, 0);
 
         window.estadoPersonalizacion.salsasElegidas  = _salsasMarcadas.map(s => s.nombre);
         window.estadoPersonalizacion.extraSalsas     = extra;
-        window.estadoPersonalizacion.detalles.push(...window.estadoPersonalizacion.salsasElegidas);
+        
+        // AGREGAR LA ETIQUETA "SIN SALSA" SI NO SELECCIONARON NADA
+        if (_salsasMarcadas.length === 0) {
+            window.estadoPersonalizacion.detalles.push("Sin salsa");
+        } else {
+            window.estadoPersonalizacion.detalles.push(...window.estadoPersonalizacion.salsasElegidas);
+        }
+        
         window.estadoPersonalizacion.precioBase     += extra;
 
         // Eliminar el botón Confirmar que se añadió al panel
