@@ -335,49 +335,58 @@ class MesaOperacionController extends Controller
      * y pueda confirmar el cobro con el método pre-seleccionado.
      */
     public function indicarPagoDelivery(Request $request): JsonResponse
-    {
-        $request->validate([
-            'mesa_id'    => 'required|integer|exists:mesas,id',
-            'orden_id'   => 'nullable|integer|exists:ordenes,id',
-            'metodo'     => 'required|string|in:efectivo,tarjeta,transferencia',
-            'referencia' => 'nullable|string|max:255',
-        ]);
+{
+    $request->validate([
+        'mesa_id'    => 'required|integer|exists:mesas,id',
+        'orden_id'   => 'nullable|integer|exists:ordenes,id',
+        'metodo'     => 'nullable|string|in:efectivo,tarjeta,transferencia',
+        'referencia' => 'nullable|string|max:255',
+        'pagos'      => 'nullable|array',
+        'pagos.*.metodo'     => 'required|string|in:efectivo,tarjeta,transferencia',
+        'pagos.*.monto'      => 'required|numeric|min:0',
+        'pagos.*.referencia' => 'nullable|string|max:255',
+    ]);
 
-        try {
-            $mesa = Mesa::findOrFail($request->mesa_id);
+    try {
+        $mesa = Mesa::findOrFail($request->mesa_id);
 
-            $orden = $request->filled('orden_id')
-                ? Orden::where('id', $request->orden_id)->where('mesa_id', $mesa->id)->first()
-                : $mesa->ordenesActivas()->latest()->first();
+        $orden = $request->filled('orden_id')
+            ? Orden::where('id', $request->orden_id)->where('mesa_id', $mesa->id)->first()
+            : $mesa->ordenesActivas()->latest()->first();
 
-            if (!$orden) {
-    $debug = Orden::where('id', $request->orden_id)->first();
-    return response()->json([
-        'success' => false,
-        'message' => 'No se encontró la orden activa para esta mesa.',
-        'debug' => [
-            'orden_id_recibido' => $request->orden_id,
-            'mesa_id_recibido'  => $request->mesa_id,
-            'orden_encontrada'  => $debug ? ['id' => $debug->id, 'mesa_id' => $debug->mesa_id, 'estado' => $debug->estado] : null,
-        ]
-    ], 422);
-}
+        if (!$orden) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró la orden activa para esta mesa.',
+            ], 422);
+        }
 
+        // Si vienen múltiples pagos, guardar resumen
+        if ($request->filled('pagos') && count($request->pagos) > 0) {
+            $resumen = collect($request->pagos)
+                ->map(fn($p) => strtoupper($p['metodo']) . ' $' . number_format($p['monto'], 2))
+                ->join(' + ');
+            $orden->update([
+                'metodo_pago'     => 'mixto',
+                'referencia_pago' => $resumen,
+            ]);
+        } else {
             $orden->update([
                 'metodo_pago'     => $request->metodo,
                 'referencia_pago' => $request->referencia ?: null,
             ]);
-
-            return response()->json(['success' => true]);
-
-        } catch (\Exception $e) {
-            Log::error('indicarPagoDelivery: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 422);
         }
+
+        return response()->json(['success' => true]);
+
+    } catch (\Exception $e) {
+        Log::error('indicarPagoDelivery: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 422);
     }
+}
 
     /**
      * Procesa el pago de un pedido a domicilio directamente desde la comanda

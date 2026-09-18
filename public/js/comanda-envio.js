@@ -139,10 +139,7 @@
     };
 
     // ===============================================================
-    // MODAL DE MÉTODO DE PAGO DOMICILIO — completamente autocontenido
-    // Captura el método (efectivo/tarjeta/transferencia) + datos extra,
-    // guarda en la orden y envía a Caja como pago pendiente.
-    // NO cobra ni libera la mesa — eso lo hace Caja.
+    // MODAL DE MÉTODO DE PAGO DOMICILIO
     // ===============================================================
     (function crearModalPagoDomicilio() {
         if (document.getElementById('_envio_modal_pago')) return;
@@ -151,7 +148,7 @@
         el.id = '_envio_modal_pago';
         el.style.cssText = 'display:none;position:fixed;inset:0;z-index:10500;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);padding:16px;';
         el.innerHTML = `
-            <div style="background:#fff;border-radius:28px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.4);display:flex;flex-direction:column;">
+           <div style="background:#fff;border-radius:28px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.4);display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:#e2e8f0 transparent;">
 
                 <!-- Cabecera -->
                 <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
@@ -211,78 +208,116 @@
                             </div>
                         </button>
 
+                        <button data-metodo="mixto" class="_ep_btn_metodo"
+                            style="padding:16px 20px;border-radius:18px;border:2px dashed #fde68a;background:#fffbeb;cursor:pointer;display:flex;align-items:center;gap:14px;text-align:left;transition:all .15s;">
+                            <div style="width:40px;height:40px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="fas fa-layer-group" style="font-size:18px;color:#d97706;"></i>
+                            </div>
+                            <div>
+                                <p style="font-size:14px;font-weight:900;color:#111827;margin:0;">Pago Mixto</p>
+                                <p style="font-size:11px;color:#6b7280;margin:0;">Combina efectivo, tarjeta o transferencia</p>
+                            </div>
+                        </button>
+
                     </div>
                 </div>
 
-                <!-- PASO 2A: Efectivo — cuánto paga y cambio -->
+                <!-- PASO 2A: Efectivo -->
                 <div id="_ep_paso_efectivo" style="display:none;padding:0 24px 20px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
                         <button id="_ep_volver_efectivo" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:13px;">←</button>
                         <p style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Efectivo</p>
                     </div>
-
                     <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:6px;">¿Con cuánto paga el cliente?</label>
                     <input id="_ep_ef_monto" type="number" min="0" step="0.01" placeholder="0.00"
                         style="width:100%;padding:14px 16px;border:2px solid #e2e8f0;border-radius:16px;font-size:22px;font-weight:900;color:#111827;outline:none;box-sizing:border-box;text-align:center;"
                         inputmode="decimal">
-
                     <div id="_ep_ef_cambio_box" style="display:none;margin-top:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:11px;font-weight:700;color:#15803d;">Cambio a devolver</span>
                         <span id="_ep_ef_cambio" style="font-size:20px;font-weight:900;color:#16a34a;">$0.00</span>
                     </div>
-
                     <div id="_ep_ef_falta_box" style="display:none;margin-top:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:11px;font-weight:700;color:#c2410c;">Falta para completar</span>
                         <span id="_ep_ef_falta" style="font-size:20px;font-weight:900;color:#ea580c;">$0.00</span>
                     </div>
-
                     <button id="_ep_ef_confirmar"
                         style="width:100%;margin-top:16px;padding:15px;border-radius:18px;background:linear-gradient(135deg,#16a34a,#22c55e);border:none;color:#fff;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
                         <i class="fas fa-check" style="margin-right:6px;"></i> Registrar Pago en Efectivo
                     </button>
                 </div>
 
-                <!-- PASO 2B: Tarjeta — folio/referencia -->
+                <!-- PASO 2B: Tarjeta -->
                 <div id="_ep_paso_tarjeta" style="display:none;padding:0 24px 20px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
                         <button id="_ep_volver_tarjeta" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:13px;">←</button>
                         <p style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Tarjeta</p>
                     </div>
-
                     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:14px;margin-bottom:16px;text-align:center;">
                         <p style="font-size:11px;font-weight:700;color:#1d4ed8;margin:0;">El pago se confirmará en Caja</p>
                         <p style="font-size:10px;color:#3b82f6;margin:4px 0 0;">Ingresa el folio si ya tienes el comprobante</p>
                     </div>
-
                     <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:6px;">Folio / Referencia de la operación (opcional)</label>
                     <input id="_ep_ta_folio" type="text" placeholder="Ej. 1234, últimos 4 dígitos..."
                         style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:14px;font-size:14px;font-weight:700;color:#111827;outline:none;box-sizing:border-box;">
-
                     <button id="_ep_ta_confirmar"
                         style="width:100%;margin-top:16px;padding:15px;border-radius:18px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;color:#fff;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
                         <i class="fas fa-check" style="margin-right:6px;"></i> Registrar — Pago con Tarjeta
                     </button>
                 </div>
 
-                <!-- PASO 2C: Transferencia — folio -->
+                <!-- PASO 2C: Transferencia -->
                 <div id="_ep_paso_transferencia" style="display:none;padding:0 24px 20px;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
                         <button id="_ep_volver_transferencia" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:13px;">←</button>
                         <p style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Transferencia</p>
                     </div>
-
                     <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:14px;padding:14px;margin-bottom:16px;text-align:center;">
                         <p style="font-size:11px;font-weight:700;color:#6d28d9;margin:0;">El pago se confirmará en Caja</p>
                         <p style="font-size:10px;color:#7c3aed;margin:4px 0 0;">Pide al cliente el folio o número de referencia</p>
                     </div>
-
                     <label style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#6b7280;display:block;margin-bottom:6px;">Folio / Número de transferencia (opcional)</label>
                     <input id="_ep_tr_folio" type="text" placeholder="Ej. SPEI-20240906-1234..."
                         style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:14px;font-size:14px;font-weight:700;color:#111827;outline:none;box-sizing:border-box;">
-
                     <button id="_ep_tr_confirmar"
                         style="width:100%;margin-top:16px;padding:15px;border-radius:18px;background:linear-gradient(135deg,#6d28d9,#7c3aed);border:none;color:#fff;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
                         <i class="fas fa-check" style="margin-right:6px;"></i> Registrar — Transferencia
+                    </button>
+                </div>
+
+                <!-- PASO 2D: Mixto -->
+                <div id="_ep_paso_mixto" style="display:none;padding:0 24px 20px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                        <button id="_ep_volver_mixto" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;color:#64748b;font-size:13px;">←</button>
+                        <p style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Pago Mixto</p>
+                    </div>
+                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:12px;margin-bottom:14px;text-align:center;">
+                        <p id="_ep_mix_total_label" style="font-size:11px;font-weight:700;color:#92400e;margin:0;">Total: $0.00</p>
+                        <p id="_ep_mix_restante_label" style="font-size:13px;font-weight:900;color:#d97706;margin:4px 0 0;">Restante: $0.00</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div>
+                            <label style="font-size:10px;font-weight:900;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:4px;">Efectivo</label>
+                            <input id="_ep_mix_efectivo" type="number" min="0" step="0.01" placeholder="0.00"
+                                style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;font-weight:700;color:#111827;outline:none;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;font-weight:900;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:4px;">Tarjeta</label>
+                            <input id="_ep_mix_tarjeta" type="number" min="0" step="0.01" placeholder="0.00"
+                                style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;font-weight:700;color:#111827;outline:none;box-sizing:border-box;margin-bottom:4px;">
+                            <input id="_ep_mix_ref_tarjeta" type="text" placeholder="Folio / Referencia (opcional)"
+                                style="width:100%;padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;font-weight:600;color:#374151;outline:none;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:10px;font-weight:900;text-transform:uppercase;color:#6b7280;display:block;margin-bottom:4px;">Transferencia</label>
+                            <input id="_ep_mix_transferencia" type="number" min="0" step="0.01" placeholder="0.00"
+                                style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:12px;font-size:16px;font-weight:700;color:#111827;outline:none;box-sizing:border-box;margin-bottom:4px;">
+                            <input id="_ep_mix_ref_transferencia" type="text" placeholder="Folio / Referencia (opcional)"
+                                style="width:100%;padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;font-weight:600;color:#374151;outline:none;box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <button id="_ep_mix_confirmar"
+                        style="width:100%;margin-top:16px;padding:15px;border-radius:18px;background:linear-gradient(135deg,#d97706,#f59e0b);border:none;color:#fff;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
+                        <i class="fas fa-check" style="margin-right:6px;"></i> Confirmar Pago Mixto
                     </button>
                 </div>
 
@@ -298,20 +333,17 @@
 
         document.body.appendChild(el);
 
-        // --- Variables internas ---
         let _total   = 0;
         let _mesaId  = null;
         let _ordenId = null;
 
-        // --- Helpers de pasos ---
         const _irPaso = (paso) => {
-            ['_ep_paso1','_ep_paso_efectivo','_ep_paso_tarjeta','_ep_paso_transferencia']
+            ['_ep_paso1','_ep_paso_efectivo','_ep_paso_tarjeta','_ep_paso_transferencia','_ep_paso_mixto']
                 .forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
             const dest = document.getElementById(paso);
             if (dest) dest.style.display = 'block';
         };
 
-        // --- Abrir modal ---
         window.abrirModalPagoDomicilio = function(total, mesaId, ordenId) {
             _total   = parseFloat(total) || 0;
             _mesaId  = mesaId;
@@ -319,8 +351,7 @@
 
             document.getElementById('_ep_total').textContent = '$' + _total.toFixed(2);
 
-            // Reset inputs
-            ['_ep_ef_monto','_ep_ta_folio','_ep_tr_folio'].forEach(id => {
+            ['_ep_ef_monto','_ep_ta_folio','_ep_tr_folio','_ep_mix_efectivo','_ep_mix_tarjeta','_ep_mix_transferencia','_ep_mix_ref_tarjeta','_ep_mix_ref_transferencia'].forEach(id => {
                 const inp = document.getElementById(id);
                 if (inp) inp.value = '';
             });
@@ -331,19 +362,14 @@
 
             _irPaso('_ep_paso1');
             el.style.display = 'flex';
-
-            // Enfocar después del render
-            setTimeout(() => {}, 50);
         };
 
         window.abrirModalPagoDelivery = window.abrirModalPagoDomicilio;
 
-        // --- Cerrar ---
         function _cerrar() { el.style.display = 'none'; }
-        document.getElementById('_ep_cerrar').onclick   = _cerrar;
-        document.getElementById('_ep_cancelar').onclick  = _cerrar;
+        document.getElementById('_ep_cerrar').onclick  = _cerrar;
+        document.getElementById('_ep_cancelar').onclick = _cerrar;
 
-        // --- Selección de método → ir a paso correspondiente ---
         el.querySelectorAll('._ep_btn_metodo').forEach(btn => {
             btn.addEventListener('click', function() {
                 const m = this.dataset.metodo;
@@ -351,15 +377,18 @@
                 if (m === 'efectivo') {
                     setTimeout(() => document.getElementById('_ep_ef_monto')?.focus(), 100);
                 }
+                if (m === 'mixto') {
+                    document.getElementById('_ep_mix_total_label').textContent = 'Total: $' + _total.toFixed(2);
+                    document.getElementById('_ep_mix_restante_label').textContent = 'Restante: $' + _total.toFixed(2);
+                    document.getElementById('_ep_mix_restante_label').style.color = '#d97706';
+                }
             });
         });
 
-        // --- Volver al paso 1 ---
-        ['_ep_volver_efectivo','_ep_volver_tarjeta','_ep_volver_transferencia'].forEach(id => {
+        ['_ep_volver_efectivo','_ep_volver_tarjeta','_ep_volver_transferencia','_ep_volver_mixto'].forEach(id => {
             document.getElementById(id)?.addEventListener('click', () => _irPaso('_ep_paso1'));
         });
 
-        // --- Efectivo: calcular cambio en tiempo real ---
         document.getElementById('_ep_ef_monto')?.addEventListener('input', function() {
             const pagado   = parseFloat(this.value) || 0;
             const cambio   = pagado - _total;
@@ -380,7 +409,6 @@
             }
         });
 
-        // --- Confirmar Efectivo ---
         document.getElementById('_ep_ef_confirmar')?.addEventListener('click', function() {
             const monto = parseFloat(document.getElementById('_ep_ef_monto')?.value) || 0;
             if (monto <= 0) {
@@ -393,48 +421,68 @@
             _indicarMetodo('efectivo', ref);
         });
 
-        // --- Confirmar Tarjeta ---
         document.getElementById('_ep_ta_confirmar')?.addEventListener('click', function() {
             const folio = document.getElementById('_ep_ta_folio')?.value?.trim() || null;
             _indicarMetodo('tarjeta', folio);
         });
 
-        // --- Confirmar Transferencia ---
         document.getElementById('_ep_tr_confirmar')?.addEventListener('click', function() {
             const folio = document.getElementById('_ep_tr_folio')?.value?.trim() || null;
             _indicarMetodo('transferencia', folio);
         });
 
-        // --- Guardar método en la orden y redirigir a dashboard ---
-        function _indicarMetodo(metodo, referencia) {
+        // --- Mixto: actualizar restante en tiempo real ---
+        const _actualizarRestante = () => {
+            const efectivo = parseFloat(document.getElementById('_ep_mix_efectivo')?.value) || 0;
+            const tarjeta  = parseFloat(document.getElementById('_ep_mix_tarjeta')?.value) || 0;
+            const transf   = parseFloat(document.getElementById('_ep_mix_transferencia')?.value) || 0;
+            const restante = _total - efectivo - tarjeta - transf;
+            const el2 = document.getElementById('_ep_mix_restante_label');
+            if (el2) {
+                el2.textContent = 'Restante: $' + Math.max(0, restante).toFixed(2);
+                el2.style.color = restante <= 0 ? '#16a34a' : '#d97706';
+            }
+        };
+        ['_ep_mix_efectivo','_ep_mix_tarjeta','_ep_mix_transferencia'].forEach(id => {
+            document.getElementById(id)?.addEventListener('input', _actualizarRestante);
+        });
+
+        document.getElementById('_ep_mix_confirmar')?.addEventListener('click', function() {
+            const efectivo = parseFloat(document.getElementById('_ep_mix_efectivo')?.value) || 0;
+            const tarjeta  = parseFloat(document.getElementById('_ep_mix_tarjeta')?.value) || 0;
+            const transf   = parseFloat(document.getElementById('_ep_mix_transferencia')?.value) || 0;
+            const suma     = efectivo + tarjeta + transf;
+
+            if (suma <= 0) { mostrarError('Ingresa al menos un monto.'); return; }
+            if (suma < _total - 0.01) { mostrarError('El total ingresado es menor al monto del pedido.'); return; }
+
+            const pagos = [];
+            if (efectivo > 0) pagos.push({ metodo: 'efectivo',      monto: efectivo, referencia: null });
+            if (tarjeta  > 0) pagos.push({ metodo: 'tarjeta',       monto: tarjeta,  referencia: document.getElementById('_ep_mix_ref_tarjeta')?.value?.trim() || null });
+            if (transf   > 0) pagos.push({ metodo: 'transferencia', monto: transf,   referencia: document.getElementById('_ep_mix_ref_transferencia')?.value?.trim() || null });
+
+            _indicarMetodoPagos(pagos);
+        });
+
+        // --- Guardar múltiples métodos (pago mixto) ---
+        function _indicarMetodoPagos(pagos) {
             const cfg  = window.ComandaConfig || {};
             const url  = cfg.rutas && cfg.rutas.deliveryIndicarPago;
             const csrf = cfg.csrfToken;
 
             if (!url) {
-                // Si no hay ruta configurada (compatibilidad), solo redirigir
                 _cerrar();
                 mostrarExito('Método registrado. El pedido pasó a Caja.');
                 setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
                 return;
             }
 
-            // Deshabilitar botones mientras procesa
             el.querySelectorAll('button').forEach(b => b.disabled = true);
 
             fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    mesa_id:    _mesaId,
-                    orden_id:   _ordenId || null,
-                    metodo:     metodo,
-                    referencia: referencia || null,
-                })
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ mesa_id: _mesaId, orden_id: _ordenId || null, pagos: pagos })
             })
             .then(r => r.json())
             .then(data => {
@@ -448,7 +496,44 @@
                 }
             })
             .catch(() => {
-                // En caso de error de red, igual redirigir para no bloquear al mesero
+                _cerrar();
+                mostrarExito('Pedido enviado a Caja.');
+                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+            });
+        }
+
+        // --- Guardar método único ---
+        function _indicarMetodo(metodo, referencia) {
+            const cfg  = window.ComandaConfig || {};
+            const url  = cfg.rutas && cfg.rutas.deliveryIndicarPago;
+            const csrf = cfg.csrfToken;
+
+            if (!url) {
+                _cerrar();
+                mostrarExito('Método registrado. El pedido pasó a Caja.');
+                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+                return;
+            }
+
+            el.querySelectorAll('button').forEach(b => b.disabled = true);
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify({ mesa_id: _mesaId, orden_id: _ordenId || null, metodo: metodo, referencia: referencia || null })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    _cerrar();
+                    mostrarExito('Pedido registrado. Pasará a Caja como pago pendiente.');
+                    setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1500);
+                } else {
+                    mostrarError(data.message || 'No se pudo registrar el método.');
+                    el.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            })
+            .catch(() => {
                 _cerrar();
                 mostrarExito('Pedido enviado a Caja.');
                 setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
@@ -466,14 +551,12 @@
         const cfg       = window.ComandaConfig || {};
         const urlParams = new URLSearchParams(window.location.search);
 
-        // Detección de domicilio: cualquiera de las tres fuentes válidas
         const esDomicilio =
             window.tipoPedidoActual === 'domicilio' ||
             urlParams.get('tipo_pedido') === 'domicilio' ||
             (cfg.mesa && String(cfg.mesa.numero || '').toUpperCase().startsWith('DOM')) ||
             (cfg.delivery && cfg.delivery.esDelivery);
 
-        // --- VALIDACIÓN PARA DOMICILIO ---
         if (esDomicilio) {
             const esExpress = Boolean(window.nombreClienteTemporal);
             if (!esExpress) {
@@ -490,7 +573,6 @@
             }
         }
 
-        // --- VALIDACIÓN PARA LLEVAR ---
         const esLlevar = window.tipoPedidoActual === 'llevar' || urlParams.get('tipo_pedido') === 'llevar';
         if (esLlevar) {
             if (!window.clienteSeleccionadoId && !window.nombreClienteTemporal) {
@@ -533,11 +615,7 @@
 
         fetch(cfg.rutas.comandaEnviar, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': cfg.csrfToken
-            },
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': cfg.csrfToken },
             body: JSON.stringify({
                 mesa_id:            (typeof mesaDestinoSeleccionada !== 'undefined' ? mesaDestinoSeleccionada : null) || (cfg.mesa && cfg.mesa.id) || 1,
                 platillos:          platillosData,
@@ -569,15 +647,12 @@
                 if (btn) { btn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i><span>Enviar Orden</span>'; btn.disabled = false; }
 
                 if (esDomicilio) {
-                    // Leer total ANTES de limpiar el ticket (limpiarTicket resetea txtTotalComanda a $0.00)
                     const totalEl    = document.getElementById('txtTotalComanda') || document.getElementById('txtTotal');
                     const totalFinal = totalEl
                         ? (parseFloat(totalEl.innerText.replace(/[$,\s]/g, '')) || totalParseado)
                         : totalParseado;
 
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
-
-                    // Primero seleccionar zona de envío, luego abrir modal de pago
                     window.abrirModalZonaEnvio(totalFinal, cfg.mesa && cfg.mesa.id, data.orden_id);
                 } else {
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
@@ -594,20 +669,19 @@
         });
     };
 })();
+
 // ===============================================================
 // MODAL DE SELECCIÓN DE ZONA DE ENVÍO
-// Aparece antes del modal de pago cuando el pedido es a domicilio.
-// Zonas: 0 ($0), 1 ($20), 2 ($30), 3 ($40), 4 ($50)
 // ===============================================================
 (function crearModalZonaEnvio() {
     if (document.getElementById('_ze_modal')) return;
 
     const ZONAS = [
-        { zona: 0, label: 'Zona 0',  precio: 0  },
-        { zona: 1, label: 'Zona 1',  precio: 20 },
-        { zona: 2, label: 'Zona 2',  precio: 30 },
-        { zona: 3, label: 'Zona 3',  precio: 40 },
-        { zona: 4, label: 'Zona 4',  precio: 50 },
+        { zona: 0, label: 'Zona 0', precio: 0  },
+        { zona: 1, label: 'Zona 1', precio: 20 },
+        { zona: 2, label: 'Zona 2', precio: 30 },
+        { zona: 3, label: 'Zona 3', precio: 40 },
+        { zona: 4, label: 'Zona 4', precio: 50 },
     ];
 
     const el = document.createElement('div');
@@ -616,8 +690,6 @@
 
     el.innerHTML = `
         <div style="background:#fff;border-radius:28px;width:100%;max-width:380px;box-shadow:0 30px 80px rgba(0,0,0,0.4);overflow:hidden;">
-
-            <!-- Cabecera -->
             <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:10px;">
                     <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;">
@@ -629,11 +701,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Botones de zona -->
             <div style="padding:20px 24px;display:flex;flex-direction:column;gap:10px;" id="_ze_zonas"></div>
-
-            <!-- Cancelar -->
             <div style="padding:0 24px 20px;">
                 <button id="_ze_cancelar" style="width:100%;padding:11px;border-radius:16px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
                     Cancelar
@@ -642,14 +710,13 @@
         </div>
     `;
 
-    // Generar botones de zona dinámicamente
     const contenedor = el.querySelector('#_ze_zonas');
     ZONAS.forEach(({ zona, label, precio }) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.dataset.zona  = zona;
+        btn.dataset.zona   = zona;
         btn.dataset.precio = precio;
-        btn.style.cssText = 'padding:16px 20px;border-radius:18px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s;';
+        btn.style.cssText  = 'padding:16px 20px;border-radius:18px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s;';
         btn.innerHTML = `
             <div style="display:flex;align-items:center;gap:12px;">
                 <div style="width:36px;height:36px;border-radius:10px;background:#fff7ed;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#d97706;">${zona}</div>
@@ -667,13 +734,11 @@
 
     document.body.appendChild(el);
 
-    // --- Variables internas ---
     let _total   = 0;
     let _mesaId  = null;
     let _ordenId = null;
     let _cfg     = null;
 
-    // --- Abrir ---
     window.abrirModalZonaEnvio = function(total, mesaId, ordenId) {
         _total   = parseFloat(total) || 0;
         _mesaId  = mesaId;
@@ -682,52 +747,33 @@
         el.style.display = 'flex';
     };
 
-    // --- Seleccionar zona y guardar en la orden ---
     function _seleccionarZona(zona, costoEnvio) {
         el.style.display = 'none';
 
         const cfg  = _cfg || window.ComandaConfig || {};
         const csrf = cfg.csrfToken;
         const url  = cfg.rutas && cfg.rutas.comandaZonaEnvio;
-
         const totalConEnvio = _total + costoEnvio;
 
         if (!url) {
-            // Si la ruta no está configurada todavía, abre directamente el pago
             window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
             return;
         }
 
         fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-                orden_id:    _ordenId,
-                zona_envio:  zona,
-                costo_envio: costoEnvio,
-            })
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ orden_id: _ordenId, zona_envio: zona, costo_envio: costoEnvio })
         })
         .then(r => r.json())
         .then(data => {
-            if (data.success) {
-                window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
-            } else {
-                mostrarError(data.message || 'No se pudo guardar la zona.');
-                // Abrir igualmente para no bloquear al mesero
-                window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
-            }
+            window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
         })
         .catch(() => {
-            // En caso de error de red no bloqueamos
             window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
         });
     }
 
-    // --- Cancelar ---
     document.getElementById('_ze_cancelar').addEventListener('click', () => {
         el.style.display = 'none';
     });
