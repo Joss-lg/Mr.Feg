@@ -107,11 +107,19 @@ IVA_BLOCK_END */
         $comisionMonto = $esDelivery ? round($baseComision * ($comisionPorcentaje / 100), 2) : 0;
         $comisionIvaMonto = $esDelivery ? round($comisionMonto * ($comisionIvaPorcentaje / 100), 2) : 0;
         $comisionTotal = round($comisionMonto + $comisionIvaMonto, 2);
+        
+         // --- Costo de envío a domicilio (zona 0–4) ---
+        $esADomicilio = $mesa->esADomicilio();
+        $costoEnvio   = 0;
+        if ($esADomicilio) {
+            $ordenConZona = $ordenesActivas->first(fn($o) => $o->zona_envio !== null);
+            $costoEnvio   = (float) ($ordenConZona?->costo_envio ?? 0);
+        }
 
         /* IVA_BLOCK_START — total_con_iva
         $total = round($subtotal + $iva + $propina + $comisionTotal, 2);
         IVA_BLOCK_END */
-        $total = round($subtotal + $propina + $comisionTotal, 2); // IVA desactivado
+        $total = round($subtotal + $propina + $comisionTotal + $costoEnvio, 2); // IVA desactivado
 
         $division = $this->obtenerEstadoDivision($mesa);
 
@@ -140,6 +148,8 @@ IVA_BLOCK_END */
             'comisionIvaPorcentaje' => $comisionIvaPorcentaje,
             'comisionIvaMonto'      => $comisionIvaMonto,
             'comisionTotal'         => $comisionTotal,
+            'costoEnvio'            => $costoEnvio,
+            'zonaEnvio'             => $esADomicilio ? ($ordenConZona?->zona_envio) : null,
             'total'                 => $total,
             'ordenes'               => $ordenesActivas,
             // NUEVO: división real de la cuenta (null si la mesa no está dividida)

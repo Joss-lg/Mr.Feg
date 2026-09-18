@@ -78,7 +78,8 @@ class ComandaController extends Controller
             'tipo_pedido' => 'nullable|string|in:comedor,llevar,domicilio',
             'cliente_id' => 'nullable|exists:clientes,id',
             'direccion_id' => 'nullable|exists:direcciones,id',
-            'nombre_temporal' => 'nullable|string|max:255', 
+            'zona_envio'  => 'nullable|integer|min:0|max:4',
+            'costo_envio' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -97,7 +98,10 @@ class ComandaController extends Controller
                 'cliente_id' => $request->cliente_id,
                 'direccion_id' => $request->direccion_id,
                 'nombre_temporal' => $request->filled('nombre_temporal') ? strtoupper($request->nombre_temporal) : null,
+                'zona_envio'      => $request->filled('zona_envio')  ? (int) $request->zona_envio  : null,
+                'costo_envio'     => $request->filled('costo_envio') ? (float) $request->costo_envio : 0,
             ];
+
 
             $orden = $this->comandaService->procesarEnvio(
                 $mesa,
@@ -339,6 +343,28 @@ public function transferirProductos(Request $request)
             'referenciaPago' => $orden->referencia_pago ?? null,
         ]);
     }
+
+        public function guardarZonaEnvio(Request $request)
+    {
+        $request->validate([
+            'orden_id'    => 'required|exists:ordenes,id',
+            'zona_envio'  => 'required|integer|min:0|max:4',
+            'costo_envio' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $orden = \App\Models\Orden::findOrFail($request->orden_id);
+            $orden->update([
+                'zona_envio'  => $request->zona_envio,
+                'costo_envio' => $request->costo_envio,
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
 
     /**
      * Crea una mesa virtual temporal para pedidos "Para Llevar" o "A Domicilio"

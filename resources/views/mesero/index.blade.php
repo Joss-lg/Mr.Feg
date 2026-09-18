@@ -138,6 +138,7 @@
                 meserosActivos: @json(route('mesero.meseros.activos')),
                 deliveryPagar: @json(route('mesero.delivery.pagar')),
                 deliveryIndicarPago: @json(route('mesero.delivery.indicar-pago')),
+                comandaZonaEnvio: @json(route('mesero.delivery.zona-envio')),
                 ticketOrden: @json(route('admin.caja.ticket.imprimir.orden', ['ordenId' => '__ORDEN_ID__'])),
             }
         };

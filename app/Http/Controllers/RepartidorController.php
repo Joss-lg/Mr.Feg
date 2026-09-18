@@ -78,4 +78,14 @@ class RepartidorController extends Controller
             'message' => 'Pedido marcado como entregado.'
         ]);
     }
+    
+     public function misPedidos()
+    {
+        $ordenesEnCamino = Orden::where('estado_reparto', 'en_camino')
+            ->where('repartidor_id', auth()->id())
+            ->with(['cliente', 'direccion', 'mesa'])
+            ->get();
+
+        return view('admin.repartidores.mis-pedidos', compact('ordenesEnCamino'));
+    }
 }

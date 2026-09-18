@@ -154,8 +154,11 @@ class LoginController extends Controller
         }
 
         // ¿Tiene acceso al módulo de Repartidores?
-        if ($user->tienePermiso('Repartidores', 'mostrar')) {
-            return redirect()->route('admin.repartidores.index');
+         if ($user->tienePermiso('Repartidores', 'mostrar')) {
+            if ($user->tienePermiso('Repartidores', 'gestionar')) {
+                return redirect()->route('admin.repartidores.index');
+            }
+            return redirect()->route('admin.repartidores.mis-pedidos');
         }
 
         // 4. Sin ningún módulo asignado no hay a dónde mandarlo: se cierra la

@@ -66,7 +66,6 @@ class MesaOperacionController extends Controller
             'cuentasDivididas' => $desglose['cuentasDivididas'],
             'totalCuentasDivision' => $desglose['totalCuentasDivision'],
             'division' => $desglose['division'],
-            // --- NUEVO: comisión de plataforma de delivery ---
             'esDelivery' => $desglose['esDelivery'],
             'plataformaNombre' => $desglose['plataformaNombre'],
             'comisionPorcentaje' => $desglose['comisionPorcentaje'],
@@ -74,7 +73,8 @@ class MesaOperacionController extends Controller
             'comisionIvaPorcentaje' => $desglose['comisionIvaPorcentaje'],
             'comisionIvaMonto' => $desglose['comisionIvaMonto'],
             'comisionTotal' => $desglose['comisionTotal'],
-            // Descuento manual aplicado desde Caja
+            'costoEnvio' => $desglose['costoEnvio'] ?? 0,
+            'zonaEnvio'  => $desglose['zonaEnvio'] ?? null,
             'descuentoPorcentaje' => $desglose['descuentoPorcentaje'],
             'descuentoCaja' => $desglose['descuentoCaja'],
         ]);
@@ -351,11 +351,17 @@ class MesaOperacionController extends Controller
                 : $mesa->ordenesActivas()->latest()->first();
 
             if (!$orden) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se encontró la orden activa para esta mesa.',
-                ], 422);
-            }
+    $debug = Orden::where('id', $request->orden_id)->first();
+    return response()->json([
+        'success' => false,
+        'message' => 'No se encontró la orden activa para esta mesa.',
+        'debug' => [
+            'orden_id_recibido' => $request->orden_id,
+            'mesa_id_recibido'  => $request->mesa_id,
+            'orden_encontrada'  => $debug ? ['id' => $debug->id, 'mesa_id' => $debug->mesa_id, 'estado' => $debug->estado] : null,
+        ]
+    ], 422);
+}
 
             $orden->update([
                 'metodo_pago'     => $request->metodo,

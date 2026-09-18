@@ -577,8 +577,8 @@
 
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
 
-                    // Abrir modal de pago (siempre disponible — lo creamos nosotros mismos)
-                    window.abrirModalPagoDomicilio(totalFinal, cfg.mesa && cfg.mesa.id, data.orden_id);
+                    // Primero seleccionar zona de envío, luego abrir modal de pago
+                    window.abrirModalZonaEnvio(totalFinal, cfg.mesa && cfg.mesa.id, data.orden_id);
                 } else {
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
                     mostrarExito("¡Enviado a cocina!");
@@ -593,4 +593,142 @@
             if (btn) { btn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i><span>Enviar Orden</span>'; btn.disabled = false; }
         });
     };
+})();
+// ===============================================================
+// MODAL DE SELECCIÓN DE ZONA DE ENVÍO
+// Aparece antes del modal de pago cuando el pedido es a domicilio.
+// Zonas: 0 ($0), 1 ($20), 2 ($30), 3 ($40), 4 ($50)
+// ===============================================================
+(function crearModalZonaEnvio() {
+    if (document.getElementById('_ze_modal')) return;
+
+    const ZONAS = [
+        { zona: 0, label: 'Zona 0',  precio: 0  },
+        { zona: 1, label: 'Zona 1',  precio: 20 },
+        { zona: 2, label: 'Zona 2',  precio: 30 },
+        { zona: 3, label: 'Zona 3',  precio: 40 },
+        { zona: 4, label: 'Zona 4',  precio: 50 },
+    ];
+
+    const el = document.createElement('div');
+    el.id = '_ze_modal';
+    el.style.cssText = 'display:none;position:fixed;inset:0;z-index:10600;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);padding:16px;';
+
+    el.innerHTML = `
+        <div style="background:#fff;border-radius:28px;width:100%;max-width:380px;box-shadow:0 30px 80px rgba(0,0,0,0.4);overflow:hidden;">
+
+            <!-- Cabecera -->
+            <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#d97706,#f59e0b);display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-map-marker-alt" style="color:#fff;font-size:14px;"></i>
+                    </div>
+                    <div>
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Pedido a Domicilio</p>
+                        <p style="font-size:16px;font-weight:900;color:#111827;margin:0;">¿A qué zona va el pedido?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de zona -->
+            <div style="padding:20px 24px;display:flex;flex-direction:column;gap:10px;" id="_ze_zonas"></div>
+
+            <!-- Cancelar -->
+            <div style="padding:0 24px 20px;">
+                <button id="_ze_cancelar" style="width:100%;padding:11px;border-radius:16px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;cursor:pointer;">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Generar botones de zona dinámicamente
+    const contenedor = el.querySelector('#_ze_zonas');
+    ZONAS.forEach(({ zona, label, precio }) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.zona  = zona;
+        btn.dataset.precio = precio;
+        btn.style.cssText = 'padding:16px 20px;border-radius:18px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s;';
+        btn.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:36px;height:36px;border-radius:10px;background:#fff7ed;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#d97706;">${zona}</div>
+                <span style="font-size:14px;font-weight:900;color:#111827;">${label}</span>
+            </div>
+            <span style="font-size:15px;font-weight:900;color:${precio === 0 ? '#16a34a' : '#d97706'};">
+                ${precio === 0 ? 'Gratis' : '$' + precio.toFixed(2)}
+            </span>
+        `;
+        btn.addEventListener('mouseenter', () => { btn.style.borderColor = '#f59e0b'; btn.style.background = '#fffbeb'; });
+        btn.addEventListener('mouseleave', () => { btn.style.borderColor = '#e2e8f0'; btn.style.background = '#fff'; });
+        btn.addEventListener('click', () => _seleccionarZona(zona, precio));
+        contenedor.appendChild(btn);
+    });
+
+    document.body.appendChild(el);
+
+    // --- Variables internas ---
+    let _total   = 0;
+    let _mesaId  = null;
+    let _ordenId = null;
+    let _cfg     = null;
+
+    // --- Abrir ---
+    window.abrirModalZonaEnvio = function(total, mesaId, ordenId) {
+        _total   = parseFloat(total) || 0;
+        _mesaId  = mesaId;
+        _ordenId = ordenId;
+        _cfg     = window.ComandaConfig || {};
+        el.style.display = 'flex';
+    };
+
+    // --- Seleccionar zona y guardar en la orden ---
+    function _seleccionarZona(zona, costoEnvio) {
+        el.style.display = 'none';
+
+        const cfg  = _cfg || window.ComandaConfig || {};
+        const csrf = cfg.csrfToken;
+        const url  = cfg.rutas && cfg.rutas.comandaZonaEnvio;
+
+        const totalConEnvio = _total + costoEnvio;
+
+        if (!url) {
+            // Si la ruta no está configurada todavía, abre directamente el pago
+            window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
+            return;
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrf,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                orden_id:    _ordenId,
+                zona_envio:  zona,
+                costo_envio: costoEnvio,
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
+            } else {
+                mostrarError(data.message || 'No se pudo guardar la zona.');
+                // Abrir igualmente para no bloquear al mesero
+                window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
+            }
+        })
+        .catch(() => {
+            // En caso de error de red no bloqueamos
+            window.abrirModalPagoDomicilio(totalConEnvio, _mesaId, _ordenId);
+        });
+    }
+
+    // --- Cancelar ---
+    document.getElementById('_ze_cancelar').addEventListener('click', () => {
+        el.style.display = 'none';
+    });
 })();

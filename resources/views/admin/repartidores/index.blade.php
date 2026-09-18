@@ -207,12 +207,14 @@
                     @endif
 
                     {{-- Botón Marcar como Entregado --}}
-                    <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async pt-1">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
-                            <i class="fas fa-check"></i> Marcar como Entregado
-                        </button>
-                    </form>
+                   @if(auth()->user()->tienePermiso('Repartidores', 'gestionar'))
+                <form action="{{ route('admin.repartidores.entregado', $orden->id) }}" method="POST" class="form-async pt-1">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 outline-none">
+                        <i class="fas fa-check"></i> Marcar como Entregado
+                    </button>
+                </form>
+                @endif
 
                 </div>
             @empty

@@ -65,6 +65,8 @@ class Orden extends Model
         'direccion_id',
         'estado_reparto',
         'repartidor_id',
+        'zona_envio',
+        'costo_envio',
     ];
 
     /**

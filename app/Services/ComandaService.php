@@ -69,6 +69,8 @@ class ComandaService
             if (!empty($datosExtra['tipo_pedido'])) $ordenDataUpdate['tipo_pedido'] = $datosExtra['tipo_pedido'];
             if (!empty($datosExtra['cliente_id'])) $ordenDataUpdate['cliente_id'] = $datosExtra['cliente_id'];
             if (!empty($datosExtra['direccion_id'])) $ordenDataUpdate['direccion_id'] = $datosExtra['direccion_id'];
+            if (isset($datosExtra['zona_envio']))  $ordenDataUpdate['zona_envio']  = $datosExtra['zona_envio'];
+            if (isset($datosExtra['costo_envio'])) $ordenDataUpdate['costo_envio'] = $datosExtra['costo_envio'];
 
             if (!empty($ordenDataUpdate)) {
                 $orden->update($ordenDataUpdate);

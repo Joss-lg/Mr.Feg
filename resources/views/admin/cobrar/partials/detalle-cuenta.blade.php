@@ -199,6 +199,15 @@
                     </div>
                 @endif
 
+                @if(($costoEnvio ?? 0) > 0)
+    <div class="flex justify-between text-orange-600 text-[11px] font-semibold">
+        <span class="flex items-center gap-1.5">
+            <i class="fas fa-motorcycle text-[10px]"></i> Envío (Zona {{ $zonaEnvio ?? '-' }})
+        </span>
+        <span class="font-bold">${{ number_format($costoEnvio, 2) }}</span>
+    </div>
+@endif
+
                 <div class="flex justify-between text-amber-600 text-[11px] font-semibold {{ ($propina ?? 0) > 0 ? '' : 'hidden' }}" id="resumen-propina-row">
                     <span class="flex items-center gap-1.5">
                         <i class="fas fa-hand-holding-dollar text-[10px]"></i> Propina

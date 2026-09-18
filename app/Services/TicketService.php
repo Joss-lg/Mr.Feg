@@ -178,7 +178,17 @@ class TicketService
         $comisionIvaMonto = $esDelivery ? round($comisionMonto * ($comisionIvaPorcentaje / 100), 2) : 0;
         $comisionTotal = round($comisionMonto + $comisionIvaMonto, 2);
 
-        $totalCalculado = $baseImponible + $iva + $propina + $comisionTotal;
+        $costoEnvio = 0;
+        $zonaEnvio  = null;
+        if ($esADomicilio) {
+            $ordenConZona = $ordenes->first(fn($o) => $o->zona_envio !== null);
+            if ($ordenConZona) {
+                $zonaEnvio  = (int) $ordenConZona->zona_envio;
+                $costoEnvio = (float) ($ordenConZona->costo_envio ?? 0);
+            }
+        }
+
+        $totalCalculado = $baseImponible + $iva + $propina + $comisionTotal + $costoEnvio;
 
         $primeraOrden = $ordenes->first();
 
@@ -217,6 +227,8 @@ class TicketService
             'ivaPorcentaje'  => $ivaPorcentaje,
             'ivaHabilitado'  => $ivaHabilitado,
             'propina'        => $propina,
+            'zonaEnvio'      => $zonaEnvio,
+            'costoEnvio'     => $costoEnvio,
             'esADomicilio'        => $esADomicilio,
             'esParaLlevar'        => $mesa->esParaLlevar(),
             'clienteNombre'       => $cliente ? trim($cliente->nombre . ' ' . ($cliente->apellido ?? '')) : null,

@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
             // Cobro inmediato para pedidos de delivery (mesero cobra en el momento de enviar)
             Route::post('/delivery/pagar', [MesaOperacionController::class, 'procesarPagoDelivery'])->name('delivery.pagar');
             Route::post('/delivery/indicar-pago', [MesaOperacionController::class, 'indicarPagoDelivery'])->name('delivery.indicar-pago');
+            Route::post('/delivery/zona-envio', [ComandaController::class, 'guardarZonaEnvio'])->name('delivery.zona-envio');        
         });
 
         Route::patch('/comanda/detalle/{detalle}/cancelar', [MesaController::class, 'cancelarProducto'])->name('comanda.detalle.cancelar');
@@ -295,6 +296,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{id}/asignar', [App\Http\Controllers\RepartidorController::class, 'asignarRepartidor'])->name('asignar')->middleware('permiso:Repartidores,gestionar');
         Route::get('/ticket/orden/{ordenId}', [App\Http\Controllers\CajaController::class, 'imprimirTicketPorOrden'])->name('ticket.orden')->middleware('permiso:Repartidores,mostrar');
         Route::patch('/{id}/entregado', [App\Http\Controllers\RepartidorController::class, 'marcarEntregado'])->name('entregado')->middleware('permiso:Repartidores,gestionar');
+        Route::get('/mis-pedidos', [App\Http\Controllers\RepartidorController::class, 'misPedidos'])->name('mis-pedidos')->middleware('permiso:Repartidores,mostrar');
     });
 
     // ------------------------------------------

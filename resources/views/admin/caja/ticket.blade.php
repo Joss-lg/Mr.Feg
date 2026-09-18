@@ -17,7 +17,6 @@
             color: #000; 
             text-transform: uppercase;
         }
-        
 
         .text-center { text-align: center; }
         .text-right { text-align: right; }
@@ -27,24 +26,14 @@
         .mt-1 { margin-top: 5px; }
         .mb-1 { margin-bottom: 5px; }
         .py-1 { padding: 5px 0; }
-        
-        /* Flexbox para alinear pagos y totales */
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Líneas punteadas */
         .dashed-line { border-top: 1px dashed #000; margin: 5px 0; }
-        
-        /* Tabla de productos */
         table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         th, td { text-align: left; vertical-align: top; padding: 3px 0; }
         th { border-bottom: 1px dashed #000; font-weight: bold; padding-bottom: 3px; font-size: 13px;}
-        
-        /* Estilos de productos (Letra grande y gruesa de Pizzetos) */
         .item-principal { font-size: 16px; font-weight: 900; line-height: 1.2; }
         .sub-item { font-size: 13px; font-weight: bold; color: #333; line-height: 1.2; }
         .precio-text { font-size: 15px; font-weight: bold; }
-
-        /* Estilo para el logo en impresión térmica */
         .ticket-logo {
             width: 140px; 
             height: auto;
@@ -52,7 +41,6 @@
             display: block;
             filter: grayscale(100%) contrast(1.2); 
         }
-
         @media print { 
             .no-print { display: none !important; } 
             body { margin: 0 auto; }
@@ -61,63 +49,51 @@
 </head>
 <body>
 
-    <!-- Encabezado (Estilo Pizzetos) -->
+    <!-- Encabezado -->
     <div class="text-center mb-1">
-        
-        <!-- Logo Mr. Feg -->
         <img src="{{ asset('images/mrlogo.png') }}" alt="Mr. Feg" class="ticket-logo">
-        
         <div style="font-size: 12px; margin-top: 0;">TICKET</div>
-
         @if(!empty($folio))
             <div class="font-bold" style="font-size: 13px;">FOLIO: {{ $folio }}</div>
         @endif
-
         <div style="font-size: 12px;">{{ $fecha }}{{ !empty($hora) ? ' - '.$hora : '' }}</div>
-
         @if($mesero) 
             <div style="font-size: 12px;">ATENDIÓ: {{ $mesero }}</div> 
         @endif
-
         @if(!empty($cajero))
             <div style="font-size: 12px;">CAJERO: {{ $cajero }}</div>
         @endif
-        
-        <!-- Bloque central de Mesa/Delivery con bordes superior e inferior -->
         <div class="font-bold text-lg mt-1 mb-1 py-1" style="border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
             @if($mesa)
-    @if($esDelivery ?? false)
-        {{ mb_strtoupper($plataformaNombre ?? 'DELIVERY') }} · {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
-    @elseif($esParaLlevar ?? false)
-        LLEVAR{{ !empty($clienteNombre) ? ' · ' . mb_strtoupper($clienteNombre) : '' }}
-    @elseif($esADomicilio ?? false)
-        DOMICILIO
-    @else
-        MESA {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
-    @endif
-@else
-    PUNTO DE VENTA
-@endif
+                @if($esDelivery ?? false)
+                    {{ mb_strtoupper($plataformaNombre ?? 'DELIVERY') }} · {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
+                @elseif($esParaLlevar ?? false)
+                    LLEVAR{{ !empty($clienteNombre) ? ' · ' . mb_strtoupper($clienteNombre) : '' }}
+                @elseif($esADomicilio ?? false)
+                    DOMICILIO
+                @else
+                    MESA {{ mb_strtoupper(preg_replace('/^mesa\s*/i', '', $mesa)) }}
+                @endif
+            @else
+                PUNTO DE VENTA
+            @endif
         </div>
     </div>
 
     @if($esADomicilio ?? false)
     <div style="border-bottom: 1px dashed #000; padding: 5px 2px; margin-bottom: 5px; font-size: 12px; line-height: 1.6;">
-
         @if(!empty($clienteNombre))
             <div class="flex-between">
                 <span class="font-bold">CLIENTE:</span>
                 <span>{{ mb_strtoupper($clienteNombre) }}</span>
             </div>
         @endif
-
         @if(!empty($clienteTelefono))
             <div class="flex-between">
                 <span class="font-bold">TEL:</span>
                 <span>{{ $clienteTelefono }}</span>
             </div>
         @endif
-
         @if(!empty($direccionCalle))
             @php
                 $partes = array_filter([
@@ -131,22 +107,19 @@
                 <span>{{ mb_strtoupper(implode(' ', $partes)) }}</span>
             </div>
         @endif
-
         @if(!empty($direccionColonia))
             <div class="flex-between">
                 <span class="font-bold">COLONIA:</span>
                 <span>{{ mb_strtoupper($direccionColonia) }}</span>
             </div>
         @endif
-
         @if(!empty($direccionReferencia))
             <div style="margin-top: 2px;">
                 <span class="font-bold">REF: </span>{{ mb_strtoupper($direccionReferencia) }}
             </div>
         @endif
-
     </div>
-@endif
+    @endif
 
     <!-- Lista de Items -->
     <table class="mb-1">
@@ -162,12 +135,11 @@
                     <td style="padding-top: 8px; padding-left: 2px;">
                         {{ $item['cantidad'] }}X {{ $item['nombre'] }}
                         @if(!empty($item['notas']))
-                            <div class="sub-item" style="font-size: 11px; font-weight: normal; text-transform: uppercase; color: #444; margin-top: 1px;">{{ $item['notas'] }}</div>
+                            <div class="sub-item" style="font-size: 11px; font-weight: normal; color: #444; margin-top: 1px;">{{ $item['notas'] }}</div>
                         @endif
                     </td>
                     <td class="text-right precio-text" style="padding-top: 8px;">${{ number_format($item['subtotal'], 2) }}</td>
                 </tr>
-                
                 @if(($item['descuento'] ?? 0) > 0)
                     <tr class="sub-item">
                         <td style="padding-left: 10px; padding-bottom: 4px;">
@@ -178,22 +150,19 @@
                         </td>
                     </tr>
                 @endif
-                
-                <!-- Espaciador entre productos -->
                 <tr><td colspan="2" style="height: 6px;"></td></tr>
             @endforeach
         </tbody>
     </table>
 
-    <div class="dashed-line"></div>
+    <!-- Totales -->
+    <div style="padding: 5px 0; border-top: 1px dashed #000;">
 
-    <!-- Totales (Alineados con flex-between estilo Pizzetos) -->
-    <div style="padding: 5px 0;">
-        <div class="flex-between" style="font-size: 14px; margin-bottom: 3px;">
+        <div class="flex-between" style="font-size: 14px; margin-bottom: 3px; padding-top: 5px;">
             <span>SUBTOTAL:</span>
             <span>${{ number_format($subtotal, 2) }}</span>
         </div>
-        
+
         @if(($descuentoTotal ?? 0) > 0)
             <div class="flex-between" style="font-size: 14px; margin-bottom: 3px;">
                 <span>DESCUENTO TOTAL:</span>
@@ -207,12 +176,6 @@
                 <span>-${{ number_format($descuentoCajaMonto, 2) }}</span>
             </div>
         @endif
-
-        @php /* IVA_BLOCK_START — iva_ticket_display
-        @if ivaHabilitado && iva > 0
-            IVA X% : $X.XX
-        @endif
-        IVA_BLOCK_END */ @endphp
 
         @if(($propina ?? 0) > 0)
             <div class="flex-between" style="font-size: 14px; margin-bottom: 3px;">
@@ -235,7 +198,15 @@
             </div>
         @endif
 
-        <div class="flex-between mt-1" style="border-top: 1px dashed #000; padding-top: 5px;">
+         @if(($costoEnvio ?? 0) > 0)
+            <div class="dashed-line"></div>
+            <div class="flex-between" style="font-size: 14px; margin-bottom: 3px; padding-top: 3px;">
+                <span>ENVÍO (ZONA {{ $zonaEnvio ?? '-' }}):</span>
+                <span>${{ number_format($costoEnvio, 2) }}</span>
+            </div>
+        @endif
+        
+        <div class="flex-between" style="border-top: 1px dashed #000; padding-top: 5px; margin-top: 3px;">
             <span class="font-bold text-lg">TOTAL:</span>
             <span class="font-bold text-xl">${{ number_format($total, 2) }}</span>
         </div>
@@ -256,8 +227,6 @@
                 @endif
             </div>
         @endforeach
-
-    {{-- Método pre-indicado (ticket impreso ANTES de cobrar, p.ej. para el repartidor) --}}
     @elseif(!empty($metodoPagoPendiente))
         <div class="dashed-line"></div>
         <div class="font-bold" style="font-size: 13px; margin-bottom: 4px;">FORMA DE PAGO INDICADA:</div>
@@ -277,12 +246,10 @@
 
     <div class="dashed-line"></div>
 
-    <!-- Agradecimiento -->
     <div class="text-center mt-1 pt-1" style="margin-top: 15px; font-size: 13px; font-weight: bold;">
         ¡GRACIAS POR SU COMPRA!
     </div>
 
-    <!-- Leyenda promocional del software -->
     <div class="dashed-line" style="margin-top: 15px;"></div>
     <div class="text-center" style="margin-top: 8px; font-size: 12px; line-height: 1.4;">
         <span class="font-bold">¿NECESITAS UN SOFTWARE PARA TU NEGOCIO?</span><br>
@@ -290,12 +257,8 @@
         WWW.OLLINTEM.COM.MX
     </div>
 
-
-
     <script>
-        // JS original de Agostadero mantenido intencionalmente
-        // El modal que lo muestra dispara la impresión. 
-        // No auto-imprimir ni auto-cerrar.
+        // JS original mantenido intencionalmente
     </script>
 </body>
 </html>
