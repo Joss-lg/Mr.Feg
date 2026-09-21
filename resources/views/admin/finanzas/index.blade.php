@@ -7,7 +7,6 @@
 
 @push('styles')
 <style>
-    /* Fondo general del sistema actualizado a #F2F2F2 */
     body, html, #app, main, .wrapper, .main-content {
         background-color: #F2F2F2 !important; 
     }
@@ -50,6 +49,11 @@
         </div>
 
         <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full xl:w-auto">
+            
+            <a href="{{ route('admin.finanzas.corte.semanal') }}" class="w-full sm:w-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-5 py-3.5 sm:py-2.5 rounded-xl text-sm font-bold transition-all outline-none flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] shadow-sm hover:shadow-md hover:shadow-indigo-500/10">
+                <i class="fas fa-calendar-week"></i> Corte Semanal
+            </a>
+
             <a href="{{ route('admin.finanzas.corte.mensual') }}" class="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-5 py-3.5 sm:py-2.5 rounded-xl text-sm font-bold transition-all outline-none flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] shadow-sm hover:shadow-md hover:shadow-blue-500/10">
                 <i class="fas fa-calendar-check"></i> Corte Mensual
             </a>
@@ -202,7 +206,7 @@
             </div>
         </div>
 
-        {{-- ===================== VISTA MÓVIL: TARJETAS (solo < sm) ===================== --}}
+        {{-- ===================== VISTA MÓVIL: TARJETAS ===================== --}}
         <div class="flex flex-col gap-3 sm:hidden">
             @forelse($flujosCaja as $flujo)
             <div class="fila-flujo-movil border border-slate-100 rounded-2xl p-4 bg-white shadow-sm hover:shadow-md hover:border-blue-100 hover:bg-blue-50/30 transition-all duration-300">
@@ -245,7 +249,7 @@
             @endforelse
         </div>
 
-        {{-- ===================== VISTA ESCRITORIO: TABLA (solo sm+) ===================== --}}
+        {{-- ===================== VISTA ESCRITORIO: TABLA ===================== --}}
         <div class="hidden sm:block overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-100 pb-2">
             <table class="w-full min-w-[700px] text-left border-collapse whitespace-nowrap">
                 <thead class="bg-slate-50 border-b border-slate-100">
@@ -388,8 +392,6 @@
 
 </div>
 
-</div>
-
 @if(auth()->user()->tienePermiso('finanzas.crear'))
     @include('admin.finanzas.modal-crear-gasto')
 @endif
@@ -404,14 +406,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- MOVER MODALES AL BODY ---
         const modales = ['modalCrearGasto', 'modalCrearNomina']; 
         modales.forEach(id => {
             const modalElement = document.getElementById(id);
             if (modalElement) document.body.appendChild(modalElement);
         });
 
-        // --- BUSCADOR ---
         const buscador = document.getElementById('buscadorFlujo');
         const filas = document.querySelectorAll('.fila-flujo, .fila-flujo-movil');
         if (buscador) {
@@ -425,7 +425,6 @@
         }
     });
 
-    // --- LÓGICA DE NÓMINA (Calculadora) ---
     function actualizarSueldo() {
         const select = document.getElementById('empleadoSelect');
         const inputSueldo = document.getElementById('sueldoBase');

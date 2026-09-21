@@ -61,7 +61,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/delivery/crear', [DeliveryController::class, 'crear'])->name('delivery.crear');
             Route::delete('/delivery/{mesa}/cancelar-vacio', [DeliveryController::class, 'cancelarVacio'])->name('delivery.cancelar-vacio');
             Route::match(['get', 'post'], '/pedido-rapido', [ComandaController::class, 'crearPedidoRapido'])->name('pedido.rapido');
-            // Cobro inmediato para pedidos de delivery (mesero cobra en el momento de enviar)
             Route::post('/delivery/pagar', [MesaOperacionController::class, 'procesarPagoDelivery'])->name('delivery.pagar');
             Route::post('/delivery/indicar-pago', [MesaOperacionController::class, 'indicarPagoDelivery'])->name('delivery.indicar-pago');
             Route::post('/delivery/zona-envio', [ComandaController::class, 'guardarZonaEnvio'])->name('delivery.zona-envio');        
@@ -219,9 +218,17 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [FinanzasController::class, 'index'])->name('index');
             Route::get('/exportar-csv', [FinanzasController::class, 'exportarCSV'])->name('exportar');
             Route::post('/estadisticas-periodo', [FinanzasController::class, 'estadisticasPeriodo'])->name('estadisticas.periodo');
+            
+            // Corte Mensual
             Route::get('/corte-mensual', [FinanzasController::class, 'corteMensual'])->name('corte.mensual');
             Route::get('/corte-mensual/exportar', [FinanzasController::class, 'exportarCorteCSV'])->name('corte.exportar');
             Route::get('/corte-mensual/pdf', [FinanzasController::class, 'exportarCortePDF'])->name('corte.pdf');
+
+            // Corte Semanal
+            Route::get('/corte-semanal', [FinanzasController::class, 'corteSemanal'])->name('corte.semanal');
+            Route::get('/corte-semanal/exportar', [FinanzasController::class, 'exportarCorteSemanalCSV'])->name('corte.semanal.exportar');
+            Route::get('/corte-semanal/pdf', [FinanzasController::class, 'exportarCorteSemanalPDF'])->name('corte.semanal.pdf');
+
             Route::get('/meseros', [MeserosFinanzasController::class, 'index'])->name('meseros');
             Route::get('/meseros/detalle', [MeserosFinanzasController::class, 'detalle'])->name('meseros.detalle');
             Route::post('/meseros/aporte', [MeserosFinanzasController::class, 'aplicarAporte'])

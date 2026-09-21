@@ -19,37 +19,27 @@ class FinanzasController extends Controller
      */
     public function index(Request $request): View
     {
-        // 1. Obtener y validar el filtro de pestaña (todos, ingresos, egresos)
         $tab = $request->query('tab', 'todos');
         if (!in_array($tab, ['todos', 'ingresos', 'egresos'], true)) {
             $tab = 'todos';
         }
 
-        // 2. Obtener empleados activos optimizando memoria
         $empleados = User::where('esta_activo', true)
             ->orderBy('nombre')
             ->select(['id', 'nombre'])
             ->get();
 
-        // 3. Mes y año actual mediante Carbon fijo
         $now = Carbon::now();
         $mesActual = $now->month;
         $añoActual = $now->year;
 
-        // --- MÉTRICAS MENSUALES ---
         $ingresosMes = FlujoCaja::ingresos()->delMes($mesActual, $añoActual)->sum('monto');
-        // Las cancelaciones se guardan como egreso para que queden asentadas,
-        // pero NO son gasto: es venta que nunca se cobro. Si se sumaran aqui,
-        // cada cliente que se va sin pagar apareceria como una compra y
-        // desinflaria el balance dos veces.
         $egresosMes  = FlujoCaja::egresos()->sinCancelaciones()->delMes($mesActual, $añoActual)->sum('monto');
         $canceladoMes = FlujoCaja::egresos()->soloCancelaciones()->delMes($mesActual, $añoActual)->sum('monto');
         $balanceNeto = $ingresosMes - $egresosMes;
 
-        // --- NÓMINA PAGADA (este mes) ---
         $nominaPagada = PagoNomina::pagados()->porMes($mesActual, $añoActual)->sum('monto_neto');
 
-        // --- FLUJO DE CAJA FILTRADO ---
         $query = FlujoCaja::query();
 
         match ($tab) {
@@ -58,10 +48,8 @@ class FinanzasController extends Controller
             default    => null,
         };
 
-        // Paginación limpia
         $flujosCaja = $query->ordenado('desc')->paginate(20)->withQueryString();
 
-        // --- ESTADÍSTICAS ADICIONALES POR CATEGORÍA ---
         $categoriasIngresos = FlujoCaja::ingresos()
             ->delMes($mesActual, $añoActual)
             ->selectRaw('categoria, SUM(monto) as total, COUNT(*) as cantidad')
@@ -75,13 +63,11 @@ class FinanzasController extends Controller
             ->groupBy('categoria')
             ->get();
 
-        // --- ÚLTIMOS 7 DÍAS ---
         $ultimosSieteDias = FlujoCaja::entre($now->copy()->subDays(7)->startOfDay(), $now->endOfDay())
             ->sinCancelaciones()
             ->ordenado('desc')
             ->get();
 
-        // --- TOP 5 GASTOS DEL MES ---
         $top5Gastos = FlujoCaja::egresos()
             ->sinCancelaciones()
             ->delMes($mesActual, $añoActual)
@@ -89,7 +75,6 @@ class FinanzasController extends Controller
             ->limit(5)
             ->get();
 
-        // --- TOP 5 MÉTODOS DE PAGO ---
         $metodosPago = FlujoCaja::delMes($mesActual, $añoActual)
             ->selectRaw('metodo_pago, tipo, SUM(monto) as total, COUNT(*) as cantidad')
             ->groupBy('metodo_pago', 'tipo')
@@ -103,8 +88,7 @@ class FinanzasController extends Controller
     }
 
     /**
-     * CORTE MENSUAL: desglose día por día de ingresos, gastos y nómina,
-     * con totales del mes, filtrable por mes y año.
+     * CORTE MENSUAL
      */
     public function corteMensual(Request $request): View
     {
@@ -113,8 +97,6 @@ class FinanzasController extends Controller
         $inicioMes = Carbon::create($año, $mes, 1)->startOfMonth();
         $finMes    = $inicioMes->copy()->endOfMonth();
 
-        // Se excluyen las cancelaciones: quedan asentadas en el corte de caja
-        // y en su PDF, pero no son gasto y no deben mover el balance del mes.
         $movimientos = FlujoCaja::whereBetween('fecha', [$inicioMes, $finMes])
             ->sinCancelaciones()
             ->orderBy('fecha', 'asc')
@@ -158,12 +140,6 @@ class FinanzasController extends Controller
         ));
     }
 
-    /**
-     * NUEVO: Exportar el corte mensual a PDF.
-     * Si el mes solicitado es el mes en curso, el corte llega solo
-     * hasta el día de HOY (corte parcial "a la fecha"); si es un mes
-     * pasado, incluye el mes completo.
-     */
     public function exportarCortePDF(Request $request)
     {
         [$mes, $año] = $this->sanearMesAño($request);
@@ -171,7 +147,6 @@ class FinanzasController extends Controller
         $inicioMes = Carbon::create($año, $mes, 1)->startOfMonth();
         $finMes    = $inicioMes->copy()->endOfMonth();
 
-        // ¿Es el mes en curso? Entonces cortamos al día de hoy.
         $esMesActual = $inicioMes->isSameMonth(now(), true);
         $ultimoDia   = $esMesActual ? now()->day : $inicioMes->daysInMonth;
         $fechaCorte  = Carbon::create($año, $mes, $ultimoDia)->endOfDay();
@@ -228,9 +203,6 @@ class FinanzasController extends Controller
         return $pdf->download($filename);
     }
 
-    /**
-     * Exportar el corte mensual (desglose diario) a CSV
-     */
     public function exportarCorteCSV(Request $request)
     {
         [$mes, $año] = $this->sanearMesAño($request);
@@ -238,8 +210,6 @@ class FinanzasController extends Controller
         $inicioMes = Carbon::create($año, $mes, 1)->startOfMonth();
         $finMes    = $inicioMes->copy()->endOfMonth();
 
-        // Se excluyen las cancelaciones: quedan asentadas en el corte de caja
-        // y en su PDF, pero no son gasto y no deben mover el balance del mes.
         $movimientos = FlujoCaja::whereBetween('fecha', [$inicioMes, $finMes])
             ->sinCancelaciones()
             ->orderBy('fecha', 'asc')
@@ -259,9 +229,8 @@ class FinanzasController extends Controller
 
         $callback = function () use ($porDia, $inicioMes, $año, $mes) {
             $file = fopen('php://output', 'w');
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM para Excel
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); 
 
-            // --- SECCIÓN 1: RESUMEN DIARIO ---
             fputcsv($file, ['CORTE MENSUAL', $inicioMes->translatedFormat('F Y')], ';');
             fputcsv($file, [], ';');
             fputcsv($file, ['Fecha', 'Ingresos', 'Gastos', 'Nómina', 'Total Egresos', 'Balance del Día', 'Balance Acumulado'], ';');
@@ -307,7 +276,6 @@ class FinanzasController extends Controller
                 '',
             ], ';');
 
-            // --- SECCIÓN 2: DETALLE DE MOVIMIENTOS ---
             fputcsv($file, [], ';');
             fputcsv($file, ['DETALLE DE MOVIMIENTOS'], ';');
             fputcsv($file, ['Fecha', 'Hora', 'Tipo', 'Categoría', 'Concepto', 'Monto', 'Método de Pago'], ';');
@@ -325,6 +293,182 @@ class FinanzasController extends Controller
                     ], ';');
                 }
             }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * CORTE SEMANAL / POR RANGO DE FECHAS
+     */
+    public function corteSemanal(Request $request): View
+    {
+        $fechaInicioStr = $request->query('fecha_inicio', now()->startOfWeek()->toDateString());
+        $fechaFinStr    = $request->query('fecha_fin', now()->endOfWeek()->toDateString());
+
+        $fechaInicio = Carbon::parse($fechaInicioStr)->startOfDay();
+        $fechaFin    = Carbon::parse($fechaFinStr)->endOfDay();
+
+        $movimientos = FlujoCaja::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->sinCancelaciones()
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        $porDia = $movimientos->groupBy(fn ($m) => $m->fecha->toDateString());
+
+        $dias = collect();
+        $balanceAcumulado = 0;
+
+        $periodo = \Carbon\CarbonPeriod::create($fechaInicio, $fechaFin);
+        
+        foreach ($periodo as $fecha) {
+            $fila  = $this->armarFilaDia($fecha, $porDia, $balanceAcumulado);
+            $dias->push($fila);
+        }
+
+        $totales = $this->calcularTotales($dias);
+
+        $categoriasIngresos = $movimientos->where('tipo', 'ingreso')
+            ->groupBy('categoria')
+            ->map(fn ($grupo) => (object) [
+                'total'    => (float) $grupo->sum('monto'),
+                'cantidad' => $grupo->count(),
+            ]);
+
+        $categoriasEgresos = $movimientos->where('tipo', 'egreso')
+            ->groupBy('categoria')
+            ->map(fn ($grupo) => (object) [
+                'total'    => (float) $grupo->sum('monto'),
+                'cantidad' => $grupo->count(),
+            ]);
+
+        return view('admin.finanzas.corte-semanal', compact(
+            'dias', 'totales', 'fechaInicioStr', 'fechaFinStr',
+            'categoriasIngresos', 'categoriasEgresos'
+        ))->with([
+            'fechaInicio' => $fechaInicioStr,
+            'fechaFin'    => $fechaFinStr
+        ]);
+    }
+
+    /**
+     * Exportar el corte semanal a PDF
+     */
+    public function exportarCorteSemanalPDF(Request $request)
+    {
+        $fechaInicioStr = $request->query('fecha_inicio', now()->startOfWeek()->toDateString());
+        $fechaFinStr    = $request->query('fecha_fin', now()->endOfWeek()->toDateString());
+
+        $fechaInicio = Carbon::parse($fechaInicioStr)->startOfDay();
+        $fechaFin    = Carbon::parse($fechaFinStr)->endOfDay();
+
+        $movimientos = FlujoCaja::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->sinCancelaciones()
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        $porDia = $movimientos->groupBy(fn ($m) => $m->fecha->toDateString());
+
+        $dias = collect();
+        $balanceAcumulado = 0;
+
+        $periodo = \Carbon\CarbonPeriod::create($fechaInicio, $fechaFin);
+        foreach ($periodo as $fecha) {
+            $fila  = $this->armarFilaDia($fecha, $porDia, $balanceAcumulado);
+            $dias->push($fila);
+        }
+
+        $totales = $this->calcularTotales($dias);
+
+        $pdf = Pdf::loadView('admin.finanzas.corte-semanal-pdf', [
+            'dias'               => $dias,
+            'totales'            => $totales,
+            'fechaInicio'        => $fechaInicio,
+            'fechaFin'           => $fechaFin,
+            'generadoEn'         => now(),
+            'generadoPor'        => auth()->user()->nombre ?? 'Sistema',
+        ])->setPaper('letter', 'portrait');
+
+        $filename = "corte_semanal_{$fechaInicioStr}_al_{$fechaFinStr}.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Exportar el corte semanal a CSV
+     */
+    public function exportarCorteSemanalCSV(Request $request)
+    {
+        $fechaInicioStr = $request->query('fecha_inicio', now()->startOfWeek()->toDateString());
+        $fechaFinStr    = $request->query('fecha_fin', now()->endOfWeek()->toDateString());
+
+        $fechaInicio = Carbon::parse($fechaInicioStr)->startOfDay();
+        $fechaFin    = Carbon::parse($fechaFinStr)->endOfDay();
+
+        $movimientos = FlujoCaja::whereBetween('fecha', [$fechaInicio, $fechaFin])
+            ->sinCancelaciones()
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        $porDia = $movimientos->groupBy(fn ($m) => $m->fecha->toDateString());
+
+        $filename = "corte_semanal_{$fechaInicioStr}_al_{$fechaFinStr}.csv";
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma'              => 'no-cache',
+            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires'             => '0',
+        ];
+
+        $callback = function () use ($porDia, $fechaInicio, $fechaFin, $fechaInicioStr, $fechaFinStr) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); 
+
+            fputcsv($file, ['CORTE SEMANAL', "Del $fechaInicioStr al $fechaFinStr"], ';');
+            fputcsv($file, [], ';');
+            fputcsv($file, ['Fecha', 'Ingresos', 'Gastos', 'Nómina', 'Total Egresos', 'Balance del Día', 'Balance Acumulado'], ';');
+
+            $totIngresos = $totGastos = $totNomina = $acumulado = 0;
+
+            $periodo = \Carbon\CarbonPeriod::create($fechaInicio, $fechaFin);
+            foreach ($periodo as $fecha) {
+                $movsDelDia = $porDia->get($fecha->toDateString(), collect());
+
+                $ingresos = $movsDelDia->where('tipo', 'ingreso')->sum('monto');
+                $nomina   = $movsDelDia->where('tipo', 'egreso')->where('categoria', 'Nómina')->sum('monto');
+                $gastos   = $movsDelDia->where('tipo', 'egreso')->where('categoria', '!=', 'Nómina')->sum('monto');
+                $egresos  = $gastos + $nomina;
+                $balance  = $ingresos - $egresos;
+                $acumulado += $balance;
+
+                $totIngresos += $ingresos;
+                $totGastos   += $gastos;
+                $totNomina   += $nomina;
+
+                fputcsv($file, [
+                    $fecha->format('Y-m-d'),
+                    number_format((float) $ingresos, 2, '.', ''),
+                    number_format((float) $gastos, 2, '.', ''),
+                    number_format((float) $nomina, 2, '.', ''),
+                    number_format((float) $egresos, 2, '.', ''),
+                    number_format((float) $balance, 2, '.', ''),
+                    number_format((float) $acumulado, 2, '.', ''),
+                ], ';');
+            }
+
+            fputcsv($file, [
+                'TOTALES',
+                number_format((float) $totIngresos, 2, '.', ''),
+                number_format((float) $totGastos, 2, '.', ''),
+                number_format((float) $totNomina, 2, '.', ''),
+                number_format((float) ($totGastos + $totNomina), 2, '.', ''),
+                number_format((float) ($totIngresos - $totGastos - $totNomina), 2, '.', ''),
+                '',
+            ], ';');
 
             fclose($file);
         };
@@ -352,7 +496,6 @@ class FinanzasController extends Controller
 
     /**
      * Helper privado: construir la fila-resumen de un día
-     * ($balanceAcumulado se pasa por referencia y se va acumulando)
      */
     private function armarFilaDia(Carbon $fecha, $porDia, &$balanceAcumulado): object
     {
@@ -397,9 +540,6 @@ class FinanzasController extends Controller
         ];
     }
 
-    /**
-     * Exportar el flujo de caja a CSV
-     */
     public function exportarCSV(Request $request)
     {
         $mes = $request->query('mes', now()->month);
@@ -439,9 +579,6 @@ class FinanzasController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * Obtener estadísticas por período (AJAX)
-     */
     public function estadisticasPeriodo(Request $request)
     {
         $request->validate([
@@ -459,9 +596,6 @@ class FinanzasController extends Controller
         ]);
     }
 
-    /**
-     * Guardar un nuevo gasto
-     */
     public function guardarGasto(Request $request)
     {
         $request->validate([
@@ -474,9 +608,6 @@ class FinanzasController extends Controller
             'descripcion' => 'nullable|string|max:500',
         ]);
 
-        // El GastoObserver se encarga automáticamente de crear el
-        // registro en flujo_caja cuando el estado es 'pagado' (evento "created"),
-        // así que aquí solo creamos el Gasto.
         Gasto::create([
             'concepto'    => $request->concepto,
             'categoria'   => $request->categoria,
@@ -491,9 +622,6 @@ class FinanzasController extends Controller
         return redirect()->route('admin.finanzas.index')->with('success', 'Gasto registrado correctamente.');
     }
 
-    /**
-     * Guardar un nuevo pago de nómina
-     */
     public function guardarNomina(Request $request)
     {
         $request->validate([
@@ -512,9 +640,6 @@ class FinanzasController extends Controller
         $deducciones = $request->deducciones ?? 0;
         $montoNeto   = PagoNomina::calcularMontoNeto($sueldoBase, $bonos, $deducciones);
 
-        // El PagoNominaObserver se encarga automáticamente de crear el
-        // registro en flujo_caja (con su vínculo a la caja activa) cuando
-        // el estado es 'pagado', así que aquí solo creamos el PagoNomina.
         PagoNomina::create([
             'user_id'       => $request->user_id,
             'periodo'       => $request->periodo,
