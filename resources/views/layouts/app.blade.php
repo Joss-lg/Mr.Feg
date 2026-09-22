@@ -11,16 +11,16 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
 
-    <!-- 2. Iconos HD para la Barra de Tareas (Windows), Accesos Directos y Apps Móviles -->
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/mrlogo.png') }}?v=3">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/mrlogo.png') }}?v=3">
-    
-    <!-- 3. Icono exclusivo para iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/mrlogo.png') }}?v=3">
+  <!-- Para Android -->
+<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192.png') }}?v=5">
+<link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512.png') }}?v=5">
+
+<!-- Para iOS -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}?v=5">
     
     <!-- 4. Manifest para Android -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=4">
-    
+
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
