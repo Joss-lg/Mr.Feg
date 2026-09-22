@@ -12,11 +12,11 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <!-- 2. Iconos HD para la Barra de Tareas (Windows), Accesos Directos y Apps Móviles -->
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/mrlogo.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/mrlogo.png') }}">
     
     <!-- 3. Icono exclusivo para iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/mrlogo.png') }}">
     
     <!-- 4. Manifest para Android -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
