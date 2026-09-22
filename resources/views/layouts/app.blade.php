@@ -7,20 +7,24 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'MR. Feg')</title>
 
-<!-- 1. Favicon para las pestañas tradicionales del navegador -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
+<!-- 1. Etiquetas OBLIGATORIAS para "Abrir como App Web" en iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MrFeg">
 
-  <!-- Para Android -->
-<link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192.png') }}?v=5">
-<link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512.png') }}?v=5">
+    <!-- 2. Favicon estándar -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
-<!-- Para iOS -->
-<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}?v=5">
+    <!-- 3. Iconos HD para Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('images/icon-512.png') }}">
     
-    <!-- 4. Manifest para Android -->
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=4">
-
+    <!-- 4. Icono con el nombre NUEVO para iOS -->
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-pwa-apple.png') }}">
+    
+    <!-- 5. Manifest para Android -->
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
