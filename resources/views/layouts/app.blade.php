@@ -19,7 +19,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/mrlogo.png') }}?v=3">
     
     <!-- 4. Manifest para Android -->
-    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=3">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}?v=4">
+    
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
