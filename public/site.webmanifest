@@ -1,0 +1,20 @@
+{
+  "name": "Mr. Feg",
+  "short_name": "MrFeg",
+  "icons": [
+    {
+      "src": "/images/mrlogo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/mrlogo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030303",
+  "theme_color": "#030303"
+}
