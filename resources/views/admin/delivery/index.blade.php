@@ -129,7 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // Ruta dinámica con prefijo admin blindada para evitar errores 404
-                const res = await fetch("{{ url('admin/delivery') }}/" + id, {
+                const urlActualizar = "{{ route('admin.delivery.update', ['id' => '__ID__']) }}".replace('__ID__', id);
+                const res = await fetch(urlActualizar, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
