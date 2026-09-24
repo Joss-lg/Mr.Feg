@@ -105,14 +105,15 @@ class ComandaService
                 }
 
                 $detalleData = [
-                    'orden_id' => $orden->id,
-                    'lote_envio' => $loteEnvio,
-                    'producto_id' => $platillo['id'],
-                    'cantidad' => $platillo['cantidad'],
-                    'precio_unitario' => $platillo['precio'],
-                    'estado' => 'en cocina',
-                    'estado_preparacion' => 'pendiente', // <-- NUEVO: arranca en la cola de Cocina/Barra
-                    'notas' => $notasFinales,
+                'orden_id' => $orden->id,
+                'lote_envio' => $loteEnvio,
+                'producto_id' => $platillo['id'],
+                'nombre_producto' => $platillo['nombre'] ?? null,
+                'cantidad' => $platillo['cantidad'],
+                'precio_unitario' => $platillo['precio'],
+                'estado' => 'en cocina',
+                'estado_preparacion' => 'pendiente',
+                'notas' => $notasFinales,
                 ];
 
                 if ($usaGramaje) $detalleData['gramaje'] = $platillo['gramaje'] ?? null;
@@ -295,14 +296,15 @@ class ComandaService
                 }
 
                 $detalleData = [
-                    'orden_id'        => $ordenDestino->id,
-                    'lote_envio'      => $loteEnvio, // NUEVO
-                    'producto_id'     => $platillo['id'],
-                    'cantidad'        => $platillo['cantidad'],
-                    'precio_unitario' => $platillo['precio'],
-                    'estado'          => 'en cocina',
-                    'estado_preparacion' => 'pendiente', // <-- NUEVO
-                    'notas'           => $notasFinales,
+                'orden_id'        => $ordenDestino->id,
+                'lote_envio'      => $loteEnvio,
+                'producto_id'     => $platillo['id'],
+                'nombre_producto' => $platillo['nombre'] ?? null,
+                'cantidad'        => $platillo['cantidad'],
+                'precio_unitario' => $platillo['precio'],
+                'estado'          => 'en cocina',
+                'estado_preparacion' => 'pendiente',
+                'notas'           => $notasFinales,
                 ];
                 if ($usaGramaje) $detalleData['gramaje'] = $platillo['gramaje'] ?? null;
                 if ($usaTiempo)  $detalleData['tiempo']  = $platillo['tiempo'] ?? null;

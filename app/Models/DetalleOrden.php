@@ -15,6 +15,7 @@ class DetalleOrden extends Model
         'orden_id',
         'lote_envio',
         'producto_id',
+        'nombre_producto',
         'cantidad',
         'precio_unitario',
         'estado',

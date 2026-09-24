@@ -325,13 +325,27 @@
             catP2.includes('alita')    || catP2.includes('boneless');
 
         if (esAlitaOBoneless2) {
-            const cbVolverSalsas = () => {
-                const ns = calcularNumeroSalsas(window.estadoPersonalizacion.tamanoSeleccionado);
-                mostrarSelectorSalsas(ns, () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack'));
-            };
-            mostrarSelectorPapasGenerico(20, 35, cbVolverSalsas);
-            return;
-        }
+    const cbVolverSalsas = () => {
+        const ns = calcularNumeroSalsas(window.estadoPersonalizacion.tamanoSeleccionado);
+        mostrarSelectorSalsas(ns, () => mostrarSelectorTamanos(prod.variantes, 'tamano_snack'));
+    };
+
+    // Buscar los modificadores de la variante seleccionada
+    const varId = window.estadoPersonalizacion.varianteIdSeleccionada;
+    const varObj = prod.variantes?.find(v => v.id === Number(varId));
+    const modsVariante = (varObj && Array.isArray(varObj.modificadores) && varObj.modificadores.length > 0)
+        ? varObj.modificadores
+        : prod.modificadores?.filter(m => Number(m.variante_id) === Number(varId)) || [];
+
+    const modFrancesa = modsVariante.find(m => (m.nombre || '').toLowerCase().includes('francesa'));
+    const modGajo     = modsVariante.find(m => (m.nombre || '').toLowerCase().includes('gajo'));
+
+    const extraFrancesa = modFrancesa ? parseFloat(modFrancesa.precio) : 20;
+    const extraGajo     = modGajo     ? parseFloat(modGajo.precio)     : 35;
+
+    mostrarSelectorPapasGenerico(extraFrancesa, extraGajo, cbVolverSalsas);
+    return;
+}
 
         if (extrasDisponibles.length > 0) {
             const opciones = [];
