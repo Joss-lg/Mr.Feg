@@ -86,19 +86,18 @@ class CategoriaController extends Controller
                          ->with('error', 'No puedes eliminar esta categoría porque tiene productos activos.');
     }
 
-    // 2. Desvincular los productos eliminados de cualquier detalle de orden
-    //    para no violar la llave foránea al hacer forceDelete
+    // 2. Obtener IDs de productos eliminados (en papelera)
     $productoIds = $categoria->productos()->onlyTrashed()->pluck('id');
 
     if ($productoIds->isNotEmpty()) {
-        \App\Models\DetalleOrden::whereIn('producto_id', $productoIds)
-            ->update(['producto_id' => null]);
+        // 3. Borrar los detalles de orden que referencian esos productos
+        \App\Models\DetalleOrden::whereIn('producto_id', $productoIds)->delete();
     }
 
-    // 3. Destruimos definitivamente los productos en la papelera
+    // 4. Destruimos definitivamente los productos en la papelera
     $categoria->productos()->onlyTrashed()->forceDelete();
 
-    // 4. Eliminamos la categoría permanentemente
+    // 5. Eliminamos la categoría permanentemente
     $categoria->forceDelete();
 
     return redirect()->route('admin.categorias.index')
