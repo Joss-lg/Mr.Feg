@@ -67,11 +67,13 @@
                     </button>
 
                     <div id="menu_Categoria" class="absolute left-0 right-0 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[110] py-2 hidden mt-1 max-h-40 overflow-y-auto unique-scrollbar">
-                        @foreach($categorias as $categoria)
+                        @forelse($categorias as $categoria)
                             <button type="button" onclick="window.selectCustomOption('val_Categoria', 'text_Categoria', 'menu_Categoria', '{{ $categoria->id }}', '{{ addslashes($categoria->nombre) }}')" class="w-full px-5 py-3 text-left text-sm hover:bg-blue-50 font-semibold text-slate-700 hover:text-blue-700 transition-colors">
                                 {{ $categoria->nombre }}
                             </button>
-                        @endforeach
+                        @empty
+                            <p class="px-5 py-3 text-xs font-semibold text-slate-400">Aún no hay categorías. Créalas con el botón «Categorías».</p>
+                        @endforelse
                     </div>
                 </div>
                 

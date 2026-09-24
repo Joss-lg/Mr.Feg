@@ -30,10 +30,10 @@ class Insumo extends Model
         'esta_activo' => 'boolean',
     ];
 
-    // Relación con Categoría
+    // Relación con la categoría de inventario (no con las categorías del POS)
     public function categoria()
     {
-        return $this->belongsTo(Categoria::class, 'categoria_id');
+        return $this->belongsTo(CategoriaInsumo::class, 'categoria_id');
     }
 
     // Relación con Movimientos

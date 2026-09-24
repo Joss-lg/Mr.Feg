@@ -37,6 +37,13 @@
                 <i class="fas fa-receipt"></i> Productos Vendidos
             </a>
 
+            @if(auth()->user()->tienePermiso('inventario.crear') || auth()->user()->tienePermiso('inventario.editar'))
+                <button type="button" onclick="abrirModalCategoriasInv()"
+                    class="w-full sm:w-auto flex justify-center items-center gap-2 rounded-2xl bg-slate-700 px-6 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-slate-800 shadow-md shadow-slate-700/20 active:scale-95 outline-none">
+                    <i class="fas fa-folder-open"></i> Categorías
+                </button>
+            @endif
+
             @if(auth()->user()->tienePermiso('inventario.crear'))
                 <button type="button" onclick="openModalCrear()" class="group w-full sm:w-auto relative flex justify-center items-center gap-2 rounded-2xl bg-blue-600 px-7 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 outline-none border-0">
                     <i class="fas fa-plus transition-transform duration-300 group-hover:rotate-90"></i>
@@ -424,6 +431,7 @@
 </script>
 
 @include('admin.inventario.modal-crear')
+@include('admin.inventario.modal-categorias')
 @include('admin.inventario.modal-eliminar')
 @include('admin.inventario.modal-movimiento')
 

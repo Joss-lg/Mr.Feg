@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Insumo;
-use App\Models\Categoria;
+use App\Models\CategoriaInsumo;
 use App\Models\MovimientoInventario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,10 @@ class InventarioController extends Controller
                             ->orderBy('nombre')
                             ->get();
                         
-        $categorias = Categoria::orderBy('nombre')->select(['id', 'nombre'])->get();
+        // Categorías propias del inventario (independientes de las del POS)
+        $categorias = CategoriaInsumo::withCount(['insumos' => fn ($q) => $q->where('esta_activo', true)])
+                                    ->orderBy('nombre')
+                                    ->get();
         
         $totalInsumos = $insumos->count();
         $valorInventario = $insumos->sum(function($insumo) {
@@ -54,7 +57,7 @@ class InventarioController extends Controller
 
         $request->validate([
             'nombre'        => 'required|string|max:255',
-            'categoria_id'  => 'required|exists:categorias,id',
+            'categoria_id'  => 'required|exists:categorias_insumos,id',
             'unidad_medida' => 'required|string|max:20', 
             'stock_minimo'  => 'required|numeric|min:0',
             'precio_compra' => 'nullable|numeric|min:0',
@@ -142,6 +145,7 @@ class InventarioController extends Controller
         $request->validate([
             'nombre'        => 'required|string|max:255',
             'unidad_medida' => 'required|string|max:20',
+            'categoria_id'  => 'nullable|exists:categorias_insumos,id',
             'stock_minimo'  => 'required|numeric|min:0',
             'precio_compra' => 'nullable|numeric|min:0',
         ]);
@@ -153,12 +157,24 @@ class InventarioController extends Controller
         $stockMinimo = (float)$request->stock_minimo;
         if ($unidad === 'l') { $unidad = 'ml'; $stockMinimo *= 1000; }
 
-        $insumo->update([
+        $datos = [
             'nombre'        => $request->nombre,
             'unidad_medida' => $unidad,
             'stock_minimo'  => $stockMinimo,
-            'precio_compra' => $request->precio_compra,
-        ]);
+        ];
+
+        // La ventana de edición envía la categoría ("Sin categoría" llega vacía).
+        if ($request->has('categoria_id')) {
+            $datos['categoria_id'] = $request->categoria_id;
+        }
+
+        // La ventana de edición no trae "Precio compra": solo se modifica si
+        // viene en la petición, para no borrarlo al editar otros campos.
+        if ($request->has('precio_compra')) {
+            $datos['precio_compra'] = $request->precio_compra;
+        }
+
+        $insumo->update($datos);
 
         return redirect()->route('admin.inventario.index')
                             ->with('success', "Los datos de {$insumo->nombre} fueron actualizados correctamente.");
@@ -171,6 +187,66 @@ class InventarioController extends Controller
 
         return redirect()->route('admin.inventario.index')
                             ->with('success', "El insumo {$insumo->nombre} fue dado de baja del almacén.");
+    }
+
+    // =========================================================================
+    // CATEGORÍAS DE INVENTARIO (independientes de las categorías del POS)
+    // =========================================================================
+
+    public function storeCategoria(Request $request)
+    {
+        $request->merge(['nombre' => trim((string) $request->nombre)]);
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:100|unique:categorias_insumos,nombre',
+        ], $this->mensajesCategoria());
+
+        $categoria = CategoriaInsumo::create($validated);
+
+        return response()->json(['success' => true, 'categoria' => $categoria], 201);
+    }
+
+    public function updateCategoria(Request $request, $id)
+    {
+        $categoria = CategoriaInsumo::findOrFail($id);
+
+        $request->merge(['nombre' => trim((string) $request->nombre)]);
+
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:100|unique:categorias_insumos,nombre,' . $categoria->id,
+        ], $this->mensajesCategoria());
+
+        $categoria->update($validated);
+
+        return response()->json(['success' => true, 'categoria' => $categoria]);
+    }
+
+    public function destroyCategoria($id)
+    {
+        $categoria = CategoriaInsumo::findOrFail($id);
+
+        $enUso = $categoria->insumos()->where('esta_activo', true)->count();
+
+        if ($enUso > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "No se puede eliminar: {$enUso} artículo(s) usan esta categoría. Cámbiales la categoría primero.",
+            ], 422);
+        }
+
+        // Los artículos dados de baja que la usaban quedan "sin categoría" (nullOnDelete).
+        $categoria->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    private function mensajesCategoria(): array
+    {
+        return [
+            'nombre.required' => 'Escribe el nombre de la categoría.',
+            'nombre.max'      => 'El nombre no puede pasar de 100 caracteres.',
+            'nombre.unique'   => 'Ya existe una categoría con ese nombre.',
+        ];
     }
 
     public function exportarPdfBajoStock()

@@ -102,6 +102,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [InventarioController::class, 'index'])->name('index');
             Route::post('/store', [InventarioController::class, 'store'])->name('store')->middleware('permiso:Inventario,crear');
             Route::post('/movimiento', [InventarioController::class, 'registrarMovimiento'])->name('movimiento')->middleware('permiso:Inventario,crear');
+            Route::post('/categorias', [InventarioController::class, 'storeCategoria'])->name('categorias.store')->middleware('permiso:Inventario,crear');
+            Route::put('/categorias/{id}', [InventarioController::class, 'updateCategoria'])->name('categorias.update')->middleware('permiso:Inventario,editar');
+            Route::delete('/categorias/{id}', [InventarioController::class, 'destroyCategoria'])->name('categorias.destroy')->middleware('permiso:Inventario,eliminar');
             Route::put('/{id}', [InventarioController::class, 'update'])->name('update')->middleware('permiso:Inventario,editar');
             Route::delete('/{id}', [InventarioController::class, 'destroy'])->name('destroy')->middleware('permiso:Inventario,eliminar');
         });

@@ -30,15 +30,6 @@ class Categoria extends Model
         return $this->hasMany(Producto::class);
     }
 
-    /**
-     * Una categoría puede tener muchos Insumos (Materia Prima)
-     * Ej: La categoría "Verduras" tiene Jitomate, Cebolla, Cilantro.
-     */
-    public function insumos()
-    {
-        return $this->hasMany(Insumo::class);
-    }
-
     // =========================================================================
     // ACCESORES / AYUDANTES (Opcionales pero muy útiles)
     // =========================================================================
