@@ -89,7 +89,7 @@ class CategoriaController extends Controller
     // 2. Obtener IDs de productos eliminados (en papelera)
     $productoIds = $categoria->productos()->onlyTrashed()->pluck('id');
 
-    if ($productoIds->isNotEmpty()) {
+      if ($productoIds->isNotEmpty()) {
         // 3. Guardar el nombre del producto en los detalles de orden antes de borrar
         foreach ($productoIds as $productoId) {
             $producto = \App\Models\Producto::withTrashed()->find($productoId);
@@ -100,10 +100,8 @@ class CategoriaController extends Controller
             }
         }
 
-        // 4. Borrar solo los detalles que no pudieron guardarse (sin nombre)
-        \App\Models\DetalleOrden::whereIn('producto_id', $productoIds)
-            ->whereNull('nombre_producto')
-            ->delete();
+        // 4. Borrar TODOS los detalles de esos productos
+        \App\Models\DetalleOrden::whereIn('producto_id', $productoIds)->delete();
     }
 
     // 5. Destruimos definitivamente los productos en la papelera
