@@ -18,7 +18,13 @@ class ComandaController extends Controller
 
     public function show($mesaId)
     {
-        $mesa = Mesa::findOrFail($mesaId);
+        $mesa = Mesa::withTrashed()->findOrFail($mesaId);
+
+        if ($mesa->trashed()) {
+            return redirect()->route('mesero.dashboard')
+                ->with('error', 'Este pedido ya fue cancelado o cerrado.');
+        }
+
         $usuario = auth()->user();
         $rolSlug = strtolower(trim($usuario->rol?->slug ?? ''));
         $esCapitan = $rolSlug === 'capitan';

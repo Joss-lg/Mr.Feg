@@ -42,7 +42,16 @@ class MesaController extends Controller
 
    public function show($mesaId)
     {
-        $mesa = Mesa::with('plataformaDelivery')->findOrFail($mesaId);
+        // withTrashed() para no lanzar 500 cuando la mesa existe pero fue
+        // soft-deleted (ej: pedido de delivery cancelado mientras el mesero
+        // tenía la pestaña abierta en ese mismo pedido).
+        $mesa = Mesa::withTrashed()->with('plataformaDelivery')->findOrFail($mesaId);
+
+        if ($mesa->trashed()) {
+            return redirect()->route('mesero.dashboard')
+                ->with('error', 'Este pedido ya fue cancelado o cerrado. Puedes abrir uno nuevo.');
+        }
+
         $usuario = auth()->user();
 
         $this->mesaService->verificarAccesoMesa($mesa, $usuario);
