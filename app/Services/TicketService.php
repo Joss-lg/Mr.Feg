@@ -231,7 +231,29 @@ class TicketService
             'costoEnvio'     => $costoEnvio,
             'esADomicilio'        => $esADomicilio,
             'esParaLlevar'        => $mesa->esParaLlevar(),
-            'clienteNombre'       => $cliente ? trim($cliente->nombre . ' ' . ($cliente->apellido ?? '')) : null,
+            'clienteNombre'       => $cliente
+                                        ? trim($cliente->nombre . ' ' . ($cliente->apellido ?? ''))
+                                        // Fallback: el nombre puede estar codificado en el número de la mesa
+                                        // (ej: "LLEVAR-JOSUE-682" → "Josue").  Esto ocurre cuando el mesero
+                                        // escribió el nombre del cliente en el modal de llevar pero no lo
+                                        // vinculó a un registro de la tabla clientes.
+                                        : (function () use ($mesa): ?string {
+                                            $numero = strtoupper((string) ($mesa->numero ?? ''));
+                                            foreach (['LLEVAR-', 'DOM-'] as $prefijo) {
+                                                if (str_starts_with($numero, $prefijo)) {
+                                                    // Formato: PREFIJO-NOMBRE-ID  (ej: LLEVAR-JOSUE-682)
+                                                    $sinPrefijo = substr($numero, strlen($prefijo)); // "JOSUE-682"
+                                                    $partes     = explode('-', $sinPrefijo);
+                                                    // El último segmento es el ID numérico; los anteriores son el nombre.
+                                                    if (count($partes) >= 2 && is_numeric(end($partes))) {
+                                                        array_pop($partes);
+                                                        $nombre = implode(' ', $partes);
+                                                        return $nombre !== '' ? ucwords(strtolower($nombre)) : null;
+                                                    }
+                                                }
+                                            }
+                                            return null;
+                                        })(),
             'clienteTelefono'     => $cliente?->telefono,
             'direccionCalle'      => $direccion?->calle,
             'direccionManzana'    => $direccion?->manzana,
