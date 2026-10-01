@@ -6,7 +6,7 @@
         {{-- Inputs de Estado Ocultos --}}
         <input id="mesa-id" type="hidden" value="{{ $mesa->id }}">
         <input id="orden-id" type="hidden" value="{{ $ordenes->first()->id ?? '' }}">
-        <input id="metodo-pago" type="hidden" value="Efectivo">
+        <input id="metodo-pago" type="hidden" value="">
         {{-- NUEVO: cuando la mesa está dividida, aquí va el id de la persona seleccionada --}}
         <input id="cuenta-division-id" type="hidden" value="">
 
@@ -24,9 +24,9 @@
             <div class="flex items-center justify-center pt-2">
                 <div class="text-center">
                     <p class="text-slate-400 uppercase tracking-[0.35em] text-[10px] font-black mb-3">Método de pago</p>
-                    <button id="btn-abrir-modal-metodo" type="button" class="inline-flex items-center gap-3 rounded-full bg-blue-50 px-6 py-3 text-blue-600 font-black uppercase tracking-[0.25em] border border-blue-100 hover:bg-blue-100 transition-all shadow-sm">
-                        <i class="fas fa-money-bill-wave text-lg"></i>
-                        <span id="metodo-pago-label">Efectivo</span>
+                    <button id="btn-abrir-modal-metodo" type="button" class="inline-flex items-center gap-3 rounded-full bg-amber-50 px-6 py-3 text-amber-600 font-black uppercase tracking-[0.25em] border border-amber-200 hover:bg-amber-100 transition-all shadow-sm">
+                        <i class="fas fa-hand-pointer text-lg"></i>
+                        <span id="metodo-pago-label">Seleccionar método</span>
                     </button>
                 </div>
             </div>

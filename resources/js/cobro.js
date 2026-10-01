@@ -536,6 +536,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon.className = this.querySelector('i').className + " text-lg";
             }
 
+            // Al elegir un método, cambiar el botón de ámbar (sin seleccionar) a azul (listo)
+            const btnMetodo = document.getElementById('btn-abrir-modal-metodo');
+            if (btnMetodo) {
+                btnMetodo.classList.remove('bg-amber-50', 'text-amber-600', 'border-amber-200', 'hover:bg-amber-100');
+                btnMetodo.classList.add('bg-blue-50', 'text-blue-600', 'border-blue-100', 'hover:bg-blue-100');
+            }
+
+            // Habilitar el botón FINALIZAR ahora que hay método seleccionado
+            if (btnPagar && btnPagar.dataset.dividido !== '1') {
+                btnPagar.disabled = false;
+            }
+
             // NUEVO: alterna el campo de referencia según el método elegido
             actualizarVisibilidadReferencia(metodo);
             
@@ -608,6 +620,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. ENVÍOS FETCH POST (FLUJO A Y FLUJO B)
     // ==========================================================================
     
+    // Bloquear FINALIZAR al inicio si no hay método seleccionado
+    if (btnPagar && btnPagar.dataset.dividido !== '1') {
+        const metodoInicial = inputMetodoOculto ? inputMetodoOculto.value : '';
+        if (!metodoInicial) {
+            btnPagar.disabled = true;
+            btnPagar.title = 'Selecciona primero el método de pago';
+        }
+    }
+
     // FLUJO A: Botón FINALIZAR de la pantalla principal (Pago Único)
     if (btnPagar) {
         btnPagar.addEventListener('click', async () => {
@@ -624,6 +645,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // NUEVO: si la mesa está dividida, hay que tener una persona seleccionada
             if (btnPagar.dataset.dividido === '1' && !cuentaSeleccionadaId) {
                 mostrarAlerta('Selecciona primero a la persona que vas a cobrar.', 'error');
+                return;
+            }
+
+           // Validar que se haya seleccionado un método de pago
+            if (!metodo) {
+                restaurarBoton(btnPagar);
+                if (modalMetodo) modalMetodo.classList.remove('hidden');
                 return;
             }
 

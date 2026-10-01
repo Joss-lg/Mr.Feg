@@ -51,7 +51,12 @@ class CajaController extends Controller
      */
     private function construirMesasCaja(): array
     {
-        $mesas = Mesa::orderBy('numero', 'asc')->with(['ordenesActivas.detalles.producto', 'plataformaDelivery'])->get();
+    $mesas = Mesa::with(['ordenesActivas.detalles.producto', 'plataformaDelivery'])
+    ->get()
+    ->sortBy(fn($mesa) =>
+        $mesa->ordenesActivas->min('abierta_el') ?? $mesa->updated_at
+        )
+        ->values();
 
         $mesas->each(function ($mesa) {
             if ($mesa->estado === Mesa::ESTADO_OCUPADA && $mesa->ordenesActivas()->count() === 0) {
