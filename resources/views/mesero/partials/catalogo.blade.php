@@ -187,6 +187,22 @@
             totalSalsas: 0,
         };
 
+        // 0. Dedos de queso y Aros de cebolla:
+        //    Flujo: Papas → Ranch (al final, como pide el negocio)
+        if (nombreLower.includes('dedos de queso') || nombreLower.includes('aros de cebolla')) {
+            // Tomar precio y datos de la variante única activa (5pz/$80 o 8pz/$65)
+            const varianteUnica = prod.variantes?.find(v => v.esta_disponible);
+            if (varianteUnica && parseFloat(varianteUnica.precio) > 0) {
+                window.estadoPersonalizacion.precioBase             = parseFloat(varianteUnica.precio);
+                window.estadoPersonalizacion.tamanoSeleccionado     = varianteUnica.nombre;
+                window.estadoPersonalizacion.varianteIdSeleccionada = varianteUnica.id;
+            }
+            // Mostrar papas primero; al confirmar papas se llamará a mostrarRanchFinal
+            mostrarPapasParaDedosAros(varianteUnica);
+            abrirContenedorModal();
+            return;
+        }
+
         // 1. Caso Bebidas con variantes
         if (catLower.includes('bebida') || catLower.includes('frapp') || catLower.includes('malteada') || catLower.includes('smoothie')) {
             if (prod.tiene_variantes && prod.variantes?.length > 0) {
@@ -210,14 +226,52 @@
             return;
         }
 
-        // 4. Caso Snacks individuales sin variantes pero con complementos globales
+        // 4. Combos: cada uno tiene sus propias preguntas configuradas
+        const COMBOS_CONFIG = {
+            'cono de snacks':   null,   // Sin preguntas
+            'combo mix':        { tipo: 'salsas_combo',    cantidad: 1,  label: '1 salsa a elegir' },
+            'combo kids':       { tipo: 'malteada_combo',  cantidad: 1,  opciones: ['Chocolate', 'Vainilla'], label: 'Malteada mini' },
+            'sabor y burbujas': { tipo: 'multi_combo',     items: [
+                                    { tipo: 'salsas_combo',    cantidad: 2, label: '2 salsas' },
+                                    { tipo: 'soda_multi',      cantidad: 2, label: '2 sodas italianas' },
+                                    { tipo: 'ranch_pregunta',  cantidad: 1, label: '1 Ranch' },
+                                  ]},
+            'mega paquete':     { tipo: 'multi_combo',     items: [
+                                    { tipo: 'malteada_combo',  cantidad: 1, opciones: ['Chocolate', 'Vainilla'], label: 'Malteada 500ml' },
+                                    { tipo: 'salsas_combo',    cantidad: 2, label: '2 salsas' },
+                                    { tipo: 'ranch_pregunta',  cantidad: 1, label: '1 Ranch' },
+                                  ]},
+            'paquete jumbo':    { tipo: 'multi_combo',     items: [
+                                    { tipo: 'salsas_combo',    cantidad: 3, label: '3 salsas' },
+                                    { tipo: 'ranch_pregunta',  cantidad: 2, label: '2 Ranch' },
+                                  ]},
+        };
+
+        const claveCombo = Object.keys(COMBOS_CONFIG).find(k => nombreLower.includes(k));
+        if (claveCombo !== undefined) {
+            const cfg = COMBOS_CONFIG[claveCombo];
+            if (cfg === null) {
+                // Cono de Snacks: sin preguntas, va directo
+                agregarAlTicket(prod.id, prod.nombre, parseFloat(prod.precio) || 0,
+                    prod.categoria?.nombre || 'Menú', [], false, 0);
+            } else {
+                window.estadoPersonalizacion._comboCfg   = cfg;
+                window.estadoPersonalizacion._comboItems = cfg.tipo === 'multi_combo' ? [...cfg.items] : [cfg];
+                window.estadoPersonalizacion._comboIdx   = 0;
+                window.estadoPersonalizacion._comboNotas = [];
+                _procesarSiguientePasoCombo();
+                abrirContenedorModal();
+            }
+            return;
+        }
+
+        // 5. Caso Snacks individuales sin variantes pero con complementos globales
         if (prod.modificadores && prod.modificadores.length > 0) {
             evaluarPapasPorTamano(null, null);
             abrirContenedorModal();
             return;
         }
 
-        // 5. Producto estándar directo al ticket
         agregarAlTicket(
             prod.id, 
             prod.nombre, 
@@ -786,7 +840,23 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
         const btnConf = document.getElementById('btn-confirmar-salsas');
         if (btnConf) btnConf.remove();
 
-        evaluarPapasPorTamano(window.estadoPersonalizacion.tamanoSeleccionado, null);
+        // ── Paso intermedio: Ranch obligatorio para Boneless, Dedos y Aros ──
+        const prodRanch = window.productoActivoParaComanda;
+        const nombreRanch = (prodRanch?.nombre || '').toLowerCase();
+        const necesitaRanch =
+            nombreRanch.includes('boneless') ||
+            nombreRanch.includes('dedos de queso') ||
+            nombreRanch.includes('aros de cebolla');
+
+        if (necesitaRanch) {
+            mostrarSelectorRanch(() => {
+                // Volver al selector de salsas
+                const ns = calcularNumeroSalsas(window.estadoPersonalizacion.tamanoSeleccionado);
+                mostrarSelectorSalsas(ns, () => mostrarSelectorTamanos(prodRanch.variantes, 'tamano_snack'));
+            });
+        } else {
+            evaluarPapasPorTamano(window.estadoPersonalizacion.tamanoSeleccionado, null);
+        }
     }
 
     // --- FINALIZACIÓN AL TICKET ---
@@ -846,6 +916,481 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
             0,
             notasParaCocina
         );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RANCH OBLIGATORIO (Boneless, Dedos de Queso, Aros de Cebolla)
+    // Regla: Boneless 250g→1pz, 1/2K→2pz, 1K→3pz | Dedos→1pz | Aros→1pz
+    // ═══════════════════════════════════════════════════════════════════════
+    function calcularPiezasRanch(nombreVariante, nombreProducto) {
+        const v = (nombreVariante || '').toLowerCase();
+        const p = (nombreProducto  || '').toLowerCase();
+        if (p.includes('boneless')) {
+            if (v.includes('1k') || v.includes('1kg'))  return 3;
+            if (v.includes('1/2') || v.includes('medio')) return 2;
+            return 1; // 250g
+        }
+        return 1; // Dedos de queso y Aros de cebolla: siempre 1pz
+    }
+
+    function mostrarSelectorRanch(callbackVolver) {
+        const prod = window.productoActivoParaComanda;
+        const tam  = window.estadoPersonalizacion.tamanoSeleccionado;
+        const pzs  = calcularPiezasRanch(tam, prod?.nombre);
+        const paso = (window.estadoPersonalizacion.salsasElegidas?.length > 0 ||
+                      window.estadoPersonalizacion.detalles?.some(d => d === 'Sin salsa')) ? 3 : 2;
+
+        document.getElementById('titulo-modal-variantes').textContent =
+            tam ? `${prod.nombre} (${tam})` : prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso}: ¿Ranch? (incluye ${pzs} pz)`;
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        btnVolver.classList.remove('hidden');
+        btnVolver.onclick = (e) => { e.stopPropagation(); callbackVolver(); };
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        const precioActual = window.estadoPersonalizacion.precioBase +
+                             (window.estadoPersonalizacion.extraAcumulado || 0);
+
+        const opciones = [
+            { label: `Con Ranch (${pzs} pz incluido${pzs > 1 ? 's' : ''})`, nota: `Ranch x${pzs}`,   si: true },
+            { label: 'Sin Ranch',                                              nota: 'Sin ranch',        si: false },
+        ];
+
+        opciones.forEach(op => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none mb-2';
+
+            btn.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0
+                                 ${op.si ? 'bg-amber-50 border border-amber-200 text-amber-500' : 'bg-slate-100 text-slate-400'}">
+                        <i class="fas ${op.si ? 'fa-bottle-droplet' : 'fa-ban'} text-xs"></i>
+                    </span>
+                    <span class="font-bold text-slate-800 text-sm">${op.label}</span>
+                </div>
+                <span class="font-black text-slate-400 text-sm">Sin costo</span>
+            `;
+
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.estadoPersonalizacion.detalles.push(op.nota);
+                // Quitar el botón Confirmar de salsas si quedó
+                const bc = document.getElementById('btn-confirmar-salsas');
+                if (bc) bc.remove();
+                // Después del ranch: si es Dedos/Aros el ticket ya tiene papas → finalizar
+                // Para otros productos (Boneless) → seguir con papas normal
+                const prodPost = window.productoActivoParaComanda;
+                const nomPost  = (prodPost?.nombre || '').toLowerCase();
+                if (nomPost.includes('dedos de queso') || nomPost.includes('aros de cebolla')) {
+                    finalizarTicket(window.estadoPersonalizacion.precioBase +
+                                   (window.estadoPersonalizacion.extraAcumulado || 0));
+                } else {
+                    evaluarPapasPorTamano(window.estadoPersonalizacion.tamanoSeleccionado, null);
+                }
+            };
+
+            cont.appendChild(btn);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PASOS DE COMBOS
+    // ═══════════════════════════════════════════════════════════════════════
+    function _procesarSiguientePasoCombo() {
+        const est   = window.estadoPersonalizacion;
+        const items = est._comboItems;
+
+        if (!items || est._comboIdx >= items.length) {
+            // Todos los pasos completados → ticket
+            _finalizarCombo();
+            return;
+        }
+
+        const paso    = est._comboIdx + 1;
+        const total   = items.length;
+        const itemCfg = items[est._comboIdx];
+
+        if (itemCfg.tipo === 'salsas_combo') {
+            _mostrarSalsasCombo(itemCfg.cantidad, paso, total);
+        } else if (itemCfg.tipo === 'malteada_combo') {
+            _mostrarOpcionCombo(itemCfg.opciones, itemCfg.label, paso, total, 'malteada');
+        } else if (itemCfg.tipo === 'ranch_pregunta') {
+            // Ranch: pregunta Sí/No (incluido en el combo, sin costo)
+            _mostrarRanchCombo(itemCfg.cantidad, itemCfg.label, paso, total);
+        } else if (itemCfg.tipo === 'soda_multi') {
+            // Sodas: selección múltiple (puede elegir 2 sabores diferentes)
+            _mostrarSodasMulti(itemCfg.cantidad, itemCfg.label, paso, total);
+        } else if (itemCfg.tipo === 'soda_combo') {
+            _mostrarOpcionCombo(
+                ['Clásica', 'Fresa', 'Fresa Hibiscus', 'Mango', 'Tamarindo', 'Maracuyá', 'Coco', 'Piña'],
+                itemCfg.label, paso, total, 'soda'
+            );
+        }
+    }
+
+    // Selector de salsas para combos (selección múltiple, sin paso de salsas gourmet)
+    let _salsasComboMarcadas = [];
+    function _mostrarSalsasCombo(cantidad, paso, totalPasos) {
+        _salsasComboMarcadas = [];
+        const prod = window.productoActivoParaComanda;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso} de ${totalPasos}: Elige ${cantidad === 1 ? '1 salsa' : cantidad + ' salsas'} — 0 / ${cantidad}`;
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        btnVolver.classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        // Barra de progreso
+        const barraWrap = document.createElement('div');
+        barraWrap.className = 'mb-3';
+        barraWrap.innerHTML = `
+            <div class="flex justify-between items-center mb-1.5">
+                <span id="lbl-sc-contador" class="text-xs font-black text-slate-500">0 / ${cantidad} seleccionada${cantidad > 1 ? 's' : ''}</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="barra-sc-progreso" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+        `;
+        cont.appendChild(barraWrap);
+
+        // Botón confirmar
+        const panel = document.getElementById('panel-variantes-comanda');
+        const prevBtn = panel.querySelector('#btn-confirmar-salsas-combo');
+        if (prevBtn) prevBtn.remove();
+        const btnConf = document.createElement('button');
+        btnConf.id = 'btn-confirmar-salsas-combo';
+        btnConf.type = 'button';
+        btnConf.disabled = false;
+        btnConf.className = 'w-full mt-4 min-h-[46px] rounded-2xl bg-blue-500 text-white text-sm font-black uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all';
+        btnConf.textContent = 'Continuar sin salsa';
+        btnConf.onclick = () => {
+            const nota = _salsasComboMarcadas.length > 0
+                ? _salsasComboMarcadas.join(', ')
+                : 'Sin salsa';
+            window.estadoPersonalizacion._comboNotas.push(nota);
+            window.estadoPersonalizacion._comboIdx++;
+            const bc = panel.querySelector('#btn-confirmar-salsas-combo');
+            if (bc) bc.remove();
+            _procesarSiguientePasoCombo();
+        };
+        panel.appendChild(btnConf);
+
+        SALSAS_INCLUIDAS.forEach(nombre => cont.appendChild(_crearChipSalsaCombo(nombre, cantidad, btnConf)));
+    }
+
+    function _crearChipSalsaCombo(nombre, limite, btnConf) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-3 rounded-2xl transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer mb-2';
+        chip.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="chip-check w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-all"></span>
+                <span class="font-bold text-slate-800 text-sm">${nombre}</span>
+            </div>
+            <span class="font-black text-sm text-slate-400">Incluida</span>
+        `;
+        chip.onclick = (e) => {
+            e.stopPropagation();
+            const idx = _salsasComboMarcadas.indexOf(nombre);
+            if (idx >= 0) {
+                _salsasComboMarcadas.splice(idx, 1);
+                chip.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                chip.classList.add('border-slate-200', 'bg-white');
+                chip.querySelector('.chip-check').innerHTML = '';
+                chip.querySelector('.chip-check').classList.remove('bg-blue-500', 'border-blue-500');
+                chip.querySelector('.chip-check').classList.add('border-slate-300');
+            } else if (_salsasComboMarcadas.length < limite) {
+                _salsasComboMarcadas.push(nombre);
+                chip.classList.add('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                chip.classList.remove('border-slate-200', 'bg-white');
+                chip.querySelector('.chip-check').innerHTML = '<i class="fas fa-check text-[9px] text-white"></i>';
+                chip.querySelector('.chip-check').classList.add('bg-blue-500', 'border-blue-500');
+                chip.querySelector('.chip-check').classList.remove('border-slate-300');
+            }
+            // Actualizar contador y progreso
+            const sel = _salsasComboMarcadas.length;
+            const lbl = document.getElementById('lbl-sc-contador');
+            if (lbl) lbl.textContent = `${sel} / ${limite} seleccionada${limite > 1 ? 's' : ''}`;
+            const barra = document.getElementById('barra-sc-progreso');
+            if (barra) barra.style.width = (limite > 0 ? (sel/limite)*100 : 0) + '%';
+            if (btnConf) btnConf.textContent = sel > 0
+                ? (sel === 1 ? `Confirmar: ${_salsasComboMarcadas[0]}` : `Confirmar ${sel} salsas`)
+                : 'Continuar sin salsa';
+        };
+        return chip;
+    }
+
+    // Selector genérico de 1 opción (malteada, soda)
+    function _mostrarOpcionCombo(opciones, labelTitulo, paso, totalPasos, tipo) {
+        const prod = window.productoActivoParaComanda;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso} de ${totalPasos}: ${labelTitulo}`;
+
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        opciones.forEach(op => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none mb-2';
+            const icono = tipo === 'malteada' ? 'fa-glass-water' : 'fa-bottle-water';
+            btn.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 text-blue-500">
+                        <i class="fas ${icono} text-xs"></i>
+                    </span>
+                    <span class="font-bold text-slate-800 text-sm">${op}</span>
+                </div>
+                <span class="font-black text-slate-400 text-sm">Incluida</span>
+            `;
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.estadoPersonalizacion._comboNotas.push(`${labelTitulo}: ${op}`);
+                window.estadoPersonalizacion._comboIdx++;
+                _procesarSiguientePasoCombo();
+            };
+            cont.appendChild(btn);
+        });
+    }
+
+    function _finalizarCombo() {
+        cerrarModalVariantes();
+        const prod  = window.productoActivoParaComanda;
+        const est   = window.estadoPersonalizacion;
+        const notas = est._comboNotas || [];
+        const nombreFinal = notas.length > 0
+            ? `${prod.nombre} (${notas.join(' - ')})`
+            : prod.nombre;
+
+        agregarAlTicket(
+            prod.id,
+            nombreFinal,
+            parseFloat(prod.precio) || 0,
+            prod.categoria?.nombre || 'Menú',
+            notas,
+            false,
+            0,
+            notas.length > 0 ? notas.join(' - ') : null
+        );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // PAPAS para Dedos de Queso y Aros de Cebolla (antes del ranch)
+    // Los modificadores están en la variante, no en el producto directamente.
+    // ═══════════════════════════════════════════════════════════════════════
+    function mostrarPapasParaDedosAros(varianteObj) {
+        const prod = window.productoActivoParaComanda;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent = 'Paso 1: ¿Agregar Papas?';
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        // Buscar modificadores de papas en la variante
+        const modsVariante = (varianteObj && Array.isArray(varianteObj.modificadores) && varianteObj.modificadores.length > 0)
+            ? varianteObj.modificadores
+            : (prod.modificadores || []).filter(m =>
+                Number(m.variante_id) === Number(window.estadoPersonalizacion.varianteIdSeleccionada));
+
+        const precioBase = window.estadoPersonalizacion.precioBase;
+
+        // Construir opciones: Sin Papas + las de BD (o defaults si no hay)
+        const opciones = [{ nombre: 'Sin Papas', extra: 0, subtitulo: 'Sin costo extra' }];
+
+        if (modsVariante.length > 0) {
+            modsVariante.forEach(m => {
+                const precio = parseFloat(m.precio || 0);
+                opciones.push({
+                    nombre: m.nombre,
+                    extra: precio,
+                    subtitulo: precio > 0 ? `+$${precio.toFixed(2)}` : 'Sin costo extra'
+                });
+            });
+        } else {
+            opciones.push({ nombre: 'c/ Papas Francesa', extra: 20, subtitulo: '+$20.00' });
+            opciones.push({ nombre: 'c/ Papas Gajo',     extra: 35, subtitulo: '+$35.00' });
+        }
+
+        opciones.forEach(op => {
+            const totalOpcion = precioBase + op.extra;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-3.5 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none mb-2';
+            btn.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800 text-sm block">${op.nombre}</span>
+                    <span class="text-[10px] font-bold text-slate-400">${op.subtitulo}</span>
+                </div>
+                <span class="font-black text-blue-600 text-sm">$${totalOpcion.toFixed(2)}</span>
+            `;
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (op.nombre !== 'Sin Papas') {
+                    window.estadoPersonalizacion.detalles.push(op.nombre);
+                }
+                // Actualizar precio con el extra de papas
+                window.estadoPersonalizacion.precioBase = totalOpcion;
+                // Paso 2: Ranch
+                mostrarSelectorRanch(() => mostrarPapasParaDedosAros(varianteObj));
+            };
+            cont.appendChild(btn);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RANCH PREGUNTA para combos (Sí/No, incluido sin costo)
+    // ═══════════════════════════════════════════════════════════════════════
+    function _mostrarRanchCombo(cantidad, label, paso, totalPasos) {
+        const prod = window.productoActivoParaComanda;
+        const labelPzs = cantidad === 1 ? '1 Ranch incluido' : `${cantidad} Ranch incluidos`;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso} de ${totalPasos}: ¿Con Ranch?`;
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        const opciones = [
+            { label: `Con Ranch (${labelPzs})`, nota: label, icono: 'fa-bottle-droplet', color: 'amber' },
+            { label: 'Sin Ranch',               nota: 'Sin Ranch',  icono: 'fa-ban',            color: 'slate'  },
+        ];
+
+        opciones.forEach(op => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-4 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none mb-2';
+            btn.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center shrink-0
+                                 ${op.color === 'amber' ? 'bg-amber-50 border border-amber-200 text-amber-500' : 'bg-slate-100 text-slate-400'}">
+                        <i class="fas ${op.icono} text-xs"></i>
+                    </span>
+                    <span class="font-bold text-slate-800 text-sm">${op.label}</span>
+                </div>
+                <span class="font-black text-slate-400 text-sm">Incluido</span>
+            `;
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.estadoPersonalizacion._comboNotas.push(op.nota);
+                window.estadoPersonalizacion._comboIdx++;
+                _procesarSiguientePasoCombo();
+            };
+            cont.appendChild(btn);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SODAS MULTI: selección múltiple para Sabor y Burbujas (2 sabores)
+    // ═══════════════════════════════════════════════════════════════════════
+    const SABORES_SODA = [
+        'Clásica', 'Fresa', 'Fresa Hibiscus', 'Mango',
+        'Tamarindo', 'Maracuyá', 'Coco', 'Piña'
+    ];
+    let _sodasMarcadas = [];
+
+    function _mostrarSodasMulti(cantidad, label, paso, totalPasos) {
+        _sodasMarcadas = [];
+        const prod = window.productoActivoParaComanda;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso} de ${totalPasos}: Elige ${cantidad} soda${cantidad > 1 ? 's' : ''} — 0 / ${cantidad}`;
+        document.getElementById('btn-volver-tamano').classList.add('hidden');
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        // Barra de progreso
+        const barraWrap = document.createElement('div');
+        barraWrap.className = 'mb-3';
+        barraWrap.innerHTML = `
+            <div class="flex justify-between items-center mb-1.5">
+                <span id="lbl-soda-contador" class="text-xs font-black text-slate-500">0 / ${cantidad} seleccionada${cantidad > 1 ? 's' : ''}</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="barra-soda-progreso" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width:0%"></div>
+            </div>
+        `;
+        cont.appendChild(barraWrap);
+
+        // Botón confirmar
+        const panel = document.getElementById('panel-variantes-comanda');
+        const prevBtn = panel.querySelector('#btn-confirmar-sodas');
+        if (prevBtn) prevBtn.remove();
+        const btnConf = document.createElement('button');
+        btnConf.id = 'btn-confirmar-sodas';
+        btnConf.type = 'button';
+        btnConf.className = 'w-full mt-4 min-h-[46px] rounded-2xl bg-blue-500 text-white text-sm font-black uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all';
+        btnConf.textContent = 'Continuar';
+        btnConf.onclick = () => {
+            const nota = _sodasMarcadas.length > 0
+                ? `Sodas: ${_sodasMarcadas.join(', ')}`
+                : 'Sin soda';
+            window.estadoPersonalizacion._comboNotas.push(nota);
+            window.estadoPersonalizacion._comboIdx++;
+            const bc = panel.querySelector('#btn-confirmar-sodas');
+            if (bc) bc.remove();
+            _procesarSiguientePasoCombo();
+        };
+        panel.appendChild(btnConf);
+
+        SABORES_SODA.forEach(nombre => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-3 rounded-2xl transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer mb-2';
+            chip.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="chip-check w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-all"></span>
+                    <span class="font-bold text-slate-800 text-sm">${nombre}</span>
+                </div>
+                <span class="font-black text-sm text-slate-400">Incluida</span>
+            `;
+            chip.onclick = (e) => {
+                e.stopPropagation();
+                const idx = _sodasMarcadas.indexOf(nombre);
+                if (idx >= 0) {
+                    _sodasMarcadas.splice(idx, 1);
+                    chip.classList.remove('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                    chip.classList.add('border-slate-200', 'bg-white');
+                    chip.querySelector('.chip-check').innerHTML = '';
+                    chip.querySelector('.chip-check').classList.remove('bg-blue-500', 'border-blue-500');
+                    chip.querySelector('.chip-check').classList.add('border-slate-300');
+                } else if (_sodasMarcadas.length < cantidad) {
+                    _sodasMarcadas.push(nombre);
+                    chip.classList.add('border-blue-500', 'ring-2', 'ring-blue-500/20', 'bg-blue-50/40');
+                    chip.classList.remove('border-slate-200', 'bg-white');
+                    chip.querySelector('.chip-check').innerHTML = '<i class="fas fa-check text-[9px] text-white"></i>';
+                    chip.querySelector('.chip-check').classList.add('bg-blue-500', 'border-blue-500');
+                    chip.querySelector('.chip-check').classList.remove('border-slate-300');
+                }
+                const sel = _sodasMarcadas.length;
+                const lbl = document.getElementById('lbl-soda-contador');
+                if (lbl) lbl.textContent = `${sel} / ${cantidad} seleccionada${cantidad > 1 ? 's' : ''}`;
+                const barra = document.getElementById('barra-soda-progreso');
+                if (barra) barra.style.width = (cantidad > 0 ? (sel/cantidad)*100 : 0) + '%';
+                if (btnConf) btnConf.textContent = sel > 0
+                    ? (sel === cantidad ? `Confirmar ${sel} sodas` : `Confirmar (${sel}/${cantidad})`)
+                    : 'Continuar';
+            };
+            cont.appendChild(chip);
+        });
     }
 
     window.cerrarModalVariantes = function() {

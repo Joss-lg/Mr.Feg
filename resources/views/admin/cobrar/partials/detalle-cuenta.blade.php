@@ -288,7 +288,22 @@
             </button>
         </div>
 
-        {{-- PASO 2: Teclado numérico para el NIP --}}
+        {{-- PASO 2: Motivo de cancelación (texto libre, obligatorio) --}}
+        <div id="pasoMotivoCancelar" class="hidden p-6 sm:p-8 space-y-5">
+            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
+                Motivo de cancelación <span class="text-rose-500">*</span>
+            </label>
+            <textarea id="inputMotivoCancelar" rows="3" maxlength="255"
+                placeholder="Ej: Error al ordenar, cliente cambió de opinión…"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none"></textarea>
+            <p id="errorMotivoCancelar" class="hidden text-[11px] font-bold text-rose-600">Escribe el motivo de la cancelación.</p>
+            <button type="button" id="btnContinuarMotivoCancelar"
+                class="w-full h-12 rounded-xl text-xs font-black uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 active:scale-95 transition-all outline-none">
+                Continuar
+            </button>
+        </div>
+
+        {{-- PASO 3: Teclado numérico para el NIP --}}
         <div id="pasoNipCancelar" class="p-6 sm:p-8 space-y-5">
             <p class="text-center text-sm text-slate-800">
                 NIP del <span class="font-black">Administrador</span>
@@ -341,12 +356,16 @@
             const subtitulo = document.getElementById('modalCancelarSubtitulo');
 
             const pasoCantidad = document.getElementById('pasoCantidadCancelar');
+            const pasoMotivo  = document.getElementById('pasoMotivoCancelar');
             const pasoNip = document.getElementById('pasoNipCancelar');
             const valorCantidadEl = document.getElementById('valorCantidadCancelar');
             const maxLabel = document.getElementById('cantidadCancelarMax');
             const btnRestar = document.getElementById('btnCantidadRestar');
             const btnSumar = document.getElementById('btnCantidadSumar');
             const btnContinuar = document.getElementById('btnContinuarCancelar');
+            const inputMotivo = document.getElementById('inputMotivoCancelar');
+            const errorMotivo = document.getElementById('errorMotivoCancelar');
+            const btnContinuarMotivo = document.getElementById('btnContinuarMotivoCancelar');
 
             const dots = document.querySelectorAll('#dotsNipCancelar .nip-dot');
             const teclas = document.querySelectorAll('.btn-tecla-nip');
@@ -359,6 +378,7 @@
             const hayPasoCantidad = cantidadTotal > 1;
             let cantidadSeleccionada = 1;
             let nip = '';
+            let motivoTexto = '';
 
             const pintarDots = () => {
                 dots.forEach((dot, i) => {
@@ -377,12 +397,24 @@
 
             const irAPasoCantidad = () => {
                 pasoNip.classList.add('hidden');
+                pasoMotivo.classList.add('hidden');
                 pasoCantidad.classList.remove('hidden');
                 subtitulo.textContent = '¿Cuántas unidades vas a cancelar?';
             };
 
+            const irAPasoMotivo = () => {
+                pasoCantidad.classList.add('hidden');
+                pasoNip.classList.add('hidden');
+                pasoMotivo.classList.remove('hidden');
+                subtitulo.textContent = 'Motivo de la cancelación';
+                inputMotivo.value = '';
+                motivoTexto = '';
+                errorMotivo.classList.add('hidden');
+                setTimeout(() => inputMotivo.focus(), 100);
+            };
             const irAPasoNip = () => {
                 pasoCantidad.classList.add('hidden');
+                pasoMotivo.classList.add('hidden');
                 pasoNip.classList.remove('hidden');
                 subtitulo.textContent = 'Ingresa el NIP del Administrador';
                 nip = '';
@@ -400,6 +432,7 @@
                     btnRestar.onclick = null;
                     btnSumar.onclick = null;
                     btnContinuar.onclick = null;
+                    btnContinuarMotivo.onclick = null;
                     teclas.forEach(t => t.onclick = null);
                     btnDel.onclick = null;
                     btnOk.onclick = null;
@@ -427,7 +460,7 @@
                         valorCantidadEl.textContent = cantidadSeleccionada;
                     }
                 };
-                btnContinuar.onclick = irAPasoNip;
+                btnContinuar.onclick = irAPasoMotivo;
             } else {
                 cantidadSeleccionada = 1;
             }
@@ -452,12 +485,23 @@
                     mostrarError('Ingresa el NIP del administrador.');
                     return;
                 }
-                cerrar({ cantidad: cantidadSeleccionada, nip });
+                cerrar({ cantidad: cantidadSeleccionada, nip, motivo: motivoTexto });
             };
-
+            btnContinuarMotivo.onclick = () => {
+                motivoTexto = inputMotivo.value.trim();
+                if (!motivoTexto) {
+                    errorMotivo.classList.remove('hidden');
+                    inputMotivo.focus();
+                    return;
+                }
+                errorMotivo.classList.add('hidden');
+                irAPasoNip();
+            };
             btnVolver.onclick = () => {
-                if (hayPasoCantidad) {
-                    irAPasoCantidad();
+                if (!pasoNip.classList.contains('hidden')) {
+                    irAPasoMotivo();
+                } else if (!pasoMotivo.classList.contains('hidden')) {
+                    if (hayPasoCantidad) { irAPasoCantidad(); } else { cerrar(null); }
                 } else {
                     cerrar(null);
                 }
@@ -470,7 +514,7 @@
                 irAPasoCantidad();
             } else {
                 pasoCantidad.classList.add('hidden');
-                irAPasoNip();
+                irAPasoMotivo();
             }
 
             modal.classList.remove('hidden');
@@ -486,7 +530,7 @@
         const resultado = await abrirModalCancelarProducto(cantidadTotal);
         if (!resultado) return; // el usuario canceló el modal
 
-        const { cantidad: cantidadCancelar, nip } = resultado;
+        const { cantidad: cantidadCancelar, nip, motivo } = resultado;
 
         btn.disabled = true;
         const icono = btn.querySelector('i');
@@ -497,7 +541,7 @@
             const res = await fetch(`/mesero/comanda/detalle/${detalleId}/cancelar`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-                body: JSON.stringify({ nip: nip, cantidad_cancelar: cantidadCancelar })
+                body: JSON.stringify({ nip: nip, cantidad_cancelar: cantidadCancelar, motivo: motivo })
             });
             const data = await res.json().catch(() => null);
             if (!res.ok || !data?.success) throw new Error(data?.message || 'No se pudo cancelar');

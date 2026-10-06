@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FlujoCaja;
 use App\Models\Mesa;
 use App\Models\Promocion;
 use App\Models\Categoria;
@@ -174,7 +175,7 @@ class MesaController extends Controller
     {
         $request->validate([
             'nip'              => 'required|string',
-            'motivo'           => 'nullable|string|max:255',
+            'motivo'           => 'required|string|min:3|max:255',
             'cantidad_cancelar' => 'nullable|integer|min:1',
         ]);
 
@@ -258,6 +259,22 @@ class MesaController extends Controller
                         'cancelado_en'       => now(),
                     ]);
                 }
+
+                // Registrar egreso en flujo de caja para auditoría de cancelaciones.
+                // Permite detectar si alguien cancela productos para ocultar ventas.
+                $cajaActiva = \App\Models\CajaMovimiento::where('estado', 'abierta')->first();
+                FlujoCaja::create([
+                    'caja_movimiento_id' => $cajaActiva?->id,
+                    'tipo'               => 'egreso',
+                    'categoria'          => 'Cancelaciones',
+                    'concepto'           => "Cancelación: {$detalle->nombre_producto}",
+                    'monto'              => $montoNeto,
+                    'metodo_pago'        => 'efectivo',
+                    'fecha'              => now(),
+                    'referencia'         => $autorizador->nombre,
+                    'observaciones'      => "Motivo: {$request->motivo}",
+                    'registrado_por'     => $autorizador->id,
+                ]);
             });
 
             $msg = $cancelacionParcial

@@ -294,8 +294,18 @@
                             @foreach($historicoCancelaciones as $cancelacion)
                                 <tr class="hover:bg-slate-50/80 transition-colors">
                                     <td class="py-3 sm:py-4 px-2 sm:px-4 text-[10px] sm:text-xs font-semibold text-slate-400 whitespace-nowrap">{{ \Carbon\Carbon::parse($cancelacion->fecha)->format('H:i') }} hrs</td>
-                                    <td class="py-3 sm:py-4 px-2 sm:px-4 text-left font-bold text-slate-800">{{ $cancelacion->concepto }}</td>
-                                    <td class="py-3 sm:py-4 px-2 sm:px-4 text-[10px] sm:text-xs text-slate-400 whitespace-nowrap">{{ $cancelacion->referencia }}</td>
+                                    <td class="py-3 sm:py-4 px-2 sm:px-4 text-left">
+                                        <span class="font-bold text-slate-800 block">{{ $cancelacion->concepto }}</span>
+                                        @if($cancelacion->observaciones)
+                                            <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">{{ $cancelacion->observaciones }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 sm:py-4 px-2 sm:px-4 text-[10px] sm:text-xs text-slate-500 whitespace-nowrap font-semibold">
+                                        {{ $cancelacion->referencia ?: '—' }}
+                                        @if($cancelacion->fecha)
+                                            <span class="block text-slate-400 font-normal">{{ \Carbon\Carbon::parse($cancelacion->fecha)->format('H:i') }} hrs</span>
+                                        @endif
+                                    </td>
                                     <td class="py-3 sm:py-4 px-2 sm:px-4 font-black text-rose-600 whitespace-nowrap">-${{ number_format($cancelacion->monto, 2) }}</td>
                                 </tr>
                             @endforeach
