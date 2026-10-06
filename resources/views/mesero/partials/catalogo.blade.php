@@ -604,6 +604,8 @@
     const SALSAS_GOURMET = [
         { nombre: 'Naranja Mezcal', extra: 8 },
         { nombre: 'Ajo Parmesano',  extra: 10 },
+        { nombre: 'Naranja Cempasuchil',  extra: 10 }
+
     ];
 
     // ─── Estado local del selector de salsas ───────────────────────────────
