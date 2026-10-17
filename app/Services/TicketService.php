@@ -97,8 +97,10 @@ class TicketService
         }
 
         // --- Items: se aplanan los detalles de TODAS las órdenes de la mesa ---
+        // Se excluyen los detalles cancelados para que el ticket sólo muestre
+        // lo que realmente se cobró (igual que la vista de caja).
         $items = $ordenes->flatMap(function ($orden) {
-            return $orden->detalles->map(function ($detalle) {
+            return $orden->detalles->filter(fn($d) => $d->estado !== 'cancelado')->map(function ($detalle) {
                 $descuento = $detalle->promocionAplicada?->monto_descuento ?? 0;
                 $subtotalLinea = $detalle->subtotal ?? ($detalle->cantidad * $detalle->precio_unitario);
 
