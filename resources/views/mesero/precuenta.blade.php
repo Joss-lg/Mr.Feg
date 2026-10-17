@@ -59,8 +59,42 @@
             <div style="font-size: 12px;">ATENDIÓ: {{ strtoupper($orden->mesero->nombre) }}</div>
         @endif
 
+        @php
+            $numMesa = strtoupper((string) ($mesa->numero ?? ''));
+            if ($mesa->esParaLlevar()) {
+                $tituloMesa = 'PARA LLEVAR';
+            } elseif ($mesa->esADomicilio()) {
+                $tituloMesa = 'A DOMICILIO';
+            } elseif ($mesa->esDelivery()) {
+                $tituloMesa = 'DELIVERY';
+            } else {
+                $tituloMesa = 'MESA ' . $numMesa;
+            }
+
+            $nombreCliente = null;
+            if ($orden && $orden->cliente) {
+                $nombreCliente = strtoupper(trim(($orden->cliente->nombre ?? '') . ' ' . ($orden->cliente->apellido ?? '')));
+            } elseif ($orden && !empty($orden->nombre_temporal)) {
+                $nombreCliente = strtoupper($orden->nombre_temporal);
+            } else {
+                foreach (['LLEVAR-', 'DOM-'] as $prefijo) {
+                    if (str_starts_with($numMesa, $prefijo)) {
+                        $sinPrefijo = substr($numMesa, strlen($prefijo));
+                        $partes = explode('-', $sinPrefijo);
+                        if (count($partes) >= 2 && is_numeric(end($partes))) {
+                            array_pop($partes);
+                            $nombreCliente = implode(' ', $partes) ?: null;
+                        }
+                        break;
+                    }
+                }
+            }
+        @endphp
         <div class="font-bold text-lg mt-1 mb-1 py-1" style="border-top: 1px dashed #000; border-bottom: 1px dashed #000;">
-            MESA {{ strtoupper($mesa->numero) }}
+            {{ $tituloMesa }}
+            @if($nombreCliente)
+                <div style="font-size: 13px; font-weight: 900; margin-top: 2px;">{{ $nombreCliente }}</div>
+            @endif
         </div>
     </div>
 
@@ -112,38 +146,47 @@
         <span>${{ number_format($totalPrecuenta, 2) }}</span>
     </div>
 
-    {{-- Método de pago pre-indicado (solo delivery) --}}
-    @if($mesa->esDelivery() && !empty($metodoPago))
+    {{-- Método de pago pre-indicado --}}
+    @if(($mesa->esParaLlevar() || $mesa->esADomicilio() || $mesa->esDelivery()) && !empty($metodoPago))
         @php
             $iconoPago = match($metodoPago) {
-                'efectivo'       => '💵',
-                'tarjeta'        => '💳',
-                'transferencia'  => '🏦',
-                default          => '💰',
+                'efectivo'       => '&#x1F4B5;',
+                'tarjeta'        => '&#x1F4B3;',
+                'transferencia'  => '&#x1F3E6;',
+                'mixto'          => '&#x1F4B0;',
+                default          => '&#x1F4B0;',
             };
             $nombrePago = match($metodoPago) {
                 'efectivo'      => 'EFECTIVO',
                 'tarjeta'       => 'TARJETA',
                 'transferencia' => 'TRANSFERENCIA',
+                'mixto'         => 'PAGO MIXTO',
                 default         => strtoupper($metodoPago),
             };
         @endphp
-        <div style="margin-top: 8px; padding: 6px 4px; border: 1px dashed #000; text-align: center; font-size: 12px;">
-            <div style="font-weight: bold; font-size: 13px;">{{ $iconoPago }} MÉTODO DE PAGO INDICADO</div>
-            <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">{{ $nombrePago }}</div>
+        <div style="margin-top: 8px; padding: 8px 6px; border: 2px solid #000; text-align: center; font-size: 12px;">
+            <div style="font-weight: bold; font-size: 11px; letter-spacing: 1px;">FORMA DE PAGO</div>
+            <div style="font-size: 18px; font-weight: 900; margin-top: 3px;">{!! $iconoPago !!} {{ $nombrePago }}</div>
             @if(!empty($referenciaPago))
-                <div style="font-size: 11px; margin-top: 2px;">REF: {{ strtoupper($referenciaPago) }}</div>
+                <div style="font-size: 11px; margin-top: 3px; border-top: 1px dashed #000; padding-top: 3px;">
+                    {{ strtoupper($referenciaPago) }}
+                </div>
             @endif
-            <div style="font-size: 10px; margin-top: 4px; color: #555;">
-                SUJETO A CAMBIO AL CONFIRMAR EN CAJA
-            </div>
         </div>
     @endif
 
     {{-- Footer --}}
     <div class="text-center mt-1" style="margin-top: 12px; font-size: 11px; line-height: 1.5;">
-        ESTA PRE-CUENTA ES SOLO INFORMATIVA.<br>
-        SOLICITA TU TICKET DE PAGO.
+        @if($mesa->esParaLlevar())
+            CONSERVA ESTE TICKET PARA RECOGER TU PEDIDO.<br>
+            SE TE LLAMARA POR NOMBRE AL ESTAR LISTO.
+        @elseif($mesa->esADomicilio())
+            TICKET DE PEDIDO A DOMICILIO.<br>
+            CONSERVA ESTE COMPROBANTE.
+        @else
+            ESTA PRE-CUENTA ES SOLO INFORMATIVA.<br>
+            SOLICITA TU TICKET DE PAGO.
+        @endif
     </div>
 
     <script>

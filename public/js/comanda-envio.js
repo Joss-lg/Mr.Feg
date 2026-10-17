@@ -464,16 +464,87 @@
             _indicarMetodoPagos(pagos);
         });
 
+        // ----------------------------------------------------------------
+        // Modal de ticket de pago (se abre DESPUÉS de guardar el método)
+        // ----------------------------------------------------------------
+        function _abrirTicketPago(urlPrecuenta, urlDashboard) {
+            const previo = document.getElementById('_ep_ticket_modal');
+            if (previo) previo.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = '_ep_ticket_modal';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:10600;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);padding:16px;';
+            overlay.innerHTML = `
+                <div style="background:#fff;border-radius:24px;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,0.5);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#16a34a,#22c55e);display:flex;align-items:center;justify-content:center;">
+                                <i class="fas fa-receipt" style="color:#fff;font-size:15px;"></i>
+                            </div>
+                            <div>
+                                <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Pedido registrado</p>
+                                <p style="font-size:15px;font-weight:900;color:#111827;margin:0;">Ticket de pago</p>
+                            </div>
+                        </div>
+                        <button id="_ep_ticket_cerrar_x" style="width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:14px;color:#6b7280;display:flex;align-items:center;justify-content:center;">✕</button>
+                    </div>
+                    <div style="margin:12px 20px 0;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+                        <i class="fas fa-check-circle" style="color:#16a34a;font-size:18px;flex-shrink:0;"></i>
+                        <p style="font-size:12px;font-weight:700;color:#15803d;margin:0;line-height:1.4;">
+                            Método de pago registrado. Imprime el ticket y entrégaselo al cliente.
+                        </p>
+                    </div>
+                    <div style="flex:1;overflow-y:auto;padding:12px;background:#f3f4f6;margin:12px;">
+                        <iframe id="_ep_ticket_iframe" src="${urlPrecuenta}" style="width:100%;min-height:55vh;border:none;border-radius:12px;background:#fff;"></iframe>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;">
+                        <button id="_ep_ticket_cerrar"
+                            style="padding:14px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:16px;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;color:#374151;">
+                            Cerrar sin imprimir
+                        </button>
+                        <button id="_ep_ticket_imprimir"
+                            style="padding:14px;background:linear-gradient(135deg,#16a34a,#22c55e);color:#fff;border:none;border-radius:16px;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                            <i class="fas fa-print"></i> Imprimir ticket
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const redirigir = () => {
+                overlay.remove();
+                window.location.href = urlDashboard || '/';
+            };
+
+            document.getElementById('_ep_ticket_cerrar_x').onclick = redirigir;
+            document.getElementById('_ep_ticket_cerrar').onclick   = redirigir;
+            document.getElementById('_ep_ticket_imprimir').onclick = () => {
+                try {
+                    document.getElementById('_ep_ticket_iframe').contentWindow.print();
+                } catch(e) {
+                    window.open(urlPrecuenta, '_blank');
+                }
+                setTimeout(redirigir, 2000);
+            };
+        }
+
         // --- Guardar múltiples métodos (pago mixto) ---
         function _indicarMetodoPagos(pagos) {
             const cfg  = window.ComandaConfig || {};
             const url  = cfg.rutas && cfg.rutas.deliveryIndicarPago;
             const csrf = cfg.csrfToken;
+            const urlDashboard = (cfg.rutas && cfg.rutas.dashboard) || '/';
+            const urlPrecuenta = cfg.rutas && cfg.rutas.comandaPrecuenta;
 
             if (!url) {
                 _cerrar();
-                mostrarExito('Método registrado. El pedido pasó a Caja.');
-                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+                if (urlPrecuenta) {
+                    _abrirTicketPago(urlPrecuenta, urlDashboard);
+                } else {
+                    mostrarExito('Método registrado. El pedido pasó a Caja.');
+                    setTimeout(() => window.location.href = urlDashboard, 1200);
+                }
                 return;
             }
 
@@ -488,8 +559,12 @@
             .then(data => {
                 if (data.success) {
                     _cerrar();
-                    mostrarExito('Pedido registrado. Pasará a Caja como pago pendiente.');
-                    setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1500);
+                    if (urlPrecuenta) {
+                        _abrirTicketPago(urlPrecuenta, urlDashboard);
+                    } else {
+                        mostrarExito('Pedido registrado. Pasará a Caja como pago pendiente.');
+                        setTimeout(() => window.location.href = urlDashboard, 1500);
+                    }
                 } else {
                     mostrarError(data.message || 'No se pudo registrar el método.');
                     el.querySelectorAll('button').forEach(b => b.disabled = false);
@@ -497,8 +572,12 @@
             })
             .catch(() => {
                 _cerrar();
-                mostrarExito('Pedido enviado a Caja.');
-                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+                if (urlPrecuenta) {
+                    _abrirTicketPago(urlPrecuenta, urlDashboard);
+                } else {
+                    mostrarExito('Pedido enviado a Caja.');
+                    setTimeout(() => window.location.href = urlDashboard, 1200);
+                }
             });
         }
 
@@ -507,11 +586,17 @@
             const cfg  = window.ComandaConfig || {};
             const url  = cfg.rutas && cfg.rutas.deliveryIndicarPago;
             const csrf = cfg.csrfToken;
+            const urlDashboard = (cfg.rutas && cfg.rutas.dashboard) || '/';
+            const urlPrecuenta = cfg.rutas && cfg.rutas.comandaPrecuenta;
 
             if (!url) {
                 _cerrar();
-                mostrarExito('Método registrado. El pedido pasó a Caja.');
-                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+                if (urlPrecuenta) {
+                    _abrirTicketPago(urlPrecuenta, urlDashboard);
+                } else {
+                    mostrarExito('Método registrado. El pedido pasó a Caja.');
+                    setTimeout(() => window.location.href = urlDashboard, 1200);
+                }
                 return;
             }
 
@@ -526,8 +611,12 @@
             .then(data => {
                 if (data.success) {
                     _cerrar();
-                    mostrarExito('Pedido registrado. Pasará a Caja como pago pendiente.');
-                    setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1500);
+                    if (urlPrecuenta) {
+                        _abrirTicketPago(urlPrecuenta, urlDashboard);
+                    } else {
+                        mostrarExito('Pedido registrado. Pasará a Caja como pago pendiente.');
+                        setTimeout(() => window.location.href = urlDashboard, 1500);
+                    }
                 } else {
                     mostrarError(data.message || 'No se pudo registrar el método.');
                     el.querySelectorAll('button').forEach(b => b.disabled = false);
@@ -535,8 +624,12 @@
             })
             .catch(() => {
                 _cerrar();
-                mostrarExito('Pedido enviado a Caja.');
-                setTimeout(() => window.location.href = (cfg.rutas && cfg.rutas.dashboard) || '/', 1200);
+                if (urlPrecuenta) {
+                    _abrirTicketPago(urlPrecuenta, urlDashboard);
+                } else {
+                    mostrarExito('Pedido enviado a Caja.');
+                    setTimeout(() => window.location.href = urlDashboard, 1200);
+                }
             });
         }
     })();

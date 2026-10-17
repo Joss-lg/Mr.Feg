@@ -298,7 +298,7 @@ public function transferirProductos(Request $request)
 
         $orden = Orden::where('mesa_id', $mesa->id)
             ->where('estado', '!=', 'pagada')
-            ->with(['detalles.producto', 'mesero:id,nombre'])
+            ->with(['detalles.producto', 'mesero:id,nombre', 'cliente:id,nombre,apellido'])
             ->latest()
             ->first();
 
