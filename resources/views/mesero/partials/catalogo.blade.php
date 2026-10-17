@@ -272,13 +272,43 @@
             return;
         }
 
+        // 6. Productos de papas independientes y snacks que llevan sazonador PL
+        //    (Papas Francesa, Papas Gajo, Salchipulpos, etc.)
+        const esPapaOSnackConSazonador = nombreLower.includes('papa') ||
+            nombreLower.includes('salchipulpo') ||
+            nombreLower.includes('francesa') ||
+            nombreLower.includes('gajo');
+
+        if (esPapaOSnackConSazonador) {
+            const precio = parseFloat(prod.precio) || 0;
+            window.estadoPersonalizacion.precioBase = precio;
+            mostrarSazonadorPL(
+                precio,
+                () => cerrarModalVariantes(), // volver = cerrar (no hay paso previo)
+                (precioFinal) => {
+                    cerrarModalVariantes();
+                    agregarAlTicket(
+                        prod.id,
+                        prod.nombre,
+                        precioFinal,
+                        prod.categoria?.nombre || 'Menú',
+                        prod.modificadores || [],
+                        !!prod.se_vende_por_peso,
+                        parseFloat(prod.precio_por_100g || 0)
+                    );
+                }
+            );
+            abrirContenedorModal();
+            return;
+        }
+
         agregarAlTicket(
-            prod.id, 
-            prod.nombre, 
-            parseFloat(prod.precio) || 0, 
-            prod.categoria?.nombre || 'Menú', 
-            prod.modificadores || [], 
-            !!prod.se_vende_por_peso, 
+            prod.id,
+            prod.nombre,
+            parseFloat(prod.precio) || 0,
+            prod.categoria?.nombre || 'Menú',
+            prod.modificadores || [],
+            !!prod.se_vende_por_peso,
             parseFloat(prod.precio_por_100g || 0)
         );
     };
@@ -563,8 +593,16 @@
                 e.stopPropagation();
                 if (op.nombre !== 'Sin Papas') {
                     window.estadoPersonalizacion.detalles.push(op.nombre);
+                    // Papas elegidas → preguntar sazonador PL antes de finalizar
+                    mostrarSazonadorPL(
+                        totalFinalOpcion,
+                        () => mostrarSelectorPapasGenerico(extraFrancesa, extraGajo, callbackVolver), // volver
+                        (precio) => finalizarTicket(precio) // siguiente: cerrar ticket
+                    );
+                } else {
+                    // Sin papas → finalizar directo
+                    finalizarTicket(totalFinalOpcion);
                 }
-                finalizarTicket(totalFinalOpcion);
             };
 
             btn.innerHTML = `
@@ -878,7 +916,21 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
                 if (opt.nombre !== 'Sin Extras / Complementos') {
                     window.estadoPersonalizacion.detalles.push(opt.nombre);
                 }
-                finalizarTicket(precioFinal);
+
+                // Si el producto es papa/snack con sazonador, intercalar pregunta PL
+                const _np = (window.productoActivoParaComanda?.nombre || '').toLowerCase();
+                const _esPapaSnack = _np.includes('papa') || _np.includes('salchipulpo') ||
+                    _np.includes('francesa') || _np.includes('gajo');
+
+                if (_esPapaSnack) {
+                    mostrarSazonadorPL(
+                        precioFinal,
+                        () => renderOpcionesFinales(opciones), // volver a complementos
+                        (p) => finalizarTicket(p)
+                    );
+                } else {
+                    finalizarTicket(precioFinal);
+                }
             };
 
             const subtexto = window.estadoPersonalizacion.precioBase === 0 
@@ -1190,6 +1242,63 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════
+    // SAZONADOR PIMIENTA LIMÓN — se muestra después de elegir cualquier papa
+    // callbackVolver  → regresa al selector de papas
+    // callbackSiguiente → lo que sigue (finalizarTicket o ranch)
+    // ═══════════════════════════════════════════════════════════════════════
+    function mostrarSazonadorPL(precioTotal, callbackVolver, callbackSiguiente) {
+        const prod = window.productoActivoParaComanda;
+
+        document.getElementById('titulo-modal-variantes').textContent = prod.nombre;
+
+        // Calcular número de paso dinámico
+        const tuveSalsas = Array.isArray(window.estadoPersonalizacion?.salsasElegidas) &&
+                           window.estadoPersonalizacion.salsasElegidas.length > 0;
+        const tuvoRanch  = window.estadoPersonalizacion?.ranchAgregado === true;
+        // Paso: Salsas(opt) → Papas → Sazonador PL → Ranch(opt) → fin
+        let paso = 1;
+        if (tuveSalsas) paso++;   // salsas ya pasaron
+        paso++;                    // papas ya pasaron
+        document.getElementById('subtitulo-modal-variantes').textContent =
+            `Paso ${paso}: ¿Sazonador Pimienta Limón?`;
+
+        const btnVolver = document.getElementById('btn-volver-tamano');
+        if (btnVolver) {
+            btnVolver.classList.remove('hidden');
+            btnVolver.onclick = (e) => { e.stopPropagation(); callbackVolver(); };
+        }
+
+        const cont = document.getElementById('lista-opciones-variantes');
+        cont.innerHTML = '';
+
+        const opciones = [
+            { label: 'Con Sazonador PL', nota: 'Sazonador PL', elegido: true  },
+            { label: 'Sin Sazonador PL', nota: null,            elegido: false },
+        ];
+
+        opciones.forEach(op => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'w-full flex justify-between items-center bg-white border border-slate-200 p-3.5 rounded-2xl hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 transition-all text-left shadow-sm active:scale-95 outline-none cursor-pointer mb-2';
+            btn.innerHTML = `
+                <div>
+                    <span class="font-bold text-slate-800 text-sm block">${op.label}</span>
+                    <span class="text-[10px] font-bold text-slate-400">Sin costo extra</span>
+                </div>
+                <span class="font-black text-blue-600 text-sm">$${precioTotal.toFixed(2)}</span>
+            `;
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                if (op.nota) {
+                    window.estadoPersonalizacion.detalles.push(op.nota);
+                }
+                callbackSiguiente(precioTotal);
+            };
+            cont.appendChild(btn);
+        });
+    }
+
     // PAPAS para Dedos de Queso y Aros de Cebolla (antes del ranch)
     // Los modificadores están en la variante, no en el producto directamente.
     // ═══════════════════════════════════════════════════════════════════════
@@ -1247,8 +1356,18 @@ function mostrarSelectorSalsas(totalSalsas, callbackVolver) {
                 }
                 // Actualizar precio con el extra de papas
                 window.estadoPersonalizacion.precioBase = totalOpcion;
-                // Paso 2: Ranch
-                mostrarSelectorRanch(() => mostrarPapasParaDedosAros(varianteObj));
+
+                if (op.nombre !== 'Sin Papas') {
+                    // Papas elegidas → preguntar sazonador PL → luego ranch
+                    mostrarSazonadorPL(
+                        totalOpcion,
+                        () => mostrarPapasParaDedosAros(varianteObj),   // volver
+                        () => mostrarSelectorRanch(() => mostrarPapasParaDedosAros(varianteObj)) // siguiente
+                    );
+                } else {
+                    // Sin papas → ir directo al ranch
+                    mostrarSelectorRanch(() => mostrarPapasParaDedosAros(varianteObj));
+                }
             };
             cont.appendChild(btn);
         });
