@@ -86,10 +86,15 @@ class ComandaService
             $totalDescuentosPromos = 0.0;
 
             foreach ($platillos as $platillo) {
-                
-              // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
-                $variante = $platillo['variante_info'] ?? null;
-                $notaManual = !empty($platillo['notas']) ? trim($platillo['notas']) : null;
+    
+    // ── PREMIO DE LEALTAD: id=0, sin registro en productos → skip ──
+    if (empty($platillo['id']) || intval($platillo['id']) <= 0) {
+        $totalCalculado += ($platillo['cantidad'] ?? 1) * ($platillo['precio'] ?? 0);
+        continue;
+         }
+  
+  // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
+         $variante = $platillo['variante_info'] ?? null;
 
                 if (!$variante) {
                     $tempV = [];

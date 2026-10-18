@@ -677,6 +677,8 @@
 
         const platillosData = [];
         itemsHTML.forEach(item => {
+            // Premios de lealtad (id=0) no se mandan a la BD
+            if (item.dataset.esPremioLealtad === '1') return;
             const nomEl = item.querySelector('.nombre-platillo');
             const nombreCompleto = nomEl ? nomEl.innerText.trim() : 'Producto';
             const modsElementos  = item.querySelectorAll('.nota-texto-real');
