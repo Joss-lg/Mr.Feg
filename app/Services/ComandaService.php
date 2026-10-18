@@ -93,8 +93,9 @@ class ComandaService
         continue;
          }
   
-  // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
-         $variante = $platillo['variante_info'] ?? null;
+                // Separamos la variante/tamaño (badge morado) de la nota manual (alerta roja)
+                $variante   = $platillo['variante_info'] ?? null;
+                $notaManual = !empty($platillo['notas']) ? trim($platillo['notas']) : null;
 
                 if (!$variante) {
                     $tempV = [];
