@@ -301,6 +301,23 @@ class MesaOperacionController extends Controller
                     return ['mesaLiberada' => false];
                 }
 
+                // Guardamos el método de pago en la orden para que el ticket
+                // siempre pueda mostrarlo, incluso si el query de FlujoCaja
+                // se ejecuta después de que la mesa ya fue liberada.
+                if ($orden) {
+                    $metodosUsados = collect($pagosNormalizados)
+                        ->where('monto', '>', 0)
+                        ->pluck('metodo')
+                        ->unique()
+                        ->values();
+
+                    $orden->update([
+                        'metodo_pago' => $metodosUsados->count() > 1
+                            ? 'mixto'
+                            : ($metodosUsados->first() ?? null),
+                    ]);
+                }
+
                 $this->cajaService->liberarMesa($mesa);
                 return ['mesaLiberada' => true];
             });

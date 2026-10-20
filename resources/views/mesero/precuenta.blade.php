@@ -98,6 +98,42 @@
         </div>
     </div>
 
+    {{-- Datos de domicilio (solo pedidos a domicilio) --}}
+    @if($mesa->esADomicilio())
+    <div style="border-bottom: 1px dashed #000; padding: 5px 2px; margin-bottom: 5px; font-size: 12px; line-height: 1.6;">
+        @if(!empty($clienteTelefono))
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:bold;">TEL:</span>
+                <span>{{ $clienteTelefono }}</span>
+            </div>
+        @endif
+        @if(!empty($direccionCalle))
+            @php
+                $partesDir = array_filter([
+                    $direccionCalle,
+                    !empty($direccionManzana) ? 'MZA. ' . $direccionManzana : null,
+                    !empty($direccionLote)    ? 'LOTE ' . $direccionLote    : null,
+                ]);
+            @endphp
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:bold;">CALLE:</span>
+                <span>{{ strtoupper(implode(' ', $partesDir)) }}</span>
+            </div>
+        @endif
+        @if(!empty($direccionColonia))
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:bold;">COLONIA:</span>
+                <span>{{ strtoupper($direccionColonia) }}</span>
+            </div>
+        @endif
+        @if(!empty($direccionReferencia))
+            <div style="margin-top:2px;">
+                <span style="font-weight:bold;">REF: </span>{{ strtoupper($direccionReferencia) }}
+            </div>
+        @endif
+    </div>
+    @endif
+
     {{-- Productos --}}
     @if($detalles->isEmpty())
         <div class="text-center" style="font-size: 12px; margin: 8px 0;">SIN PRODUCTOS ENVIADOS A COCINA</div>

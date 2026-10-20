@@ -54,7 +54,10 @@ class CajaController extends Controller
     $mesas = Mesa::with(['ordenesActivas.detalles.producto', 'plataformaDelivery'])
     ->get()
     ->sortBy(fn($mesa) =>
-        $mesa->ordenesActivas->min('abierta_el') ?? $mesa->updated_at
+        // Usamos el ID mínimo de las órdenes activas: es estable y nunca cambia,
+        // a diferencia de updated_at que se modifica al agregar productos y
+        // hace que las mesas brinquen de posición en pantalla.
+        $mesa->ordenesActivas->min('id') ?? $mesa->id
         )
         ->values();
 

@@ -157,7 +157,7 @@
                             <i class="fas fa-motorcycle" style="color:#fff;font-size:14px;"></i>
                         </div>
                         <div>
-                            <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Pedido a Domicilio</p>
+                            <p id="_ep_tipo_label" style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0;">Pedido a Domicilio</p>
                             <p style="font-size:16px;font-weight:900;color:#111827;margin:0;">¿Cómo pagará el cliente?</p>
                         </div>
                     </div>
@@ -365,6 +365,13 @@
         };
 
         window.abrirModalPagoDelivery = window.abrirModalPagoDomicilio;
+
+        // Para llevar: mismo modal que domicilio, solo cambia la etiqueta del header
+        window.abrirModalPagoLlevar = function(total, mesaId, ordenId) {
+            const lbl = document.getElementById('_ep_tipo_label');
+            if (lbl) lbl.textContent = 'Para Llevar';
+            window.abrirModalPagoDomicilio(total, mesaId, ordenId);
+        };
 
         function _cerrar() { el.style.display = 'none'; }
         document.getElementById('_ep_cerrar').onclick  = _cerrar;
@@ -634,6 +641,7 @@
         }
     })();
 
+
     // ---------------------------------------------------------------
     // ENVÍO A COCINA
     // ---------------------------------------------------------------
@@ -749,6 +757,14 @@
 
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
                     window.abrirModalZonaEnvio(totalFinal, cfg.mesa && cfg.mesa.id, data.orden_id);
+                } else if (esLlevar && typeof window.abrirModalPagoLlevar === 'function') {
+                    // Capturar total ANTES de limpiar el ticket (limpiarTicket resetea txtTotal a $0)
+                    const elTotal = document.getElementById('txtTotalComanda') || document.getElementById('txtTotal');
+                    const totalFinalLlevar = elTotal
+                        ? (parseFloat(elTotal.innerText.replace(/[$,\s]/g, '')) || totalParseado)
+                        : totalParseado;
+                    if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
+                    window.abrirModalPagoLlevar(totalFinalLlevar, cfg.mesa && cfg.mesa.id, data.orden_id);
                 } else {
                     if (typeof window.limpiarTicket === 'function') window.limpiarTicket();
                     mostrarExito("¡Enviado a cocina!");

@@ -1528,6 +1528,177 @@ window.canjearPremioLealtad = function(descripcionPremio, clienteId = null) {
     </div>
 </div>
 
+{{-- ============================================================ --}}
+{{-- MODAL PAGO PARA LLEVAR                                       --}}
+{{-- ============================================================ --}}
+<div id="modalPagoLlevar" class="modal-overlay hidden fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="modal-sheet w-full sm:max-w-md max-h-[95vh] overflow-y-auto hide-scroll rounded-t-[28px] sm:rounded-[24px] bg-white border border-slate-200 shadow-2xl">
+        <div class="sm:hidden w-10 h-1.5 rounded-full bg-slate-200 mx-auto mt-4 mb-2"></div>
+
+        {{-- Header --}}
+        <div class="flex items-center justify-between px-6 pt-4 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shadow-md shadow-amber-500/20">
+                    <i class="fas fa-shopping-bag text-white text-sm"></i>
+                </span>
+                <div>
+                    <h2 class="text-base font-black text-slate-800 tracking-tight">Cobrar Para Llevar</h2>
+                    <p class="text-[11px] text-slate-500">Selecciona el método de pago</p>
+                </div>
+            </div>
+            <button type="button" onclick="cerrarModalPagoLlevar()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-all">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        <div class="px-6 py-5 space-y-4">
+            {{-- Total --}}
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Total a cobrar</p>
+                <p id="llevar-total-display" class="text-3xl font-black text-slate-800">$0.00</p>
+            </div>
+
+            {{-- Métodos simples --}}
+            <div id="llevar-seccion-simple" class="space-y-2">
+                <button type="button" class="llevar-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="efectivo">
+                    <span class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center"><i class="fas fa-money-bill-wave text-emerald-600 text-sm"></i></span>
+                    Efectivo
+                </button>
+                <button type="button" class="llevar-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-violet-400 hover:bg-violet-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="tarjeta">
+                    <span class="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center"><i class="fas fa-credit-card text-violet-600 text-sm"></i></span>
+                    Tarjeta
+                </button>
+                <button type="button" class="llevar-metodo-btn w-full text-left px-4 py-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:border-sky-400 hover:bg-sky-50 transition-all font-bold text-slate-800 flex items-center gap-3" data-metodo="transferencia">
+                    <span class="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center"><i class="fas fa-building-columns text-sky-600 text-sm"></i></span>
+                    Transferencia
+                </button>
+            </div>
+        </div>
+
+        <div class="px-6 pb-6 pt-2">
+            <button type="button" onclick="cerrarModalPagoLlevar()"
+                class="w-full h-11 bg-slate-50 hover:bg-slate-100 text-slate-500 font-black text-xs uppercase tracking-widest rounded-2xl border border-slate-200 transition-all">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Modal ticket para llevar (pre-cuenta) --}}
+<div id="modalTicketLlevar" class="hidden fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-[24px] w-full max-w-sm shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <span class="text-xs font-black uppercase tracking-widest text-slate-800">
+                <i class="fas fa-receipt text-amber-500 mr-2"></i> Ticket Para Llevar
+            </span>
+            <button id="btn-cerrar-ticket-llevar" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 text-xs transition-all">✕</button>
+        </div>
+        <div class="p-3 bg-slate-100 max-h-[60vh] overflow-y-auto">
+            <iframe id="iframe-ticket-llevar" src="" class="w-full min-h-[50vh] border-none rounded-xl bg-white"></iframe>
+        </div>
+        <div class="grid grid-cols-2 gap-3 p-4 border-t border-slate-100">
+            <button id="btn-cerrar-ticket-llevar2" class="h-11 bg-slate-50 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-100 transition-all">Cerrar</button>
+            <button id="btn-imprimir-ticket-llevar" class="h-11 bg-gradient-to-r from-amber-500 to-amber-400 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 hover:opacity-90 transition-all">
+                <i class="fas fa-print mr-2"></i> Imprimir
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// =====================================================
+// LÓGICA MODAL PAGO PARA LLEVAR
+// =====================================================
+(function () {
+    let _llevarMesaId  = null;
+    let _llevarOrdenId = null;
+    let _llevarTotal   = 0;
+
+    window.abrirModalPagoLlevar = function (total, mesaId, ordenId) {
+        _llevarTotal   = parseFloat(total) || 0;
+        _llevarMesaId  = mesaId;
+        _llevarOrdenId = ordenId;
+        document.getElementById('llevar-total-display').innerText = '$' + _llevarTotal.toFixed(2);
+        document.getElementById('modalPagoLlevar').classList.remove('hidden');
+    };
+
+    window.cerrarModalPagoLlevar = function () {
+        document.getElementById('modalPagoLlevar').classList.add('hidden');
+    };
+
+    // Pago simple — guarda el método y abre pre-cuenta
+    document.querySelectorAll('.llevar-metodo-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const metodo = this.dataset.metodo;
+            guardarMetodoPagoLlevar(metodo);
+        });
+    });
+
+    function guardarMetodoPagoLlevar(metodo) {
+        const config = window.ComandaConfig || {};
+        const url    = config.rutas && config.rutas.deliveryIndicarPago;
+        const csrf   = config.csrfToken;
+
+        if (!url || !_llevarMesaId) {
+            mostrarError('Error de configuración. Recarga la página.');
+            return;
+        }
+
+        document.querySelectorAll('#modalPagoLlevar button').forEach(b => b.disabled = true);
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ mesa_id: _llevarMesaId, metodo: metodo })
+        })
+        .then(r => r.json())
+        .then(data => {
+            cerrarModalPagoLlevar();
+            if (data.success !== false) {
+                mostrarPrecuentaLlevar();
+            } else {
+                mostrarError(data.message || 'No se pudo guardar el método de pago.');
+                document.querySelectorAll('#modalPagoLlevar button').forEach(b => b.disabled = false);
+            }
+        })
+        .catch(() => {
+            // Si falla el guardado igual mostramos la pre-cuenta para no bloquear al mesero
+            cerrarModalPagoLlevar();
+            mostrarPrecuentaLlevar();
+        });
+    }
+
+    function mostrarPrecuentaLlevar() {
+        const config   = window.ComandaConfig || {};
+        const urlPrec  = config.rutas && config.rutas.comandaPrecuenta;
+        const urlDash  = (config.rutas && config.rutas.dashboard) || '/';
+
+        const modal  = document.getElementById('modalTicketLlevar');
+        const iframe = document.getElementById('iframe-ticket-llevar');
+
+        if (!urlPrec) {
+            // Sin URL, ir al dashboard
+            setTimeout(() => window.location.href = urlDash, 800);
+            return;
+        }
+
+        iframe.src = urlPrec;
+        modal.classList.remove('hidden');
+
+        const cerrar = () => {
+            modal.classList.add('hidden');
+            window.location.href = urlDash;
+        };
+
+        document.getElementById('btn-cerrar-ticket-llevar').onclick  = cerrar;
+        document.getElementById('btn-cerrar-ticket-llevar2').onclick = cerrar;
+        document.getElementById('btn-imprimir-ticket-llevar').onclick = () => {
+            try { iframe.contentWindow.print(); } catch(e) { window.open(urlPrec, '_blank'); }
+        };
+    }
+})();
+</script>
+
 <script>
 // =====================================================
 // LÓGICA MODAL PAGO DELIVERY

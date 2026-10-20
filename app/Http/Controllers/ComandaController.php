@@ -298,7 +298,7 @@ public function transferirProductos(Request $request)
 
         $orden = Orden::where('mesa_id', $mesa->id)
             ->where('estado', '!=', 'pagada')
-            ->with(['detalles.producto', 'mesero:id,nombre', 'cliente:id,nombre,apellido'])
+            ->with(['detalles.producto', 'mesero:id,nombre', 'cliente:id,nombre,apellido,telefono', 'direccion'])
             ->latest()
             ->first();
 
@@ -334,6 +334,8 @@ public function transferirProductos(Request $request)
         // El total final incluye el subtotal con descuento, el IVA y la propina voluntaria
         $total = $subtotalConDescuento + $iva + $propina;
 
+        $direccion = $orden?->direccion;
+
         return view('mesero.precuenta', [
             'mesa'           => $mesa,
             'orden'          => $orden,
@@ -347,6 +349,13 @@ public function transferirProductos(Request $request)
             // Método de pago pre-indicado por el mesero (delivery)
             'metodoPago'     => $orden->metodo_pago ?? null,
             'referenciaPago' => $orden->referencia_pago ?? null,
+            // Datos de domicilio
+            'direccionCalle'      => $direccion?->calle,
+            'direccionManzana'    => $direccion?->manzana,
+            'direccionLote'       => $direccion?->lote,
+            'direccionColonia'    => $direccion?->colonia,
+            'direccionReferencia' => $direccion?->referencia,
+            'clienteTelefono'     => $orden?->cliente?->telefono,
         ]);
     }
 
