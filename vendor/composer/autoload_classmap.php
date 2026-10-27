@@ -48,6 +48,7 @@ return array(
     'App\\Models\\AporteFondoPropina' => $baseDir . '/app/Models/AporteFondoPropina.php',
     'App\\Models\\CajaMovimiento' => $baseDir . '/app/Models/CajaMovimiento.php',
     'App\\Models\\Categoria' => $baseDir . '/app/Models/Categoria.php',
+    'App\\Models\\CategoriaInsumo' => $baseDir . '/app/Models/CategoriaInsumo.php',
     'App\\Models\\Cliente' => $baseDir . '/app/Models/Cliente.php',
     'App\\Models\\Configuracion' => $baseDir . '/app/Models/Configuracion.php',
     'App\\Models\\CuentaDivision' => $baseDir . '/app/Models/CuentaDivision.php',

@@ -41,6 +41,12 @@
             display: block;
             filter: grayscale(100%) contrast(1.2); 
         }
+        .ticket-qr {
+            width: 130px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+        }
         @media print { 
             .no-print { display: none !important; } 
             body { margin: 0 auto; }
@@ -248,6 +254,14 @@
 
     <div class="text-center mt-1 pt-1" style="margin-top: 15px; font-size: 13px; font-weight: bold;">
         ¡GRACIAS POR SU COMPRA!
+    </div>
+
+    {{-- QR de WhatsApp para hacer pedidos --}}
+    <div class="dashed-line" style="margin-top: 15px;"></div>
+    <div class="text-center" style="margin-top: 8px; font-size: 12px; line-height: 1.4;">
+        <img src="{{ asset('images/qr-whatsapp.jpg') }}" alt="QR WhatsApp" class="ticket-qr">
+        <div class="font-bold" style="margin-top: 4px;">¡HAZ TU PEDIDO POR WHATSAPP!</div>
+        <div style="font-size: 11px;">ESCANEA ESTE QR</div>
     </div>
 
     <div class="dashed-line" style="margin-top: 15px;"></div>
