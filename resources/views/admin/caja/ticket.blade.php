@@ -264,7 +264,6 @@
         <div style="font-size: 11px;">ESCANEA ESTE QR</div>
     </div>
 
-    <div class="dashed-line" style="margin-top: 15px;"></div>
     <div class="text-center" style="margin-top: 8px; font-size: 12px; line-height: 1.4;">
         <span class="font-bold">¿NECESITAS UN SOFTWARE PARA TU NEGOCIO?</span><br>
         <span class="font-bold">¡CONTÁCTANOS!</span><br>
