@@ -264,12 +264,6 @@
         <div style="font-size: 11px;">ESCANEA ESTE QR</div>
     </div>
 
-    <div class="text-center" style="margin-top: 8px; font-size: 12px; line-height: 1.4;">
-        <span class="font-bold">¿NECESITAS UN SOFTWARE PARA TU NEGOCIO?</span><br>
-        <span class="font-bold">¡CONTÁCTANOS!</span><br>
-        WWW.OLLINTEM.COM.MX
-    </div>
-
     <script>
         // JS original mantenido intencionalmente
     </script>
